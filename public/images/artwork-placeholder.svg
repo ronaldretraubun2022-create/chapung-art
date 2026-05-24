@@ -1,0 +1,8 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="900" fill="#080808"/>
+  <rect x="80" y="80" width="1040" height="740" rx="36" fill="#111111" stroke="#3f3f46" stroke-width="2"/>
+  <path d="M260 640L460 420L610 565L730 450L940 640H260Z" fill="#27272a"/>
+  <circle cx="785" cy="300" r="72" fill="#a16207"/>
+  <text x="600" y="735" text-anchor="middle" fill="#d4d4d8" font-family="Arial, sans-serif" font-size="44" font-weight="700" letter-spacing="10">CHAPUNG ART</text>
+  <text x="600" y="785" text-anchor="middle" fill="#71717a" font-family="Arial, sans-serif" font-size="20" letter-spacing="8">ARTWORK IMAGE</text>
+</svg>
