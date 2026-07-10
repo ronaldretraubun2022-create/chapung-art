@@ -115,4 +115,49 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Department Mailboxes
+    |--------------------------------------------------------------------------
+    |
+    | Public forms and internal notifications use these mailbox aliases so the
+    | project can route messages without hardcoding addresses in controllers.
+    |
+    */
+
+    'departments' => [
+        'admin' => [
+            'label' => 'Admin',
+            'address' => env('MAIL_ADMIN_ADDRESS', 'admin@chapungart.com'),
+        ],
+        'info' => [
+            'label' => 'Info',
+            'address' => env('MAIL_INFO_ADDRESS', 'info@chapungart.com'),
+        ],
+        'gallery' => [
+            'label' => 'Gallery',
+            'address' => env('MAIL_GALLERY_ADDRESS', 'gallery@chapungart.com'),
+        ],
+        'news' => [
+            'label' => 'News',
+            'address' => env('MAIL_NEWS_ADDRESS', 'news@chapungart.com'),
+        ],
+        'media' => [
+            'label' => 'Media',
+            'address' => env('MAIL_MEDIA_ADDRESS', 'media@chapungart.com'),
+        ],
+        'support' => [
+            'label' => 'Support',
+            'address' => env('MAIL_SUPPORT_ADDRESS', 'support@chapungart.com'),
+        ],
+        'finance' => [
+            'label' => 'Finance',
+            'address' => env('MAIL_FINANCE_ADDRESS', 'finance@chapungart.com'),
+        ],
+        'contact' => [
+            'label' => 'Contact',
+            'address' => env('MAIL_CONTACT_ADDRESS', 'contact@chapungart.com'),
+        ],
+    ],
+
 ];

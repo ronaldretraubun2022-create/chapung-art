@@ -18,7 +18,7 @@
     </section>
 
     <section class="border-b border-zinc-800 px-4 py-8 sm:px-6 lg:px-8">
-        <form method="GET" action="{{ route('gallery') }}" class="mx-auto grid max-w-7xl gap-3 md:grid-cols-[1.4fr_1fr_1fr_1fr_.8fr_auto]">
+        <form method="GET" action="{{ route('gallery') }}" class="mx-auto grid max-w-7xl gap-3 md:grid-cols-2 xl:grid-cols-[1.3fr_.9fr_.9fr_.9fr_.9fr_.8fr_auto]">
             <input name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Search artwork, artist, material" class="rounded-md border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-yellow-600 focus:ring-yellow-600">
             <select name="category" class="rounded-md border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white focus:border-yellow-600 focus:ring-yellow-600">
                 <option value="">All categories</option>
@@ -38,13 +38,26 @@
                     <option value="{{ $collection->id }}" @selected(($filters['collection'] ?? '') == $collection->id)>{{ $collection->name }}</option>
                 @endforeach
             </select>
+            <select name="tag" class="rounded-md border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white focus:border-yellow-600 focus:ring-yellow-600">
+                <option value="">All tags</option>
+                @foreach ($tags as $tag)
+                    <option value="{{ $tag->id }}" @selected(($filters['tag'] ?? '') == $tag->id)>{{ $tag->name }}</option>
+                @endforeach
+            </select>
             <select name="sort" class="rounded-md border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white focus:border-yellow-600 focus:ring-yellow-600">
-                <option value="">Newest</option>
-                <option value="featured" @selected(($filters['sort'] ?? '') === 'featured')>Featured</option>
+                <option value="newest" @selected(($filters['sort'] ?? 'newest') === 'newest' || ($filters['sort'] ?? '') === '')>Newest</option>
+                <option value="oldest" @selected(($filters['sort'] ?? '') === 'oldest')>Oldest</option>
                 <option value="price_asc" @selected(($filters['sort'] ?? '') === 'price_asc')>Price low</option>
                 <option value="price_desc" @selected(($filters['sort'] ?? '') === 'price_desc')>Price high</option>
             </select>
-            <button class="rounded-md bg-yellow-600 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black hover:bg-yellow-500">Filter</button>
+            <div class="flex items-center gap-3 rounded-md border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white">
+                <input id="gallery-featured" name="featured" value="1" type="checkbox" @checked(($filters['featured'] ?? false) || ($filters['sort'] ?? '') === 'featured') class="rounded border-zinc-700 bg-black text-yellow-600 focus:ring-yellow-600">
+                <label for="gallery-featured" class="text-xs font-black uppercase tracking-[0.14em] text-zinc-300">Featured</label>
+            </div>
+            <div class="flex gap-3 md:col-span-2 xl:col-span-1">
+                <button class="flex-1 rounded-md bg-yellow-600 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black hover:bg-yellow-500">Filter</button>
+                <a href="{{ route('gallery') }}" class="rounded-md border border-zinc-800 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-zinc-300 hover:border-yellow-600 hover:text-yellow-500">Reset</a>
+            </div>
         </form>
     </section>
 

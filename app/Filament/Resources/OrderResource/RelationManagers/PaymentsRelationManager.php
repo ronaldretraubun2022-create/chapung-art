@@ -3,13 +3,13 @@
 namespace App\Filament\Resources\OrderResource\RelationManagers;
 
 use App\Filament\Resources\PaymentResource;
+use App\Services\ImageUploadService;
 use Filament\Forms;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
 
 class PaymentsRelationManager extends RelationManager
 {
@@ -47,20 +47,13 @@ class PaymentsRelationManager extends RelationManager
                             ->seconds(false)
                             ->nullable(),
 
-                        Forms\Components\FileUpload::make('proof_image')
-                            ->label('Proof Image')
-                            ->image()
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->maxSize(4096)
-                            ->disk('public')
-                            ->directory('payments/proofs')
-                            ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                'image/jpeg' => 'jpg',
-                                'image/png' => 'png',
-                                'image/webp' => 'webp',
-                                default => 'bin',
-                            })
-                            ->visibility('public')
+                        ImageUploadService::configureFilamentUpload(
+                            Forms\Components\FileUpload::make('proof_image')
+                                ->label('Proof Image'),
+                            'payments/proofs',
+                            'local',
+                            'private'
+                        )
                             ->imageEditor()
                             ->imagePreviewHeight(180)
                             ->nullable()
@@ -102,7 +95,7 @@ class PaymentsRelationManager extends RelationManager
 
                 Tables\Columns\ImageColumn::make('proof_image')
                     ->label('Proof')
-                    ->disk('public')
+                    ->disk('local')
                     ->rounded()
                     ->height(48)
                     ->width(48),

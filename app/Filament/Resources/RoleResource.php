@@ -11,6 +11,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use UnitEnum;
@@ -28,6 +29,13 @@ class RoleResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
     protected static string|UnitEnum|null $navigationGroup = 'System';
     protected static ?int $navigationSort = 20;
+
+    public static function canDelete(Model $record): bool
+    {
+        return $record instanceof Role
+            && $record->name !== 'Super Admin'
+            && parent::canDelete($record);
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -106,9 +114,7 @@ class RoleResource extends Resource
                 \Filament\Actions\DeleteAction::make()
                     ->visible(fn (Role $record): bool => $record->name !== 'Super Admin'),
             ])
-            ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
-            ])
+            ->bulkActions([])
             ->defaultSort('name');
     }
 

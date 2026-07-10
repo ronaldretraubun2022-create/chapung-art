@@ -1,16 +1,13 @@
 <?php
 
-use App\Models\SiteSetting;
 use App\Models\SeoMeta;
+use App\Support\PerformanceCache;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 
 if (! function_exists('site_setting')) {
     function site_setting(string $key, mixed $default = null): mixed
     {
-        $settings = Cache::rememberForever('site_settings', function () {
-            return SiteSetting::query()->pluck('value', 'key')->all();
-        });
+        $settings = PerformanceCache::siteSettings();
 
         $value = $settings[$key] ?? null;
 

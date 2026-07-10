@@ -4,8 +4,16 @@ Target hosting: Rumahweb Paket M/Medium cPanel
 Domain: `chapungart.com`  
 Goal: siapkan project untuk upload/deploy, bukan deploy langsung dari local.
 
+Environment detail ada di:
+
+```text
+docs/PRODUCTION_ENVIRONMENT.md
+```
+
 ## 1. Pre-Upload Checklist
 
+- Set PHP 8.3 dari MultiPHP Manager atau Select PHP Version.
+- Pastikan extension PHP aktif: `bcmath`, `ctype`, `curl`, `dom`, `fileinfo`, `gd`, `intl`, `mbstring`, `openssl`, `pdo`, `pdo_mysql`, `tokenizer`, `xml`, `zip`.
 - Pastikan `.env` local tidak ikut diupload atau commit.
 - Upload source project ke folder non-public, contoh:
 
@@ -39,21 +47,58 @@ APP_KEY=
 APP_DEBUG=false
 APP_URL=https://chapungart.com
 ADMIN_EMAILS=admin@chapungart.com
+TRUSTED_PROXIES=*
 
-DB_CONNECTION=mysql
+DB_CONNECTION=mariadb
 DB_HOST=localhost
 DB_PORT=3306
 DB_DATABASE=CPANEL_USER_chapungart
 DB_USERNAME=CPANEL_USER_chapungart
 DB_PASSWORD=STRONG_DATABASE_PASSWORD
+DB_CHARSET=utf8mb4
+DB_COLLATION=utf8mb4_unicode_ci
+
+FILESYSTEM_DISK=local
+IMAGE_UPLOAD_DISK=public
+
+SESSION_DRIVER=database
+SESSION_CONNECTION=mariadb
+SESSION_TABLE=sessions
+SESSION_ENCRYPT=true
+SESSION_COOKIE=chapung_art_session
 
 SESSION_SECURE_COOKIE=true
 SESSION_DOMAIN=.chapungart.com
+SESSION_HTTP_ONLY=true
+SESSION_SAME_SITE=lax
+
+CACHE_STORE=database
+CACHE_PREFIX=chapungart_cache
+DB_CACHE_CONNECTION=mariadb
+DB_CACHE_TABLE=cache
+DB_CACHE_LOCK_CONNECTION=mariadb
+DB_CACHE_LOCK_TABLE=cache_locks
+
+QUEUE_CONNECTION=database
+QUEUE_FAILED_DRIVER=database-uuids
 
 MAIL_HOST=mail.chapungart.com
+MAIL_PORT=587
 MAIL_USERNAME=noreply@chapungart.com
 MAIL_PASSWORD=STRONG_EMAIL_PASSWORD
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@chapungart.com
+MAIL_FROM_NAME="${APP_NAME}"
+MAIL_ADMIN_ADDRESS=admin@chapungart.com
+MAIL_INFO_ADDRESS=info@chapungart.com
+MAIL_GALLERY_ADDRESS=gallery@chapungart.com
+MAIL_NEWS_ADDRESS=news@chapungart.com
+MAIL_MEDIA_ADDRESS=media@chapungart.com
+MAIL_SUPPORT_ADDRESS=support@chapungart.com
+MAIL_FINANCE_ADDRESS=finance@chapungart.com
+MAIL_CONTACT_ADDRESS=contact@chapungart.com
 
+SECURITY_HSTS_ENABLED=true
 BACKUP_ARCHIVE_PASSWORD=LONG_RANDOM_BACKUP_PASSWORD
 ```
 
@@ -91,9 +136,9 @@ public/build/manifest.json
 
 Jika build dilakukan di local, upload juga folder `public/build` ke server.
 
-## 5. Database Migration
+## 5. MariaDB & Database Migration
 
-Buat database dan user MySQL dari cPanel, lalu jalankan:
+Buat database dan user MariaDB dari cPanel MySQL Databases, berikan privilege penuh ke user aplikasi, lalu jalankan:
 
 ```bash
 php artisan migrate --force
@@ -127,6 +172,15 @@ storage/app/private
 ```
 
 Jangan membuat symlink dari `storage/app/private` ke public.
+
+Default filesystem production:
+
+```env
+FILESYSTEM_DISK=local
+IMAGE_UPLOAD_DISK=public
+```
+
+Artinya backup/private tetap di `storage/app/private`, sedangkan gambar publik masuk `storage/app/public`.
 
 ## 7. Cache & Optimization Commands
 
@@ -188,6 +242,7 @@ Di Rumahweb cPanel:
 - Arahkan DNS `chapungart.com` dan `www.chapungart.com` ke hosting.
 - Aktifkan AutoSSL/SSL dari menu SSL/TLS Status.
 - Pastikan `APP_URL=https://chapungart.com`.
+- Pastikan `SESSION_SECURE_COOKIE=true` dan `SECURITY_HSTS_ENABLED=true`.
 - Paksa HTTPS dari cPanel atau `.htaccess` jika dibutuhkan.
 - Cek halaman publik:
 
@@ -195,6 +250,21 @@ Di Rumahweb cPanel:
 https://chapungart.com
 https://www.chapungart.com
 ```
+
+## 10.1 Mail Verification
+
+Di cPanel Email Accounts, buat mailbox:
+
+- `admin@chapungart.com`
+- `info@chapungart.com`
+- `gallery@chapungart.com`
+- `news@chapungart.com`
+- `media@chapungart.com`
+- `support@chapungart.com`
+- `finance@chapungart.com`
+- `contact@chapungart.com`
+
+Pastikan SMTP `noreply@chapungart.com` bisa login dengan `MAIL_HOST`, `MAIL_PORT`, dan `MAIL_ENCRYPTION` di `.env` production.
 
 ## 11. Backup & Maintenance
 

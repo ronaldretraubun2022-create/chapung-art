@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Photography;
 use App\Models\Post;
 use App\Models\SeoMeta;
+use App\Services\ImageUploadService;
 use BackedEnum;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -16,7 +17,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
 use UnitEnum;
 
 class SeoMetaResource extends Resource
@@ -88,20 +88,11 @@ class SeoMetaResource extends Resource
                                     ->nullable()
                                     ->columnSpan(2),
 
-                                Forms\Components\FileUpload::make('og_image')
-                                    ->label('OG Image')
-                                    ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(4096)
-                                    ->disk('public')
-                                    ->directory('seo/og-images')
-                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                        'image/jpeg' => 'jpg',
-                                        'image/png' => 'png',
-                                        'image/webp' => 'webp',
-                                        default => 'bin',
-                                    })
-                                    ->visibility('public')
+                                ImageUploadService::configureFilamentUpload(
+                                    Forms\Components\FileUpload::make('og_image')
+                                        ->label('OG Image'),
+                                    'seo/og-images'
+                                )
                                     ->imageEditor()
                                     ->imagePreviewHeight(220)
                                     ->nullable()

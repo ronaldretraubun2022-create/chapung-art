@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\HomepageSectionResource\Pages;
 use App\Models\HomepageSection;
+use App\Services\ImageUploadService;
 use BackedEnum;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -12,7 +13,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
 use UnitEnum;
 
 class HomepageSectionResource extends Resource
@@ -70,20 +70,11 @@ class HomepageSectionResource extends Resource
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                Forms\Components\FileUpload::make('image')
-                                    ->label('Image')
-                                    ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(4096)
-                                    ->disk('public')
-                                    ->directory('homepage-sections')
-                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                        'image/jpeg' => 'jpg',
-                                        'image/png' => 'png',
-                                        'image/webp' => 'webp',
-                                        default => 'bin',
-                                    })
-                                    ->visibility('public')
+                                ImageUploadService::configureFilamentUpload(
+                                    Forms\Components\FileUpload::make('image')
+                                        ->label('Image'),
+                                    'homepage-sections'
+                                )
                                     ->imageEditor()
                                     ->imagePreviewHeight(220)
                                     ->nullable()

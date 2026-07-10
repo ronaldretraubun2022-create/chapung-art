@@ -10,6 +10,8 @@ class Order extends Model
 {
     protected $fillable = [
         'order_number',
+        'invoice_number',
+        'invoiced_at',
         'customer_id',
         'customer_name',
         'customer_email',
@@ -28,6 +30,7 @@ class Order extends Model
         'discount_total' => 'decimal:2',
         'shipping_total' => 'decimal:2',
         'grand_total' => 'decimal:2',
+        'invoiced_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -35,6 +38,11 @@ class Order extends Model
         static::creating(function (Order $order): void {
             if (blank($order->order_number)) {
                 $order->order_number = static::generateOrderNumber();
+            }
+
+            if (blank($order->invoice_number)) {
+                $order->invoice_number = static::generateInvoiceNumber();
+                $order->invoiced_at ??= now();
             }
         });
 
@@ -90,6 +98,27 @@ class Order extends Model
         do {
             $number = 'CA-'.now()->format('Ymd').'-'.str_pad((string) random_int(1, 99999), 5, '0', STR_PAD_LEFT);
         } while (static::where('order_number', $number)->exists());
+
+        return $number;
+    }
+
+    public function ensureInvoiceNumber(): void
+    {
+        if (filled($this->invoice_number)) {
+            return;
+        }
+
+        $this->forceFill([
+            'invoice_number' => static::generateInvoiceNumber(),
+            'invoiced_at' => now(),
+        ])->save();
+    }
+
+    public static function generateInvoiceNumber(): string
+    {
+        do {
+            $number = 'INV-'.now()->format('Ymd').'-'.str_pad((string) random_int(1, 99999), 5, '0', STR_PAD_LEFT);
+        } while (static::where('invoice_number', $number)->exists());
 
         return $number;
     }

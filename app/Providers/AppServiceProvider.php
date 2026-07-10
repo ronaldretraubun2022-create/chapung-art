@@ -25,10 +25,15 @@ use App\Models\Tag;
 use App\Models\User;
 use App\Observers\ActivityLogObserver;
 use App\Services\ActivityLogger;
+use App\Services\CartService;
 use Illuminate\Auth\Events\Login as LoginEvent;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Throwable;
@@ -48,6 +53,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if ($this->app->isProduction() && str_starts_with((string) config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
+
+        $this->registerRateLimiters();
         $this->registerAuthorizationGates();
 
         $trackedModels = [
@@ -78,6 +88,8 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Event::listen(LoginEvent::class, function (LoginEvent $event): void {
+            app(CartService::class)->mergeAfterLogin($event->user);
+
             ActivityLogger::record(
                 'login',
                 $event->user,
@@ -85,6 +97,19 @@ class AppServiceProvider extends ServiceProvider
                 ['guard' => $event->guard]
             );
         });
+    }
+
+    private function registerRateLimiters(): void
+    {
+        RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(5)->by(
+            Str::lower((string) $request->input('email')).'|'.$request->ip()
+        ));
+
+        RateLimiter::for('public-form', fn (Request $request): Limit => Limit::perMinute(10)->by($request->ip()));
+
+        RateLimiter::for('global-search', fn (Request $request): Limit => Limit::perMinute(60)->by($request->ip()));
+
+        RateLimiter::for('certificate-verification', fn (Request $request): Limit => Limit::perMinute(20)->by($request->ip()));
     }
 
     private function registerAuthorizationGates(): void

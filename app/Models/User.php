@@ -53,7 +53,7 @@ class User extends Authenticatable implements FilamentUser
             'Photographer',
             'Journalist',
         ])) {
-            return true;
+            return $this->isConfiguredAdmin();
         }
 
         return $this->roles()->doesntExist() && $this->isConfiguredAdmin();
@@ -76,7 +76,7 @@ class User extends Authenticatable implements FilamentUser
         $adminEmails = collect(config('admin.emails', []));
 
         if ($adminEmails->isEmpty()) {
-            return true;
+            return ! app()->isProduction();
         }
 
         return $adminEmails->contains(mb_strtolower($this->email));

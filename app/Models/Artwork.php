@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ManagesImageUploads;
+use App\Support\HtmlSanitizer;
+use App\Support\PerformanceCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -12,6 +15,12 @@ use Illuminate\Database\Eloquent\Model;
 class Artwork extends Model
 {
     use HasFactory;
+    use ManagesImageUploads;
+
+    protected array $imageUploads = [
+        'og_image' => 'public',
+        'thumbnail' => 'public',
+    ];
 
     protected $fillable = [
         'title',
@@ -61,6 +70,22 @@ class Artwork extends Model
         'likes' => 'integer',
         'is_featured' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(function (): void {
+            PerformanceCache::flushContent();
+        });
+
+        static::deleted(function (): void {
+            PerformanceCache::flushContent();
+        });
+    }
+
+    public function setDescriptionAttribute(?string $value): void
+    {
+        $this->attributes['description'] = HtmlSanitizer::clean($value);
+    }
 
     public function category(): BelongsTo
     {

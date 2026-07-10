@@ -84,7 +84,7 @@ Project Chapung Art sudah layak online dengan kondisi:
 
 - Pastikan document root hosting selalu diarahkan ke folder `public`.
 - Jangan membuka `APP_DEBUG=true` di production.
-- Backup rutin database SQLite dan folder `storage/app/public`.
+- Backup rutin database MariaDB dan folder `storage/app/public`.
 - Backup folder `public/images` jika ada aset legalitas atau OpenGraph baru.
 - Jika upload gambar tidak tampil, cek ulang `php artisan storage:link` dan permission folder `storage`.
 - Setelah update route, config, atau view, jalankan ulang `php artisan optimize`.

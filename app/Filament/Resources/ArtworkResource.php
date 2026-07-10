@@ -8,6 +8,7 @@ use App\Models\Artwork;
 use App\Models\Category;
 use App\Models\Collection;
 use App\Models\Tag;
+use App\Services\ImageUploadService;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -187,20 +188,11 @@ class ArtworkResource extends Resource
                                     ->nullable()
                                     ->columnSpan(['default' => 2, 'md' => 1]),
 
-                                Forms\Components\FileUpload::make('thumbnail')
-                                    ->label('Foto Karya')
-                                    ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(4096)
-                                    ->disk('public')
-                                    ->directory('artworks')
-                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                        'image/jpeg' => 'jpg',
-                                        'image/png' => 'png',
-                                        'image/webp' => 'webp',
-                                        default => 'bin',
-                                    })
-                                    ->visibility('public')
+                                ImageUploadService::configureFilamentUpload(
+                                    Forms\Components\FileUpload::make('thumbnail')
+                                        ->label('Foto Karya'),
+                                    'artworks'
+                                )
                                     ->imageEditor()
                                     ->imagePreviewHeight(250)
                                     ->nullable()
@@ -221,20 +213,11 @@ class ArtworkResource extends Resource
                             ->label('Gallery Images')
                             ->relationship('mediaItems')
                             ->schema([
-                                Forms\Components\FileUpload::make('file_path')
-                                    ->label('Image')
-                                    ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(4096)
-                                    ->disk('public')
-                                    ->directory('artworks/gallery')
-                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                        'image/jpeg' => 'jpg',
-                                        'image/png' => 'png',
-                                        'image/webp' => 'webp',
-                                        default => 'bin',
-                                    })
-                                    ->visibility('public')
+                                ImageUploadService::configureFilamentUpload(
+                                    Forms\Components\FileUpload::make('file_path')
+                                        ->label('Image'),
+                                    'artworks/gallery'
+                                )
                                     ->imageEditor()
                                     ->imagePreviewHeight(180)
                                     ->required()

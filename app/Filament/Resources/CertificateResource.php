@@ -6,6 +6,7 @@ use App\Filament\Resources\CertificateResource\Pages;
 use App\Models\Artist;
 use App\Models\Artwork;
 use App\Models\Certificate;
+use App\Support\UploadSecurity;
 use BackedEnum;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -102,12 +103,12 @@ class CertificateResource extends Resource
                             ->schema([
                                 Forms\Components\FileUpload::make('pdf_path')
                                     ->label('Certificate PDF')
-                                    ->acceptedFileTypes(['application/pdf'])
-                                    ->maxSize(8192)
-                                    ->disk('public')
+                                    ->acceptedFileTypes(UploadSecurity::PDF_MIME_TYPES)
+                                    ->maxSize(UploadSecurity::PDF_MAX_KB)
+                                    ->disk('local')
                                     ->directory('certificates/pdfs')
                                     ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.pdf')
-                                    ->visibility('public')
+                                    ->visibility('private')
                                     ->nullable()
                                     ->columnSpan(['default' => 2, 'md' => 1]),
 

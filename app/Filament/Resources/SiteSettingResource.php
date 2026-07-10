@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SiteSettingResource\Pages;
 use App\Models\SiteSetting;
+use App\Services\ImageUploadService;
 use BackedEnum;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -12,7 +13,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
 use UnitEnum;
 
 class SiteSettingResource extends Resource
@@ -73,22 +73,11 @@ class SiteSettingResource extends Resource
                                     ->visible(fn (callable $get): bool => $get('type') !== 'image')
                                     ->columnSpan(2),
 
-                                Forms\Components\FileUpload::make('value')
-                                    ->label('Image Value')
-                                    ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/x-icon'])
-                                    ->maxSize(4096)
-                                    ->disk('public')
-                                    ->directory('site-settings')
-                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                        'image/jpeg' => 'jpg',
-                                        'image/png' => 'png',
-                                        'image/webp' => 'webp',
-                                        'image/svg+xml' => 'svg',
-                                        'image/x-icon', 'image/vnd.microsoft.icon' => 'ico',
-                                        default => 'bin',
-                                    })
-                                    ->visibility('public')
+                                ImageUploadService::configureFilamentUpload(
+                                    Forms\Components\FileUpload::make('value')
+                                        ->label('Image Value'),
+                                    'site-settings'
+                                )
                                     ->imagePreviewHeight(120)
                                     ->nullable()
                                     ->visible(fn (callable $get): bool => $get('type') === 'image')

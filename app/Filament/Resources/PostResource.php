@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
 use App\Models\User;
+use App\Services\ImageUploadService;
 use BackedEnum;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -191,20 +192,11 @@ class PostResource extends Resource
                                     ->rows(4)
                                     ->nullable(),
 
-                                Forms\Components\FileUpload::make('og_image')
-                                    ->label('OG Image')
-                                    ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(4096)
-                                    ->disk('public')
-                                    ->directory('posts/og')
-                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                        'image/jpeg' => 'jpg',
-                                        'image/png' => 'png',
-                                        'image/webp' => 'webp',
-                                        default => 'bin',
-                                    })
-                                    ->visibility('public')
+                                ImageUploadService::configureFilamentUpload(
+                                    Forms\Components\FileUpload::make('og_image')
+                                        ->label('OG Image'),
+                                    'posts/og'
+                                )
                                     ->imageEditor()
                                     ->imagePreviewHeight(180)
                                     ->nullable()
@@ -215,40 +207,22 @@ class PostResource extends Resource
 
                 Section::make('Media')
                     ->schema([
-                        Forms\Components\FileUpload::make('featured_image')
-                            ->label('Featured Image')
-                            ->image()
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->maxSize(4096)
-                            ->disk('public')
-                            ->directory('posts/featured')
-                            ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                'image/jpeg' => 'jpg',
-                                'image/png' => 'png',
-                                'image/webp' => 'webp',
-                                default => 'bin',
-                            })
-                            ->visibility('public')
+                        ImageUploadService::configureFilamentUpload(
+                            Forms\Components\FileUpload::make('featured_image')
+                                ->label('Featured Image'),
+                            'posts/featured'
+                        )
                             ->imageEditor()
                             ->nullable()
                             ->imagePreviewHeight(250)
                             ->columnSpanFull(),
 
-                        Forms\Components\FileUpload::make('thumbnail')
-                            ->label('Legacy Thumbnail')
+                        ImageUploadService::configureFilamentUpload(
+                            Forms\Components\FileUpload::make('thumbnail')
+                                ->label('Legacy Thumbnail'),
+                            'posts'
+                        )
                             ->helperText('Dipertahankan untuk kompatibilitas konten lama.')
-                            ->image()
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->maxSize(4096)
-                            ->disk('public')
-                            ->directory('posts')
-                            ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                'image/jpeg' => 'jpg',
-                                'image/png' => 'png',
-                                'image/webp' => 'webp',
-                                default => 'bin',
-                            })
-                            ->visibility('public')
                             ->imageEditor()
                             ->nullable()
                             ->imagePreviewHeight(200)
@@ -258,20 +232,11 @@ class PostResource extends Resource
                             ->label('Gallery Images')
                             ->relationship('mediaItems')
                             ->schema([
-                                Forms\Components\FileUpload::make('file_path')
-                                    ->label('Image')
-                                    ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(4096)
-                                    ->disk('public')
-                                    ->directory('posts/gallery')
-                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                        'image/jpeg' => 'jpg',
-                                        'image/png' => 'png',
-                                        'image/webp' => 'webp',
-                                        default => 'bin',
-                                    })
-                                    ->visibility('public')
+                                ImageUploadService::configureFilamentUpload(
+                                    Forms\Components\FileUpload::make('file_path')
+                                        ->label('Image'),
+                                    'posts/gallery'
+                                )
                                     ->imageEditor()
                                     ->imagePreviewHeight(180)
                                     ->required()

@@ -4,6 +4,7 @@
     $mainImage = $artwork->thumbnail ?: $artwork->og_image;
     $description = str(strip_tags($artwork->excerpt ?: $artwork->description ?: 'Karya seni Papua Selatan dari Chapung Art.'))->limit(160);
     $price = $artwork->price ? 'Rp '.number_format((float) $artwork->price, 0, ',', '.') : 'By request';
+    $canAddToCart = $artwork->status === 'available' && (int) ($artwork->stock ?? 0) > 0;
     $whatsapp = preg_replace('/\D+/', '', site_setting('whatsapp', '6281234567890')) ?: '6281234567890';
     $message = rawurlencode('Halo Chapung Art, saya tertarik dengan artwork: '.$artwork->title.' - '.route('artwork.show', $artwork->slug));
 @endphp
@@ -53,7 +54,16 @@
                     {!! $artwork->description ?: '<p>Deskripsi artwork belum tersedia.</p>' !!}
                 </div>
 
-                <a href="https://wa.me/{{ $whatsapp }}?text={{ $message }}" target="_blank" rel="noopener" class="mt-8 inline-flex w-full justify-center rounded-md bg-yellow-600 px-6 py-4 text-center text-xs font-black uppercase tracking-[0.2em] text-black hover:bg-yellow-500">Inquire Artwork</a>
+                <div class="mt-8 grid gap-3 sm:grid-cols-[1fr_auto]">
+                    <form method="POST" action="{{ route('cart.store') }}" class="grid gap-3 sm:grid-cols-[110px_1fr]">
+                        @csrf
+                        <input type="hidden" name="artwork_id" value="{{ $artwork->id }}">
+                        <label for="quantity" class="sr-only">Quantity</label>
+                        <input id="quantity" name="quantity" type="number" min="1" max="{{ max(1, (int) ($artwork->stock ?? 1)) }}" value="1" @disabled(! $canAddToCart) class="h-12 rounded-md border border-zinc-800 bg-zinc-950 px-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50 focus:border-yellow-600 focus:ring-yellow-600">
+                        <button type="submit" @disabled(! $canAddToCart) class="h-12 rounded-md bg-yellow-600 px-5 text-xs font-black uppercase tracking-[0.18em] text-black hover:bg-yellow-500 disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-500">Add to Cart</button>
+                    </form>
+                    <a href="https://wa.me/{{ $whatsapp }}?text={{ $message }}" target="_blank" rel="noopener" class="inline-flex h-12 justify-center rounded-md border border-yellow-600/60 px-5 py-4 text-center text-xs font-black uppercase tracking-[0.18em] text-yellow-500 hover:bg-yellow-600 hover:text-black">Inquire</a>
+                </div>
             </article>
         </div>
     </section>

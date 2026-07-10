@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ArtistResource\Pages;
 use App\Models\Artist;
 use App\Models\User;
+use App\Services\ImageUploadService;
 use BackedEnum;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -74,20 +75,11 @@ class ArtistResource extends Resource
                                     ->nullable()
                                     ->columnSpan(['default' => 2, 'md' => 1]),
 
-                                Forms\Components\FileUpload::make('photo')
-                                    ->label('Foto Profil')
-                                    ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(4096)
-                                    ->disk('public')
-                                    ->directory('artists')
-                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                        'image/jpeg' => 'jpg',
-                                        'image/png' => 'png',
-                                        'image/webp' => 'webp',
-                                        default => 'bin',
-                                    })
-                                    ->visibility('public')
+                                ImageUploadService::configureFilamentUpload(
+                                    Forms\Components\FileUpload::make('photo')
+                                        ->label('Foto Profil'),
+                                    'artists'
+                                )
                                     ->imageEditor()
                                     ->imagePreviewHeight(220)
                                     ->nullable()

@@ -50,10 +50,13 @@
                         <a href="{{ route('media.show', $post->slug) }}" class="block">
                             <div class="relative aspect-[16/10] overflow-hidden bg-zinc-900">
                                 <img
-                                    src="{{ $thumbnail ? asset('storage/' . $thumbnail) : 'https://placehold.co/1200x700/111111/FFFFFF?text=Chapung+Art+Media' }}"
+                                    src="{{ $thumbnail ? asset('storage/' . $thumbnail) : asset('images/og-image.jpg') }}"
                                     alt="{{ $post->title }}"
+                                    width="1200"
+                                    height="700"
                                     class="w-full h-full object-cover transition duration-500 group-hover:scale-105"
                                     loading="lazy"
+                                    decoding="async"
                                     onerror="this.onerror=null;this.src='https://placehold.co/1200x700/111111/FFFFFF?text=Chapung+Art+Media';"
                                 >
                                 <span class="absolute bottom-4 right-4 z-10 rounded-full bg-black/70 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-white backdrop-blur">Chapung Art © Papua Selatan</span>

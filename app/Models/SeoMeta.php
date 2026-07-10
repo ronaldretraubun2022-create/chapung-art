@@ -2,12 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ManagesImageUploads;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Cache;
 
 class SeoMeta extends Model
 {
+    use ManagesImageUploads;
+
+    protected array $imageUploads = [
+        'og_image' => 'public',
+    ];
+
     protected $fillable = [
         'seoable_type',
         'seoable_id',

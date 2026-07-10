@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Artist;
-use App\Models\Category;
-use App\Models\Collection;
 use App\Models\Photography;
 use App\Services\PageViewTracker;
+use App\Support\PerformanceCache;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -16,9 +15,9 @@ class PhotographyController extends Controller
     {
         return view('photography', [
             'photographies' => $this->filteredQuery($request)->latest()->paginate(12)->withQueryString(),
-            'categories' => Category::query()->where('type', 'photography')->where('is_active', true)->orderBy('name')->get(),
-            'artists' => Artist::active()->orderBy('name')->get(),
-            'collections' => Collection::active()->orderBy('name')->get(),
+            'categories' => PerformanceCache::activeCategories('photography'),
+            'artists' => Artist::query()->select(['id', 'name', 'slug', 'is_active'])->active()->orderBy('name')->get(),
+            'collections' => PerformanceCache::activeCollections(),
             'filters' => $request->only(['q', 'category', 'artist', 'collection', 'sort']),
         ]);
     }
@@ -44,7 +43,9 @@ class PhotographyController extends Controller
 
     private function filteredQuery(Request $request)
     {
-        return Photography::with(['artist', 'category', 'collection'])
+        return Photography::query()
+            ->select(['id', 'title', 'slug', 'category_id', 'artist_id', 'collection_id', 'photographer_name', 'location', 'province', 'license', 'description', 'thumbnail', 'price', 'status', 'is_featured', 'created_at'])
+            ->with(['artist:id,name', 'category:id,name', 'collection:id,name,slug'])
             ->when($request->filled('q'), function ($query) use ($request): void {
                 $keyword = $request->string('q')->toString();
 

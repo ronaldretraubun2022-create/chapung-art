@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ManagesImageUploads;
+use App\Support\HtmlSanitizer;
+use App\Support\PerformanceCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -9,6 +12,13 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Photography extends Model
 {
+    use ManagesImageUploads;
+
+    protected array $imageUploads = [
+        'og_image' => 'public',
+        'thumbnail' => 'public',
+    ];
+
     protected $fillable = [
         'title',
         'category_id',
@@ -52,6 +62,22 @@ class Photography extends Model
         'views' => 'integer',
         'iso' => 'integer',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(function (): void {
+            PerformanceCache::flushContent();
+        });
+
+        static::deleted(function (): void {
+            PerformanceCache::flushContent();
+        });
+    }
+
+    public function setDescriptionAttribute(?string $value): void
+    {
+        $this->attributes['description'] = HtmlSanitizer::clean($value);
+    }
 
     public function category(): BelongsTo
     {

@@ -2,11 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ManagesImageUploads;
+use App\Support\PerformanceCache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class HomepageSection extends Model
 {
+    use ManagesImageUploads;
+
+    protected array $imageUploads = [
+        'image' => 'public',
+    ];
+
     protected $fillable = [
         'section_key',
         'title',
@@ -25,6 +33,17 @@ class HomepageSection extends Model
         'payload' => 'array',
         'sort_order' => 'integer',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(function (): void {
+            PerformanceCache::flushHomepage();
+        });
+
+        static::deleted(function (): void {
+            PerformanceCache::flushHomepage();
+        });
+    }
 
     public function scopeActive(Builder $query): Builder
     {

@@ -4,22 +4,32 @@ namespace App\Http\Controllers;
 
 use App\Models\Artist;
 use App\Models\Artwork;
-use App\Models\Category;
-use App\Models\Collection;
 use App\Services\PageViewTracker;
+use App\Support\PerformanceCache;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ArtworkController extends Controller
 {
     public function index(Request $request): View
     {
+        $request->validate([
+            'q' => ['nullable', 'string', 'max:80'],
+            'category' => ['nullable', 'integer'],
+            'artist' => ['nullable', 'integer'],
+            'collection' => ['nullable', 'integer'],
+            'tag' => ['nullable', 'integer'],
+            'featured' => ['nullable', 'boolean'],
+            'sort' => ['nullable', Rule::in(['newest', 'oldest', 'price_asc', 'price_desc', 'featured'])],
+        ]);
+
         $artworks = $this->filteredQuery($request)
-            ->latest()
             ->paginate(12)
             ->withQueryString();
 
         $featuredArtworks = Artwork::with(['artist', 'category'])
+            ->select(['id', 'title', 'slug', 'artist_id', 'category_id', 'artist_name', 'thumbnail', 'price', 'status', 'is_featured', 'created_at'])
             ->where('is_featured', true)
             ->latest()
             ->take(4)
@@ -28,10 +38,11 @@ class ArtworkController extends Controller
         return view('gallery', [
             'artworks' => $artworks,
             'featuredArtworks' => $featuredArtworks,
-            'categories' => Category::query()->where('type', 'artwork')->where('is_active', true)->orderBy('name')->get(),
-            'artists' => Artist::active()->orderBy('name')->get(),
-            'collections' => Collection::active()->orderBy('name')->get(),
-            'filters' => $request->only(['q', 'category', 'artist', 'collection', 'sort']),
+            'categories' => PerformanceCache::activeCategories('artwork'),
+            'artists' => Artist::query()->select(['id', 'name', 'slug', 'is_active'])->active()->orderBy('name')->get(),
+            'collections' => PerformanceCache::activeCollections(),
+            'tags' => PerformanceCache::activeTags('artwork'),
+            'filters' => $request->only(['q', 'category', 'artist', 'collection', 'tag', 'featured', 'sort']),
         ]);
     }
 
@@ -61,7 +72,9 @@ class ArtworkController extends Controller
 
     private function filteredQuery(Request $request)
     {
-        return Artwork::with(['artist', 'category', 'collection'])
+        return Artwork::query()
+            ->select(['id', 'title', 'slug', 'category_id', 'artist_id', 'collection_id', 'artist_name', 'description', 'thumbnail', 'price', 'status', 'is_featured', 'created_at'])
+            ->with(['artist:id,name', 'category:id,name', 'collection:id,name,slug'])
             ->when($request->filled('q'), function ($query) use ($request): void {
                 $keyword = $request->string('q')->toString();
 
@@ -74,8 +87,13 @@ class ArtworkController extends Controller
             ->when($request->filled('category'), fn ($query) => $query->where('category_id', $request->integer('category')))
             ->when($request->filled('artist'), fn ($query) => $query->where('artist_id', $request->integer('artist')))
             ->when($request->filled('collection'), fn ($query) => $query->where('collection_id', $request->integer('collection')))
-            ->when($request->input('sort') === 'price_asc', fn ($query) => $query->orderBy('price'))
-            ->when($request->input('sort') === 'price_desc', fn ($query) => $query->orderByDesc('price'))
-            ->when($request->input('sort') === 'featured', fn ($query) => $query->orderByDesc('is_featured'));
+            ->when($request->filled('tag'), fn ($query) => $query->whereHas('tags', fn ($query) => $query
+                ->where('tags.id', $request->integer('tag'))
+                ->where('tags.is_active', true)))
+            ->when($request->boolean('featured') || $request->input('sort') === 'featured', fn ($query) => $query->where('is_featured', true))
+            ->when($request->input('sort') === 'oldest', fn ($query) => $query->oldest())
+            ->when($request->input('sort') === 'price_asc', fn ($query) => $query->orderByRaw('price IS NULL')->orderBy('price')->latest())
+            ->when($request->input('sort') === 'price_desc', fn ($query) => $query->orderByRaw('price IS NULL')->orderByDesc('price')->latest())
+            ->when(in_array($request->input('sort'), [null, '', 'newest', 'featured'], true), fn ($query) => $query->latest());
     }
 }

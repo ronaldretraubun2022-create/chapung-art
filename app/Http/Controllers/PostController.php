@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Models\Post;
 use App\Services\PageViewTracker;
+use App\Support\PerformanceCache;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -13,7 +13,9 @@ class PostController extends Controller
     public function index(Request $request): View
     {
         return view('news.index', [
-            'posts' => Post::with(['category', 'author', 'tags'])
+            'posts' => Post::query()
+                ->select(['id', 'title', 'slug', 'category_id', 'author_id', 'excerpt', 'featured_image', 'thumbnail', 'author_name', 'content', 'status', 'published_at', 'views', 'created_at'])
+                ->with(['category:id,name', 'author:id,name', 'tags:id,name,slug'])
                 ->where('status', 'published')
                 ->when($request->filled('q'), function ($query) use ($request): void {
                     $keyword = $request->string('q')->toString();
@@ -30,7 +32,7 @@ class PostController extends Controller
                 ->latest('published_at')
                 ->paginate(9)
                 ->withQueryString(),
-            'categories' => Category::query()->where('type', 'post')->where('is_active', true)->orderBy('name')->get(),
+            'categories' => PerformanceCache::activeCategories('post'),
             'filters' => $request->only(['q', 'category', 'sort']),
         ]);
     }

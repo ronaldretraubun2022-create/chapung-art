@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Collection;
 use App\Models\Photography;
 use App\Models\Tag;
+use App\Services\ImageUploadService;
 use BackedEnum;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -268,20 +269,11 @@ class PhotographyResource extends Resource
                                     ->rows(4)
                                     ->nullable(),
 
-                                Forms\Components\FileUpload::make('og_image')
-                                    ->label('OG Image')
-                                    ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(4096)
-                                    ->disk('public')
-                                    ->directory('photographies/og')
-                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                        'image/jpeg' => 'jpg',
-                                        'image/png' => 'png',
-                                        'image/webp' => 'webp',
-                                        default => 'bin',
-                                    })
-                                    ->visibility('public')
+                                ImageUploadService::configureFilamentUpload(
+                                    Forms\Components\FileUpload::make('og_image')
+                                        ->label('OG Image'),
+                                    'photographies/og'
+                                )
                                     ->imageEditor()
                                     ->imagePreviewHeight(180)
                                     ->nullable()
@@ -292,20 +284,11 @@ class PhotographyResource extends Resource
 
                 Section::make('Media')
                     ->schema([
-                        Forms\Components\FileUpload::make('thumbnail')
-                            ->label('Thumbnail')
-                            ->image()
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->maxSize(4096)
-                            ->disk('public')
-                            ->directory('photographies')
-                            ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                'image/jpeg' => 'jpg',
-                                'image/png' => 'png',
-                                'image/webp' => 'webp',
-                                default => 'bin',
-                            })
-                            ->visibility('public')
+                        ImageUploadService::configureFilamentUpload(
+                            Forms\Components\FileUpload::make('thumbnail')
+                                ->label('Thumbnail'),
+                            'photographies'
+                        )
                             ->imageEditor()
                             ->imagePreviewHeight(250)
                             ->nullable()
@@ -315,20 +298,11 @@ class PhotographyResource extends Resource
                             ->label('Gallery Images')
                             ->relationship('mediaItems')
                             ->schema([
-                                Forms\Components\FileUpload::make('file_path')
-                                    ->label('Image')
-                                    ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(4096)
-                                    ->disk('public')
-                                    ->directory('photographies/gallery')
-                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                        'image/jpeg' => 'jpg',
-                                        'image/png' => 'png',
-                                        'image/webp' => 'webp',
-                                        default => 'bin',
-                                    })
-                                    ->visibility('public')
+                                ImageUploadService::configureFilamentUpload(
+                                    Forms\Components\FileUpload::make('file_path')
+                                        ->label('Image'),
+                                    'photographies/gallery'
+                                )
                                     ->imageEditor()
                                     ->imagePreviewHeight(180)
                                     ->required()

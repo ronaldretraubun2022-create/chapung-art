@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CollectionResource\Pages;
 use App\Models\Collection;
+use App\Services\ImageUploadService;
 use BackedEnum;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -67,39 +68,21 @@ class CollectionResource extends Resource
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                Forms\Components\FileUpload::make('cover_image')
-                                    ->label('Cover Image')
-                                    ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(4096)
-                                    ->disk('public')
-                                    ->directory('collections/covers')
-                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                        'image/jpeg' => 'jpg',
-                                        'image/png' => 'png',
-                                        'image/webp' => 'webp',
-                                        default => 'bin',
-                                    })
-                                    ->visibility('public')
+                                ImageUploadService::configureFilamentUpload(
+                                    Forms\Components\FileUpload::make('cover_image')
+                                        ->label('Cover Image'),
+                                    'collections/covers'
+                                )
                                     ->imageEditor()
                                     ->imagePreviewHeight(220)
                                     ->nullable()
                                     ->columnSpan(['default' => 2, 'md' => 1]),
 
-                                Forms\Components\FileUpload::make('banner_image')
-                                    ->label('Banner Image')
-                                    ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(4096)
-                                    ->disk('public')
-                                    ->directory('collections/banners')
-                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                        'image/jpeg' => 'jpg',
-                                        'image/png' => 'png',
-                                        'image/webp' => 'webp',
-                                        default => 'bin',
-                                    })
-                                    ->visibility('public')
+                                ImageUploadService::configureFilamentUpload(
+                                    Forms\Components\FileUpload::make('banner_image')
+                                        ->label('Banner Image'),
+                                    'collections/banners'
+                                )
                                     ->imageEditor()
                                     ->imagePreviewHeight(220)
                                     ->nullable()

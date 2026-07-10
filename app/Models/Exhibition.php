@@ -2,12 +2,20 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ManagesImageUploads;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Exhibition extends Model
 {
+    use ManagesImageUploads;
+
+    protected array $imageUploads = [
+        'poster' => 'public',
+        'banner' => 'public',
+    ];
+
     protected $fillable = [
         'title',
         'slug',

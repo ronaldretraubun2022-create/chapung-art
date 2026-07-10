@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ManagesImageUploads;
+use App\Support\HtmlSanitizer;
+use App\Support\PerformanceCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,7 +12,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Artist extends Model
 {
+    use ManagesImageUploads;
     use SoftDeletes;
+
+    protected array $imageUploads = [
+        'photo' => 'public',
+    ];
 
     protected $fillable = [
         'user_id',
@@ -41,6 +49,22 @@ class Artist extends Model
         'is_featured' => 'boolean',
         'is_active' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(function (): void {
+            PerformanceCache::flushContent();
+        });
+
+        static::deleted(function (): void {
+            PerformanceCache::flushContent();
+        });
+    }
+
+    public function setBioAttribute(?string $value): void
+    {
+        $this->attributes['bio'] = HtmlSanitizer::clean($value);
+    }
 
     public function user(): BelongsTo
     {

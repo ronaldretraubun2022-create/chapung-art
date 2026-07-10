@@ -2,11 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ManagesImageUploads;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payment extends Model
 {
+    use ManagesImageUploads;
+
+    protected array $imageUploads = [
+        'proof_image' => 'local',
+    ];
+
     protected $fillable = [
         'order_id',
         'payment_method',

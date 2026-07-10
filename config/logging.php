@@ -4,6 +4,7 @@ use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
+use App\Logging\SanitizeLogContext;
 
 return [
 
@@ -18,7 +19,7 @@ return [
     |
     */
 
-    'default' => env('LOG_CHANNEL', 'stack'),
+    'default' => env('LOG_CHANNEL', 'production'),
 
     /*
     |--------------------------------------------------------------------------
@@ -56,6 +57,16 @@ return [
             'driver' => 'stack',
             'channels' => explode(',', (string) env('LOG_STACK', 'single')),
             'ignore_exceptions' => false,
+            'tap' => [SanitizeLogContext::class],
+        ],
+
+        'production' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/chapung-art.log'),
+            'level' => env('LOG_LEVEL', 'warning'),
+            'days' => (int) env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+            'tap' => [SanitizeLogContext::class],
         ],
 
         'single' => [
@@ -63,14 +74,16 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
+            'tap' => [SanitizeLogContext::class],
         ],
 
         'daily' => [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
-            'days' => env('LOG_DAILY_DAYS', 14),
+            'days' => (int) env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
+            'tap' => [SanitizeLogContext::class],
         ],
 
         'slack' => [

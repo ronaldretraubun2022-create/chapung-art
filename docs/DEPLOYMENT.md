@@ -9,6 +9,27 @@ Dokumen checklist lengkap ada di:
 docs/DEPLOYMENT_CHECKLIST.md
 ```
 
+Dokumen environment production lengkap ada di:
+
+```text
+docs/PRODUCTION_ENVIRONMENT.md
+```
+
+Dokumen audit MariaDB production ada di:
+
+```text
+docs/MARIADB_PRODUCTION_AUDIT.md
+```
+
+## Production Environment Target
+
+- cPanel/Rumahweb hosting.
+- PHP 8.3.x dengan extension Laravel aktif.
+- MariaDB via cPanel MySQL Databases.
+- HTTPS penuh untuk `chapungart.com` dan `www.chapungart.com`.
+- Document root wajib mengarah ke folder `public`.
+- Session, cache, dan queue memakai database agar kompatibel dengan shared hosting.
+
 ## Production Command Order
 
 Jalankan dari root project di server:
@@ -24,6 +45,29 @@ php artisan route:cache
 php artisan view:cache
 php artisan optimize
 ```
+
+## Production `.env` Baseline
+
+Gunakan `.env.example` sebagai baseline production, lalu isi secret di server:
+
+```env
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://chapungart.com
+DB_CONNECTION=mariadb
+SESSION_DRIVER=database
+CACHE_STORE=database
+QUEUE_CONNECTION=database
+FILESYSTEM_DISK=local
+IMAGE_UPLOAD_DISK=public
+SESSION_SECURE_COOKIE=true
+SECURITY_HSTS_ENABLED=true
+MAIL_MAILER=smtp
+MAIL_HOST=mail.chapungart.com
+MAIL_FROM_ADDRESS=noreply@chapungart.com
+```
+
+Mailbox production yang harus dibuat di cPanel: `admin`, `info`, `gallery`, `news`, `media`, `support`, `finance`, dan `contact` pada domain `chapungart.com`.
 
 ## Important Rules
 

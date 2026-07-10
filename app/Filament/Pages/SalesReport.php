@@ -56,6 +56,7 @@ class SalesReport extends Page
     public function getRecentOrders(): Collection
     {
         return $this->applyDateFilter(Order::query())
+            ->select(['id', 'order_number', 'customer_name', 'status', 'payment_status', 'grand_total', 'created_at'])
             ->latest()
             ->limit(10)
             ->get();
@@ -77,6 +78,7 @@ class SalesReport extends Page
     public function exportCsv(): StreamedResponse
     {
         $rows = $this->applyDateFilter(Order::query())
+            ->select(['order_number', 'customer_name', 'status', 'payment_status', 'subtotal', 'discount_total', 'shipping_total', 'grand_total', 'created_at'])
             ->latest()
             ->get()
             ->map(fn (Order $order): array => [

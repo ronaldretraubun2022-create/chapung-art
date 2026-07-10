@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ManagesImageUploads;
+use App\Support\PerformanceCache;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 
 class SiteSetting extends Model
 {
+    use ManagesImageUploads;
+
     protected $fillable = [
         'key',
         'value',
@@ -16,7 +19,21 @@ class SiteSetting extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn (): bool => Cache::forget('site_settings'));
-        static::deleted(fn (): bool => Cache::forget('site_settings'));
+        static::saved(function (): void {
+            PerformanceCache::flushSiteSettings();
+        });
+
+        static::deleted(function (): void {
+            PerformanceCache::flushSiteSettings();
+        });
+    }
+
+    protected function imageUploadAttributes(): array
+    {
+        if ($this->type !== 'image' && $this->getOriginal('type') !== 'image') {
+            return [];
+        }
+
+        return ['value' => 'public'];
     }
 }

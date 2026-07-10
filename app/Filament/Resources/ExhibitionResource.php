@@ -6,6 +6,7 @@ use App\Filament\Resources\ExhibitionResource\Pages;
 use App\Models\Artwork;
 use App\Models\Exhibition;
 use App\Models\Photography;
+use App\Services\ImageUploadService;
 use BackedEnum;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -266,20 +267,11 @@ class ExhibitionResource extends Resource
 
     private static function imageUpload(string $field, string $label, string $directory): Forms\Components\FileUpload
     {
-        return Forms\Components\FileUpload::make($field)
-            ->label($label)
-            ->image()
-            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-            ->maxSize(4096)
-            ->disk('public')
-            ->directory($directory)
-            ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                'image/jpeg' => 'jpg',
-                'image/png' => 'png',
-                'image/webp' => 'webp',
-                default => 'bin',
-            })
-            ->visibility('public')
+        return ImageUploadService::configureFilamentUpload(
+            Forms\Components\FileUpload::make($field)
+                ->label($label),
+            $directory
+        )
             ->imageEditor()
             ->imagePreviewHeight(220)
             ->nullable()

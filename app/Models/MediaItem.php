@@ -2,11 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ManagesImageUploads;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class MediaItem extends Model
 {
+    use ManagesImageUploads;
+
+    protected array $imageUploads = [
+        'file_path' => 'public',
+    ];
+
     protected $fillable = [
         'collection_name',
         'file_path',

@@ -6,6 +6,7 @@ use App\Models\Artist;
 use App\Models\Category;
 use App\Models\Collection;
 use App\Models\Tag;
+use App\Services\ImageUploadService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
@@ -291,20 +292,11 @@ class ArtworkForm
                                     ->rows(4)
                                     ->nullable(),
 
-                                FileUpload::make('og_image')
-                                    ->label('OG Image')
-                                    ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(4096)
-                                    ->disk('public')
-                                    ->directory('artworks/og')
-                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                        'image/jpeg' => 'jpg',
-                                        'image/png' => 'png',
-                                        'image/webp' => 'webp',
-                                        default => 'bin',
-                                    })
-                                    ->visibility('public')
+                                ImageUploadService::configureFilamentUpload(
+                                    FileUpload::make('og_image')
+                                        ->label('OG Image'),
+                                    'artworks/og'
+                                )
                                     ->imageEditor()
                                     ->imagePreviewHeight('180')
                                     ->nullable()
@@ -315,20 +307,11 @@ class ArtworkForm
 
                 Section::make('Media')
                     ->schema([
-                        FileUpload::make('thumbnail')
-                            ->label('Foto Karya')
-                            ->image()
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->maxSize(4096)
-                            ->disk('public')
-                            ->directory('artworks')
-                            ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                'image/jpeg' => 'jpg',
-                                'image/png' => 'png',
-                                'image/webp' => 'webp',
-                                default => 'bin',
-                            })
-                            ->visibility('public')
+                        ImageUploadService::configureFilamentUpload(
+                            FileUpload::make('thumbnail')
+                                ->label('Foto Karya'),
+                            'artworks'
+                        )
                             ->imageEditor()
                             ->imagePreviewHeight('250')
                             ->nullable()
@@ -338,20 +321,11 @@ class ArtworkForm
                             ->label('Gallery Images')
                             ->relationship('mediaItems')
                             ->schema([
-                                FileUpload::make('file_path')
-                                    ->label('Image')
-                                    ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(4096)
-                                    ->disk('public')
-                                    ->directory('artworks/gallery')
-                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                        'image/jpeg' => 'jpg',
-                                        'image/png' => 'png',
-                                        'image/webp' => 'webp',
-                                        default => 'bin',
-                                    })
-                                    ->visibility('public')
+                                ImageUploadService::configureFilamentUpload(
+                                    FileUpload::make('file_path')
+                                        ->label('Image'),
+                                    'artworks/gallery'
+                                )
                                     ->imageEditor()
                                     ->imagePreviewHeight('180')
                                     ->required()

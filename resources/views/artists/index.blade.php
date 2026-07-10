@@ -38,7 +38,7 @@
                                 <div class="flex gap-4">
                                     <div class="h-20 w-20 shrink-0 overflow-hidden rounded-md bg-zinc-900">
                                         @if ($artist->photo)
-                                            <img src="{{ asset('storage/'.$artist->photo) }}" alt="{{ $artist->name }}" class="h-full w-full object-cover" loading="lazy">
+                                            <img src="{{ asset('storage/'.$artist->photo) }}" alt="{{ $artist->name }}" width="640" height="800" class="h-full w-full object-cover" loading="lazy" decoding="async">
                                         @else
                                             <div class="grid h-full w-full place-items-center text-sm font-black text-yellow-600">{{ str($artist->name)->substr(0, 2)->upper() }}</div>
                                         @endif

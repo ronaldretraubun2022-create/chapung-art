@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\PaymentResource\Pages;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Services\ImageUploadService;
 use BackedEnum;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -13,7 +14,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
 use UnitEnum;
 
 class PaymentResource extends Resource
@@ -86,20 +86,13 @@ class PaymentResource extends Resource
                                     ->nullable()
                                     ->columnSpan(['default' => 2, 'md' => 1]),
 
-                                Forms\Components\FileUpload::make('proof_image')
-                                    ->label('Proof Image')
-                                    ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(4096)
-                                    ->disk('public')
-                                    ->directory('payments/proofs')
-                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
-                                        'image/jpeg' => 'jpg',
-                                        'image/png' => 'png',
-                                        'image/webp' => 'webp',
-                                        default => 'bin',
-                                    })
-                                    ->visibility('public')
+                                ImageUploadService::configureFilamentUpload(
+                                    Forms\Components\FileUpload::make('proof_image')
+                                        ->label('Proof Image'),
+                                    'payments/proofs',
+                                    'local',
+                                    'private'
+                                )
                                     ->imageEditor()
                                     ->imagePreviewHeight(220)
                                     ->nullable()
@@ -149,7 +142,7 @@ class PaymentResource extends Resource
 
                 Tables\Columns\ImageColumn::make('proof_image')
                     ->label('Proof')
-                    ->disk('public')
+                    ->disk('local')
                     ->rounded()
                     ->height(48)
                     ->width(48),

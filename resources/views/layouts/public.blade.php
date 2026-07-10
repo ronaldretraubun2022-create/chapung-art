@@ -10,6 +10,7 @@
     $siteAddress = site_setting('address', 'Merauke, Papua Selatan');
     $siteLogoUrl = filled($siteLogo) ? asset('storage/'.$siteLogo) : null;
     $siteFaviconUrl = filled($siteFavicon) ? asset('storage/'.$siteFavicon) : null;
+    $cartCount = app(\App\Services\CartService::class)->count();
     $navItems = [
         ['label' => 'Home', 'route' => 'home'],
         ['label' => 'Artwork', 'route' => 'gallery'],
@@ -45,7 +46,7 @@
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-5 px-4 py-4 sm:px-6 lg:px-8">
             <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3">
                 @if ($siteLogoUrl)
-                    <img src="{{ $siteLogoUrl }}" alt="{{ $siteName }}" class="h-10 w-10 rounded-md object-cover" loading="lazy">
+                    <img src="{{ $siteLogoUrl }}" alt="{{ $siteName }}" width="40" height="40" class="h-10 w-10 rounded-md object-cover" loading="lazy" decoding="async">
                 @else
                     <span class="grid h-10 w-10 place-items-center rounded-md border border-yellow-600/50 bg-zinc-950 text-sm font-black text-yellow-500">CA</span>
                 @endif
@@ -61,31 +62,86 @@
                 @endforeach
             </div>
 
-            <a href="{{ $siteWhatsappUrl }}" target="_blank" rel="noopener" class="hidden rounded-md bg-yellow-600 px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-black hover:bg-yellow-500 sm:inline-flex">WhatsApp</a>
+            <div class="hidden items-center gap-3 sm:flex">
+                @include('partials.public.global-search', ['id' => 'global-search-desktop', 'class' => 'w-64'])
+                <a href="{{ route('cart.index') }}" class="relative rounded-md border border-zinc-800 px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-zinc-200 hover:border-yellow-600 hover:text-yellow-500">
+                    Cart
+                    @if ($cartCount > 0)
+                        <span class="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-yellow-600 px-1 text-[10px] leading-none text-black">{{ $cartCount }}</span>
+                    @endif
+                </a>
+                <a href="{{ $siteWhatsappUrl }}" target="_blank" rel="noopener" class="rounded-md bg-yellow-600 px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-black hover:bg-yellow-500">WhatsApp</a>
+            </div>
         </div>
 
         <div class="flex gap-5 overflow-x-auto border-t border-zinc-900 px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-zinc-300 lg:hidden">
             @foreach ($navItems as $item)
                 <a href="{{ route($item['route']) }}" class="shrink-0 {{ request()->routeIs($item['route']) ? 'text-yellow-500' : '' }}">{{ $item['label'] }}</a>
             @endforeach
+            <a href="{{ route('cart.index') }}" class="shrink-0 {{ request()->routeIs('cart.*') ? 'text-yellow-500' : '' }}">
+                Cart
+                @if ($cartCount > 0)
+                    ({{ $cartCount }})
+                @endif
+            </a>
+        </div>
+        <div class="border-t border-zinc-900 px-4 py-3 sm:hidden">
+            @include('partials.public.global-search', ['id' => 'global-search-mobile', 'class' => 'w-full'])
         </div>
     </nav>
+
+    @if (session('toast'))
+        @php($toast = session('toast'))
+        <div class="fixed right-4 top-24 z-50 max-w-sm rounded-md border border-yellow-600/50 bg-zinc-950 px-4 py-3 text-sm font-bold text-white shadow-2xl shadow-black/40" role="status" aria-live="polite">
+            {{ $toast['message'] ?? 'Cart updated.' }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="fixed right-4 top-24 z-50 max-w-sm rounded-md border border-red-700/60 bg-zinc-950 px-4 py-3 text-sm font-bold text-red-200 shadow-2xl shadow-black/40" role="alert">
+            {{ $errors->first() }}
+        </div>
+    @endif
 
     <main>
         @yield('content')
     </main>
 
-    <footer class="border-t border-zinc-800 bg-zinc-950 px-4 py-10 sm:px-6 lg:px-8">
-        <div class="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1.2fr_.8fr]">
+    <footer class="border-t border-zinc-800 bg-zinc-950 px-4 py-12 sm:px-6 lg:px-8">
+        <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.15fr_.85fr_.75fr]">
             <div>
-                <h2 class="text-2xl font-black uppercase tracking-[0.26em] text-white">{{ $siteName }}</h2>
-                <p class="mt-4 max-w-2xl text-sm leading-7 text-zinc-400">{{ $siteDescription }}</p>
+                <div class="flex items-center gap-3">
+                    @if ($siteLogoUrl)
+                        <img src="{{ $siteLogoUrl }}" alt="{{ $siteName }}" width="44" height="44" class="h-11 w-11 rounded-md object-cover" loading="lazy" decoding="async">
+                    @else
+                        <span class="grid h-11 w-11 place-items-center rounded-md border border-yellow-600/50 bg-black text-sm font-black text-yellow-500">CA</span>
+                    @endif
+                    <div>
+                        <h2 class="text-xl font-black uppercase tracking-[0.22em] text-white">{{ $siteName }}</h2>
+                        <p class="text-[10px] font-black uppercase tracking-[0.22em] text-yellow-600">Papua Selatan</p>
+                    </div>
+                </div>
+                <p class="mt-5 max-w-2xl text-sm leading-7 text-zinc-400">{{ $siteDescription }}</p>
             </div>
-            <div class="text-sm leading-7 text-zinc-400 md:text-right">
-                <p>{{ $siteAddress }}</p>
+
+            <nav aria-label="Footer navigation" class="grid grid-cols-2 gap-3 text-xs font-black uppercase tracking-[0.16em] text-zinc-400 sm:grid-cols-3 lg:grid-cols-2">
+                @foreach ($navItems as $item)
+                    <a href="{{ route($item['route']) }}" class="hover:text-yellow-500">{{ $item['label'] }}</a>
+                @endforeach
+            </nav>
+
+            <div class="text-sm leading-7 text-zinc-400 lg:text-right">
+                <p class="font-bold text-white">{{ $siteAddress }}</p>
                 <a href="mailto:{{ $siteEmail }}" class="text-yellow-500 hover:text-yellow-400">{{ $siteEmail }}</a>
-                <p class="mt-4 text-xs uppercase tracking-[0.2em] text-zinc-600">Premium gallery and cultural archive</p>
+                <div class="mt-5">
+                    <a href="{{ $siteWhatsappUrl }}" target="_blank" rel="noopener" class="inline-flex rounded-md border border-yellow-600/70 px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-yellow-500 hover:bg-yellow-600 hover:text-black">WhatsApp</a>
+                </div>
             </div>
+        </div>
+
+        <div class="mx-auto mt-10 flex max-w-7xl flex-col gap-3 border-t border-zinc-800 pt-6 text-xs uppercase tracking-[0.16em] text-zinc-600 sm:flex-row sm:items-center sm:justify-between">
+            <p>&copy; {{ now()->year }} {{ $siteName }}</p>
+            <p>Premium gallery and cultural archive</p>
         </div>
     </footer>
 </body>

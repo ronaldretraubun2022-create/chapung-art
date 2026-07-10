@@ -105,6 +105,7 @@ class ContentReport extends Page
     private function contentRows(string $modelClass, string $type): Collection
     {
         return $this->applyDateFilter($modelClass::query())
+            ->select(['id', 'title', 'status', 'views', 'created_at'])
             ->latest()
             ->limit(15)
             ->get()

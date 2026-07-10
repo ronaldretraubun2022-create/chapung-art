@@ -56,6 +56,7 @@ class VisitorReport extends Page
     public function getRecentViews(): Collection
     {
         return $this->applyDateFilter(PageView::query(), 'viewed_at')
+            ->select(['id', 'url', 'browser', 'device', 'viewed_at'])
             ->latest('viewed_at')
             ->limit(15)
             ->get();
@@ -90,6 +91,7 @@ class VisitorReport extends Page
     public function exportCsv(): StreamedResponse
     {
         $rows = $this->applyDateFilter(PageView::query(), 'viewed_at')
+            ->select(['url', 'viewable_type', 'viewable_id', 'browser', 'device', 'referer', 'viewed_at'])
             ->latest('viewed_at')
             ->get()
             ->map(fn (PageView $view): array => [

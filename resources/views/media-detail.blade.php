@@ -58,10 +58,13 @@
                 @endphp
                 <div class="relative mx-auto max-w-7xl overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950">
                     <img
-                        src="{{ $thumbnail ? asset('storage/' . $thumbnail) : 'https://placehold.co/1200x700/111111/FFFFFF?text=Chapung+Art+Media' }}"
+                        src="{{ $thumbnail ? asset('storage/' . $thumbnail) : asset('images/og-image.jpg') }}"
                         alt="{{ $post->title }}"
+                        width="1200"
+                        height="700"
                         class="w-full h-full object-cover"
                         loading="lazy"
+                        decoding="async"
                         onerror="this.onerror=null;this.src='https://placehold.co/1200x700/111111/FFFFFF?text=Chapung+Art+Media';"
                     >
                     <span class="absolute bottom-4 right-4 z-10 rounded-full bg-black/70 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white backdrop-blur">Chapung Art © Papua Selatan</span>

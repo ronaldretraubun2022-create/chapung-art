@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ManagesImageUploads;
+use App\Support\HtmlSanitizer;
+use App\Support\PerformanceCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -9,6 +12,14 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Post extends Model
 {
+    use ManagesImageUploads;
+
+    protected array $imageUploads = [
+        'featured_image' => 'public',
+        'og_image' => 'public',
+        'thumbnail' => 'public',
+    ];
+
     protected $fillable = [
         'title',
         'author_id',
@@ -38,9 +49,16 @@ class Post extends Model
         'views' => 'integer',
     ];
 
+    public function setContentAttribute(?string $value): void
+    {
+        $this->attributes['content'] = HtmlSanitizer::clean($value);
+    }
+
     protected static function booted(): void
     {
         static::saved(function (Post $post): void {
+            PerformanceCache::flushContent();
+
             if ($post->status !== 'published') {
                 return;
             }
@@ -55,6 +73,10 @@ class Post extends Model
                 'type' => 'post',
                 'url' => url('/admin/posts/'.$post->id.'/edit'),
             ]);
+        });
+
+        static::deleted(function (): void {
+            PerformanceCache::flushContent();
         });
     }
 

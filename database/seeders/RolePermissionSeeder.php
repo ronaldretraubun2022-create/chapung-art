@@ -79,9 +79,14 @@ class RolePermissionSeeder extends Seeder
         Role::findByName('Journalist', 'web')->syncPermissions($this->journalistPermissions());
         Role::findByName('Customer', 'web')->syncPermissions([]);
 
-        User::query()
-            ->whereDoesntHave('roles')
-            ->each(fn (User $user): mixed => $user->assignRole('Super Admin'));
+        $adminEmails = collect(config('admin.emails', []));
+
+        if ($adminEmails->isNotEmpty()) {
+            User::query()
+                ->whereIn('email', $adminEmails)
+                ->whereDoesntHave('roles')
+                ->each(fn (User $user): mixed => $user->assignRole('Super Admin'));
+        }
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
