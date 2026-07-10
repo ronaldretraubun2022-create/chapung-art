@@ -18,7 +18,7 @@ class InvoiceService
         return [
             'site_name' => site_setting('site_name', 'Chapung Art'),
             'site_description' => site_setting('site_description', 'Galeri seni, fotografi budaya, dan media kreatif Papua Selatan.'),
-            'site_email' => site_setting('email', 'info@chapungart.com'),
+            'site_email' => site_setting('email', (string) config('chapung.emails.info')),
             'site_phone' => site_setting('phone', site_setting('whatsapp', '')),
             'site_address' => site_setting('address', 'Merauke, Papua Selatan'),
             'order' => $order,

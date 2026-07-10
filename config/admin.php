@@ -1,8 +1,7 @@
 <?php
 
 return [
-    'emails' => array_values(array_filter(array_map(
-        fn (string $email): string => mb_strtolower(trim($email)),
-        explode(',', (string) env('ADMIN_EMAILS', '')),
-    ))),
+    // Legacy key kept for compatibility. Application code should use
+    // config('chapung.admin_emails') so ADMIN_EMAILS is parsed in one place.
+    'emails' => [],
 ];

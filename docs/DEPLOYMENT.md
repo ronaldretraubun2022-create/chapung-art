@@ -64,10 +64,23 @@ SESSION_SECURE_COOKIE=true
 SECURITY_HSTS_ENABLED=true
 MAIL_MAILER=smtp
 MAIL_HOST=mail.chapungart.com
-MAIL_FROM_ADDRESS=noreply@chapungart.com
+MAIL_PORT=465
+MAIL_USERNAME=admin@chapungart.com
+MAIL_PASSWORD=
+MAIL_ENCRYPTION=ssl
+MAIL_FROM_ADDRESS=admin@chapungart.com
+ADMIN_EMAILS=admin@chapungart.com
+INFO_EMAIL=info@chapungart.com
+GALLERY_EMAIL=gallery@chapungart.com
+NEWS_EMAIL=news@chapungart.com
+MEDIA_EMAIL=media@chapungart.com
+SUPPORT_EMAIL=support@chapungart.com
+FINANCE_EMAIL=finance@chapungart.com
+CONTACT_EMAIL=contact@chapungart.com
 ```
 
 Mailbox production yang harus dibuat di cPanel: `admin`, `info`, `gallery`, `news`, `media`, `support`, `finance`, dan `contact` pada domain `chapungart.com`.
+Password SMTP hanya boleh diisi pada file `.env` production di cPanel dan tidak boleh di-commit ke repository.
 
 ## Important Rules
 

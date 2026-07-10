@@ -27,6 +27,7 @@ class ContactInquiryReceived extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
+            from: new Address((string) config('mail.from.address'), (string) config('mail.from.name')),
             replyTo: [new Address($this->payload['email'], $this->payload['name'])],
             subject: '[Chapung Art] '.$this->departmentLabel.' - '.$this->payload['subject'],
         );

@@ -3,7 +3,7 @@
     $siteDescription = site_setting('site_description', 'Galeri seni, fotografi budaya, dan media kreatif Papua Selatan.');
     $siteLogo = site_setting('logo');
     $siteFavicon = site_setting('favicon');
-    $siteEmail = site_setting('email', 'info@chapungart.com');
+    $siteEmail = site_setting('email', (string) config('chapung.emails.info'));
     $siteWhatsapp = site_setting('whatsapp', '6281234567890');
     $siteWhatsappNumber = preg_replace('/\D+/', '', $siteWhatsapp) ?: '6281234567890';
     $siteWhatsappUrl = 'https://wa.me/'.$siteWhatsappNumber;

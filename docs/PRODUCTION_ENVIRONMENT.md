@@ -166,14 +166,14 @@ php artisan queue:work --stop-when-empty --tries=3 --timeout=60
 Buat email account di cPanel untuk mailbox operasional berikut:
 
 ```env
-MAIL_ADMIN_ADDRESS=admin@chapungart.com
-MAIL_INFO_ADDRESS=info@chapungart.com
-MAIL_GALLERY_ADDRESS=gallery@chapungart.com
-MAIL_NEWS_ADDRESS=news@chapungart.com
-MAIL_MEDIA_ADDRESS=media@chapungart.com
-MAIL_SUPPORT_ADDRESS=support@chapungart.com
-MAIL_FINANCE_ADDRESS=finance@chapungart.com
-MAIL_CONTACT_ADDRESS=contact@chapungart.com
+ADMIN_EMAILS=admin@chapungart.com
+INFO_EMAIL=info@chapungart.com
+GALLERY_EMAIL=gallery@chapungart.com
+NEWS_EMAIL=news@chapungart.com
+MEDIA_EMAIL=media@chapungart.com
+SUPPORT_EMAIL=support@chapungart.com
+FINANCE_EMAIL=finance@chapungart.com
+CONTACT_EMAIL=contact@chapungart.com
 ```
 
 Gunakan SMTP cPanel untuk pengiriman aplikasi:
@@ -181,15 +181,16 @@ Gunakan SMTP cPanel untuk pengiriman aplikasi:
 ```env
 MAIL_MAILER=smtp
 MAIL_HOST=mail.chapungart.com
-MAIL_PORT=587
-MAIL_USERNAME=noreply@chapungart.com
-MAIL_PASSWORD=CHANGE_ME_EMAIL_PASSWORD
-MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@chapungart.com
+MAIL_PORT=465
+MAIL_USERNAME=admin@chapungart.com
+MAIL_PASSWORD=
+MAIL_ENCRYPTION=ssl
+MAIL_FROM_ADDRESS=admin@chapungart.com
 MAIL_FROM_NAME="${APP_NAME}"
 ```
 
 Form contact publik akan mengirim ke mailbox sesuai pilihan user. Jika mailbox departemen tidak valid, aplikasi fallback ke `contact`, lalu `info`, lalu `MAIL_FROM_ADDRESS`.
+Password SMTP hanya boleh diisi pada file `.env` production di cPanel dan tidak boleh di-commit.
 
 ## 9. Production Commands
 

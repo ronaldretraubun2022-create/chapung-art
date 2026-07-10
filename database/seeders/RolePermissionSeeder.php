@@ -79,7 +79,7 @@ class RolePermissionSeeder extends Seeder
         Role::findByName('Journalist', 'web')->syncPermissions($this->journalistPermissions());
         Role::findByName('Customer', 'web')->syncPermissions([]);
 
-        $adminEmails = collect(config('admin.emails', []));
+        $adminEmails = collect(config('chapung.admin_emails', []));
 
         if ($adminEmails->isNotEmpty()) {
             User::query()

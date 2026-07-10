@@ -83,20 +83,19 @@ QUEUE_CONNECTION=database
 QUEUE_FAILED_DRIVER=database-uuids
 
 MAIL_HOST=mail.chapungart.com
-MAIL_PORT=587
-MAIL_USERNAME=noreply@chapungart.com
-MAIL_PASSWORD=STRONG_EMAIL_PASSWORD
-MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@chapungart.com
+MAIL_PORT=465
+MAIL_USERNAME=admin@chapungart.com
+MAIL_PASSWORD=
+MAIL_ENCRYPTION=ssl
+MAIL_FROM_ADDRESS=admin@chapungart.com
 MAIL_FROM_NAME="${APP_NAME}"
-MAIL_ADMIN_ADDRESS=admin@chapungart.com
-MAIL_INFO_ADDRESS=info@chapungart.com
-MAIL_GALLERY_ADDRESS=gallery@chapungart.com
-MAIL_NEWS_ADDRESS=news@chapungart.com
-MAIL_MEDIA_ADDRESS=media@chapungart.com
-MAIL_SUPPORT_ADDRESS=support@chapungart.com
-MAIL_FINANCE_ADDRESS=finance@chapungart.com
-MAIL_CONTACT_ADDRESS=contact@chapungart.com
+INFO_EMAIL=info@chapungart.com
+GALLERY_EMAIL=gallery@chapungart.com
+NEWS_EMAIL=news@chapungart.com
+MEDIA_EMAIL=media@chapungart.com
+SUPPORT_EMAIL=support@chapungart.com
+FINANCE_EMAIL=finance@chapungart.com
+CONTACT_EMAIL=contact@chapungart.com
 
 SECURITY_HSTS_ENABLED=true
 BACKUP_ARCHIVE_PASSWORD=LONG_RANDOM_BACKUP_PASSWORD
@@ -264,7 +263,8 @@ Di cPanel Email Accounts, buat mailbox:
 - `finance@chapungart.com`
 - `contact@chapungart.com`
 
-Pastikan SMTP `noreply@chapungart.com` bisa login dengan `MAIL_HOST`, `MAIL_PORT`, dan `MAIL_ENCRYPTION` di `.env` production.
+Pastikan SMTP `admin@chapungart.com` bisa login dengan `MAIL_HOST`, `MAIL_PORT`, dan `MAIL_ENCRYPTION` di `.env` production.
+Isi `MAIL_PASSWORD` hanya pada file `.env` production di cPanel. Jangan commit password SMTP, backup `.env`, atau credential email ke repository.
 
 ## 11. Backup & Maintenance
 

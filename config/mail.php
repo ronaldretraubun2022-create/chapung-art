@@ -41,10 +41,11 @@ return [
             'transport' => 'smtp',
             'scheme' => env('MAIL_SCHEME'),
             'url' => env('MAIL_URL'),
-            'host' => env('MAIL_HOST', '127.0.0.1'),
-            'port' => env('MAIL_PORT', 2525),
+            'host' => env('MAIL_HOST', 'mail.chapungart.com'),
+            'port' => env('MAIL_PORT', 465),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
+            'encryption' => env('MAIL_ENCRYPTION', 'ssl'),
             'timeout' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
@@ -111,7 +112,7 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
+        'address' => env('MAIL_FROM_ADDRESS', 'admin@chapungart.com'),
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
@@ -125,39 +126,11 @@ return [
     |
     */
 
-    'departments' => [
-        'admin' => [
-            'label' => 'Admin',
-            'address' => env('MAIL_ADMIN_ADDRESS', 'admin@chapungart.com'),
-        ],
-        'info' => [
-            'label' => 'Info',
-            'address' => env('MAIL_INFO_ADDRESS', 'info@chapungart.com'),
-        ],
-        'gallery' => [
-            'label' => 'Gallery',
-            'address' => env('MAIL_GALLERY_ADDRESS', 'gallery@chapungart.com'),
-        ],
-        'news' => [
-            'label' => 'News',
-            'address' => env('MAIL_NEWS_ADDRESS', 'news@chapungart.com'),
-        ],
-        'media' => [
-            'label' => 'Media',
-            'address' => env('MAIL_MEDIA_ADDRESS', 'media@chapungart.com'),
-        ],
-        'support' => [
-            'label' => 'Support',
-            'address' => env('MAIL_SUPPORT_ADDRESS', 'support@chapungart.com'),
-        ],
-        'finance' => [
-            'label' => 'Finance',
-            'address' => env('MAIL_FINANCE_ADDRESS', 'finance@chapungart.com'),
-        ],
-        'contact' => [
-            'label' => 'Contact',
-            'address' => env('MAIL_CONTACT_ADDRESS', 'contact@chapungart.com'),
-        ],
-    ],
+    'departments' => collect(config('chapung.emails', []))
+        ->map(fn (string $address, string $key): array => [
+            'label' => (string) config('chapung.email_labels.'.$key, ucfirst($key)),
+            'address' => $address,
+        ])
+        ->all(),
 
 ];

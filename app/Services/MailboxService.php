@@ -11,12 +11,25 @@ class MailboxService
      */
     public function departments(): array
     {
-        return collect(config('mail.departments', []))
-            ->map(fn (array $mailbox, string $key): array => [
-                'label' => (string) ($mailbox['label'] ?? ucfirst($key)),
-                'address' => $this->validAddress((string) ($mailbox['address'] ?? '')),
+        return collect(config('chapung.emails', []))
+            ->map(fn (string $address, string $key): array => [
+                'label' => (string) config('chapung.email_labels.'.$key, ucfirst($key)),
+                'address' => $this->validAddress($address),
             ])
             ->filter(fn (array $mailbox): bool => filled($mailbox['address']))
+            ->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function adminEmails(): array
+    {
+        return collect(config('chapung.admin_emails', []))
+            ->map(fn (string $email): string => mb_strtolower($this->validAddress($email)))
+            ->filter()
+            ->unique()
+            ->values()
             ->all();
     }
 
@@ -35,6 +48,7 @@ class MailboxService
         return Arr::get($departments, $department.'.address')
             ?: Arr::get($departments, 'contact.address')
             ?: Arr::get($departments, 'info.address')
+            ?: Arr::get($departments, 'admin.address')
             ?: (string) config('mail.from.address');
     }
 

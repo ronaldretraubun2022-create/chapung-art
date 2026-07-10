@@ -73,7 +73,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function isConfiguredAdmin(): bool
     {
-        $adminEmails = collect(config('admin.emails', []));
+        $adminEmails = collect(config('chapung.admin_emails', []));
 
         if ($adminEmails->isEmpty()) {
             return ! app()->isProduction();

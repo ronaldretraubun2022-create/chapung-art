@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\ManagesImageUploads;
+use App\Services\InternalNotificationMailService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -43,6 +44,8 @@ class Payment extends Model
                     'type' => 'payment',
                     'url' => url('/admin/payments/'.$payment->id.'/edit'),
                 ]);
+
+                app(InternalNotificationMailService::class)->notifyFinance($payment);
             }
         });
     }

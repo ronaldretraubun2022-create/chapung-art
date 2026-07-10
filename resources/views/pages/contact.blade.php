@@ -1,7 +1,7 @@
 @extends('layouts.public')
 
 @php
-    $email = site_setting('email', 'info@chapungart.com');
+    $email = site_setting('email', (string) config('chapung.emails.info'));
     $whatsapp = preg_replace('/\D+/', '', site_setting('whatsapp', '6281234567890')) ?: '6281234567890';
     $address = site_setting('address', 'Merauke, Papua Selatan');
     $maps = site_setting('google_maps_url');

@@ -30,6 +30,15 @@
         <env name="DB_DATABASE" value=":memory:"/>
         <env name="DB_URL" value=""/>
         <env name="MAIL_MAILER" value="array"/>
+        <env name="MAIL_FROM_ADDRESS" value="admin@chapungart.com"/>
+        <env name="ADMIN_EMAILS" value="admin@chapungart.com"/>
+        <env name="INFO_EMAIL" value="info@chapungart.com"/>
+        <env name="GALLERY_EMAIL" value="gallery@chapungart.com"/>
+        <env name="NEWS_EMAIL" value="news@chapungart.com"/>
+        <env name="MEDIA_EMAIL" value="media@chapungart.com"/>
+        <env name="SUPPORT_EMAIL" value="support@chapungart.com"/>
+        <env name="FINANCE_EMAIL" value="finance@chapungart.com"/>
+        <env name="CONTACT_EMAIL" value="contact@chapungart.com"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>

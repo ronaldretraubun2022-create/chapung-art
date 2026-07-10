@@ -17,7 +17,7 @@ class SiteSettingSeeder extends Seeder
             ['key' => 'site_description', 'value' => 'Galeri seni, fotografi budaya, dan media kreatif Papua Selatan.', 'type' => 'textarea', 'group' => 'general'],
             ['key' => 'logo', 'value' => null, 'type' => 'image', 'group' => 'brand'],
             ['key' => 'favicon', 'value' => null, 'type' => 'image', 'group' => 'brand'],
-            ['key' => 'email', 'value' => 'info@chapungart.com', 'type' => 'email', 'group' => 'contact'],
+            ['key' => 'email', 'value' => (string) config('chapung.emails.info'), 'type' => 'email', 'group' => 'contact'],
             ['key' => 'whatsapp', 'value' => '6281234567890', 'type' => 'phone', 'group' => 'contact'],
             ['key' => 'instagram', 'value' => 'https://instagram.com/chapungart', 'type' => 'url', 'group' => 'social'],
             ['key' => 'facebook', 'value' => 'https://facebook.com/chapungart', 'type' => 'url', 'group' => 'social'],

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\InternalNotificationMailService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,6 +19,13 @@ class AdminNotification extends Model
     protected $casts = [
         'read_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::created(function (AdminNotification $notification): void {
+            app(InternalNotificationMailService::class)->notifyAdmins($notification);
+        });
+    }
 
     public function markAsRead(): void
     {
