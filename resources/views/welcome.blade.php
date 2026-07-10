@@ -3,9 +3,9 @@
 @php
     $homepageSections = $homepageSections ?? collect();
     $hero = $homepageSections->get('hero');
-    $heroTitle = $hero?->title ?: site_setting('site_name', 'Chapung Art');
-    $heroSubtitle = $hero?->subtitle ?: 'Premium gallery for Papua art, culture, and visual archives.';
-    $heroContent = $hero?->content ?: site_setting('site_description', 'Galeri seni, fotografi budaya, dan media kreatif Papua Selatan.');
+    $heroTitle = $hero?->title ?: 'CHAPUNG ART';
+    $heroSubtitle = $hero?->subtitle ?: 'Galeri Seni Rupa, fotografi budaya, dan media kreatif Papua Selatan.';
+    $heroContent = $hero?->content ?: 'Ruang digital untuk karya seni rupa, dokumentasi budaya, dan cerita visual dari Papua Selatan.';
     $heroImage = $hero?->image;
 @endphp
 

@@ -15,8 +15,8 @@ class HomepageSectionSeeder extends Seeder
         $sections = [
             [
                 'section_key' => 'hero',
-                'title' => 'Chapung Art Merauke',
-                'subtitle' => 'Galeri seni, fotografi budaya, dan media kreatif Papua Selatan.',
+                'title' => 'CHAPUNG ART',
+                'subtitle' => 'Galeri Seni Rupa, fotografi budaya, dan media kreatif Papua Selatan.',
                 'content' => 'Ruang digital untuk karya seni rupa, dokumentasi budaya, dan cerita visual dari Papua Selatan.',
                 'button_text' => 'Lihat Galeri',
                 'button_url' => '/gallery',
