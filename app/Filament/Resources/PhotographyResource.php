@@ -3,18 +3,26 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PhotographyResource\Pages;
+use App\Models\Artist;
+use App\Models\Category;
+use App\Models\Collection;
 use App\Models\Photography;
+use App\Models\Tag;
+use BackedEnum;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use UnitEnum;
-use BackedEnum;
 
 class PhotographyResource extends Resource
 {
+    protected static bool $shouldCheckPolicyExistence = false;
+
     protected static ?string $model = Photography::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-camera';
@@ -26,30 +34,34 @@ class PhotographyResource extends Resource
     {
         return $schema
             ->schema([
-                \Filament\Schemas\Components\Section::make('Informasi Photography')
+                Section::make('Basic Info')
                     ->schema([
-                        \Filament\Schemas\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('title')
+                                    ->label('Title')
                                     ->required()
-                                    ->reactive()
+                                    ->live(onBlur: true)
                                     ->afterStateUpdated(function (?string $state, callable $set): void {
-                                        if ($state !== null) {
-                                            $set('slug', Str::slug($state));
-                                        }
+                                        $set('slug', filled($state) ? Str::slug($state) : null);
                                     })
-                                    ->columnSpan(['default' => 2, 'md' => 1]),
+                                    ->maxLength(255),
 
                                 Forms\Components\TextInput::make('slug')
+                                    ->label('Slug')
                                     ->required()
                                     ->unique(ignoreRecord: true)
-                                    ->columnSpan(['default' => 2, 'md' => 1]),
+                                    ->maxLength(255),
 
                                 Forms\Components\Textarea::make('excerpt')
+                                    ->label('Excerpt')
                                     ->rows(4)
+                                    ->nullable()
                                     ->columnSpan(2),
 
                                 Forms\Components\RichEditor::make('description')
+                                    ->label('Description')
+                                    ->nullable()
                                     ->toolbarButtons([
                                         'bold',
                                         'italic',
@@ -66,42 +78,203 @@ class PhotographyResource extends Resource
                     ])
                     ->columns(2),
 
-                \Filament\Schemas\Components\Section::make('Detail Tambahan')
+                Section::make('Artist & Category')
                     ->schema([
-                        \Filament\Schemas\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
+                                Forms\Components\Select::make('category_id')
+                                    ->label('Category')
+                                    ->options(fn (): array => Category::query()
+                                        ->where('type', 'photography')
+                                        ->where('is_active', true)
+                                        ->orderBy('name')
+                                        ->pluck('name', 'id')
+                                        ->all())
+                                    ->searchable()
+                                    ->preload()
+                                    ->nullable(),
+
+                                Forms\Components\Select::make('artist_id')
+                                    ->label('Artist')
+                                    ->options(fn (): array => Artist::query()
+                                        ->where('is_active', true)
+                                        ->orderBy('name')
+                                        ->pluck('name', 'id')
+                                        ->all())
+                                    ->searchable()
+                                    ->preload()
+                                    ->nullable()
+                                    ->helperText('Opsional. Jika kosong, Photographer tetap digunakan sebagai fallback.'),
+
                                 Forms\Components\TextInput::make('photographer_name')
                                     ->label('Photographer')
-                                    ->columnSpan(['default' => 2, 'md' => 1]),
+                                    ->maxLength(255)
+                                    ->nullable(),
 
-                                Forms\Components\TextInput::make('location')
-                                    ->columnSpan(['default' => 2, 'md' => 1]),
+                                Forms\Components\Select::make('collection_id')
+                                    ->label('Collection')
+                                    ->options(fn (): array => Collection::query()
+                                        ->where('is_active', true)
+                                        ->orderBy('name')
+                                        ->pluck('name', 'id')
+                                        ->all())
+                                    ->searchable()
+                                    ->preload()
+                                    ->nullable(),
 
+                                Forms\Components\Select::make('tags')
+                                    ->label('Tags')
+                                    ->relationship(
+                                        name: 'tags',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn ($query) => $query
+                                            ->where('is_active', true)
+                                            ->where(function ($query): void {
+                                                $query->whereNull('type')
+                                                    ->orWhereIn('type', ['general', 'photography']);
+                                            })
+                                            ->orderBy('name')
+                                    )
+                                    ->getOptionLabelFromRecordUsing(fn (Tag $record): string => $record->name)
+                                    ->multiple()
+                                    ->searchable()
+                                    ->preload()
+                                    ->columnSpan(2),
+                            ]),
+                    ])
+                    ->columns(2),
+
+                Section::make('Camera Metadata')
+                    ->schema([
+                        Grid::make(4)
+                            ->schema([
                                 Forms\Components\TextInput::make('camera')
-                                    ->columnSpan(['default' => 2, 'md' => 1]),
+                                    ->label('Camera')
+                                    ->maxLength(255)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('lens')
+                                    ->label('Lens')
+                                    ->maxLength(255)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('iso')
+                                    ->label('ISO')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('aperture')
+                                    ->label('Aperture')
+                                    ->maxLength(50)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('shutter_speed')
+                                    ->label('Shutter Speed')
+                                    ->maxLength(50)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('focal_length')
+                                    ->label('Focal Length')
+                                    ->maxLength(50)
+                                    ->nullable(),
+
+                                Forms\Components\DateTimePicker::make('taken_at')
+                                    ->label('Taken At')
+                                    ->native(false)
+                                    ->nullable(),
+                            ]),
+                    ]),
+
+                Section::make('Location')
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                Forms\Components\TextInput::make('location')
+                                    ->label('Location')
+                                    ->maxLength(255)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('province')
+                                    ->label('Province')
+                                    ->maxLength(255)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('country')
+                                    ->label('Country')
+                                    ->default('Indonesia')
+                                    ->maxLength(255)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('gps_lat')
+                                    ->label('GPS Latitude')
+                                    ->numeric()
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('gps_lng')
+                                    ->label('GPS Longitude')
+                                    ->numeric()
+                                    ->nullable(),
+                            ]),
+                    ]),
+
+                Section::make('License & Price')
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                Forms\Components\Select::make('license')
+                                    ->label('License')
+                                    ->options([
+                                        'all_rights_reserved' => 'All Rights Reserved',
+                                        'creative_commons' => 'Creative Commons',
+                                        'editorial' => 'Editorial Use',
+                                        'commercial' => 'Commercial Use',
+                                    ])
+                                    ->nullable(),
 
                                 Forms\Components\TextInput::make('price')
                                     ->label('Price')
                                     ->numeric()
                                     ->prefix('Rp ')
-                                    ->columnSpan(['default' => 2, 'md' => 1]),
+                                    ->nullable(),
 
-                                Forms\Components\Select::make('status')
-                                    ->required()
-                                    ->options([
-                                        'available' => 'Available',
-                                        'sold' => 'Sold',
-                                        'reserved' => 'Reserved',
-                                    ])
-                                    ->default('available')
-                                    ->columnSpan(['default' => 2, 'md' => 1]),
+                                Forms\Components\TextInput::make('stock')
+                                    ->label('Stock')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->default(1)
+                                    ->required(),
 
-                                Forms\Components\FileUpload::make('thumbnail')
+                                Forms\Components\TextInput::make('views')
+                                    ->label('Views')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->default(0)
+                                    ->required(),
+                            ]),
+                    ]),
+
+                Section::make('SEO')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('seo_title')
+                                    ->label('SEO Title')
+                                    ->maxLength(255)
+                                    ->nullable(),
+
+                                Forms\Components\Textarea::make('seo_description')
+                                    ->label('SEO Description')
+                                    ->rows(4)
+                                    ->nullable(),
+
+                                Forms\Components\FileUpload::make('og_image')
+                                    ->label('OG Image')
                                     ->image()
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                     ->maxSize(4096)
                                     ->disk('public')
-                                    ->directory('photographies')
+                                    ->directory('photographies/og')
                                     ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
                                         'image/jpeg' => 'jpg',
                                         'image/png' => 'png',
@@ -110,16 +283,111 @@ class PhotographyResource extends Resource
                                     })
                                     ->visibility('public')
                                     ->imageEditor()
-                                    ->imagePreviewHeight(250)
-                                    ->columnSpan(2),
-
-                                Forms\Components\Toggle::make('is_featured')
-                                    ->label('Featured')
-                                    ->helperText('Centang untuk menandai foto sebagai unggulan.')
+                                    ->imagePreviewHeight(180)
+                                    ->nullable()
                                     ->columnSpan(2),
                             ]),
                     ])
                     ->columns(2),
+
+                Section::make('Media')
+                    ->schema([
+                        Forms\Components\FileUpload::make('thumbnail')
+                            ->label('Thumbnail')
+                            ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize(4096)
+                            ->disk('public')
+                            ->directory('photographies')
+                            ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
+                                'image/jpeg' => 'jpg',
+                                'image/png' => 'png',
+                                'image/webp' => 'webp',
+                                default => 'bin',
+                            })
+                            ->visibility('public')
+                            ->imageEditor()
+                            ->imagePreviewHeight(250)
+                            ->nullable()
+                            ->columnSpanFull(),
+
+                        Forms\Components\Repeater::make('mediaItems')
+                            ->label('Gallery Images')
+                            ->relationship('mediaItems')
+                            ->schema([
+                                Forms\Components\FileUpload::make('file_path')
+                                    ->label('Image')
+                                    ->image()
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                    ->maxSize(4096)
+                                    ->disk('public')
+                                    ->directory('photographies/gallery')
+                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
+                                        'image/jpeg' => 'jpg',
+                                        'image/png' => 'png',
+                                        'image/webp' => 'webp',
+                                        default => 'bin',
+                                    })
+                                    ->visibility('public')
+                                    ->imageEditor()
+                                    ->imagePreviewHeight(180)
+                                    ->required()
+                                    ->columnSpan(2),
+
+                                Forms\Components\Hidden::make('collection_name')
+                                    ->default('gallery'),
+
+                                Forms\Components\Hidden::make('file_type')
+                                    ->default('image'),
+
+                                Forms\Components\TextInput::make('title')
+                                    ->label('Title')
+                                    ->maxLength(255)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('alt_text')
+                                    ->label('Alt Text')
+                                    ->maxLength(255)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('sort_order')
+                                    ->label('Order')
+                                    ->numeric()
+                                    ->default(0),
+
+                                Forms\Components\Toggle::make('is_cover')
+                                    ->label('Gallery Cover')
+                                    ->default(false),
+                            ])
+                            ->columns(2)
+                            ->defaultItems(0)
+                            ->reorderableWithButtons()
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Gallery image')
+                            ->addActionLabel('Tambah Gambar')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Status')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                Forms\Components\Select::make('status')
+                                    ->label('Status')
+                                    ->required()
+                                    ->options([
+                                        'available' => 'Available',
+                                        'sold' => 'Sold',
+                                        'reserved' => 'Reserved',
+                                    ])
+                                    ->default('available'),
+
+                                Forms\Components\Toggle::make('is_featured')
+                                    ->label('Featured')
+                                    ->helperText('Centang untuk menandai foto sebagai unggulan.')
+                                    ->default(false),
+                            ]),
+                    ]),
             ]);
     }
 
@@ -128,35 +396,55 @@ class PhotographyResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('thumbnail')
-                    ->label('Thumbnail')
+                    ->label('Image')
                     ->rounded()
                     ->square()
-                    ->height(60)
-                    ->width(60)
-                    ->sortable(),
+                    ->height(56)
+                    ->width(56),
 
                 Tables\Columns\TextColumn::make('title')
                     ->label('Title')
                     ->searchable()
                     ->sortable()
-                    ->limit(40),
+                    ->limit(36),
 
-                Tables\Columns\TextColumn::make('photographer_name')
-                    ->label('Photographer')
+                Tables\Columns\TextColumn::make('artist_display_name')
+                    ->label('Artist')
+                    ->state(fn (Photography $record): string => $record->artist_display_name ?: '-')
+                    ->searchable(query: fn ($query, string $search) => $query
+                        ->where('photographer_name', 'like', "%{$search}%")
+                        ->orWhereHas('artist', fn ($artistQuery) => $artistQuery->where('name', 'like', "%{$search}%")))
+                    ->limit(28)
+                    ->placeholder('-'),
+
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label('Category')
                     ->searchable()
                     ->sortable()
-                    ->limit(30),
+                    ->placeholder('-'),
+
+                Tables\Columns\TextColumn::make('camera')
+                    ->label('Camera')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('-')
+                    ->limit(24),
 
                 Tables\Columns\TextColumn::make('location')
                     ->label('Location')
                     ->searchable()
                     ->sortable()
-                    ->limit(25),
+                    ->placeholder('-')
+                    ->limit(24),
 
                 Tables\Columns\TextColumn::make('price')
                     ->label('Price')
                     ->sortable()
-                    ->formatStateUsing(fn (?float $state): string => $state !== null ? 'Rp ' . number_format($state, 2, ',', '.') : '-'),
+                    ->formatStateUsing(fn ($state): string => $state !== null ? 'Rp ' . number_format((float) $state, 0, ',', '.') : '-'),
+
+                Tables\Columns\TextColumn::make('stock')
+                    ->label('Stock')
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
@@ -181,11 +469,6 @@ class PhotographyResource extends Resource
                     ->formatStateUsing(fn (bool $state): string => $state ? 'Featured' : 'No')
                     ->color(fn (bool $state): string => $state ? 'success' : 'gray')
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Created')
-                    ->dateTime('d M Y')
-                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -194,6 +477,7 @@ class PhotographyResource extends Resource
                         'sold' => 'Sold',
                         'reserved' => 'Reserved',
                     ]),
+
                 Tables\Filters\TernaryFilter::make('is_featured')
                     ->label('Featured'),
             ])
@@ -203,7 +487,8 @@ class PhotographyResource extends Resource
             ])
             ->bulkActions([
                 \Filament\Actions\DeleteBulkAction::make(),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getPages(): array

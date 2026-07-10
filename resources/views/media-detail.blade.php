@@ -4,30 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     @php
+        $siteName = site_setting('site_name', 'Chapung Art');
         $metaThumbnail = $post->thumbnail ? urldecode($post->thumbnail) : null;
         $metaThumbnail = $metaThumbnail ? str_replace('%2F', '/', $metaThumbnail) : null;
         $metaThumbnail = $metaThumbnail ? ltrim(preg_replace('#^/?storage/#', '', $metaThumbnail), '/') : null;
         $ogImage = $metaThumbnail ? asset('storage/' . $metaThumbnail) : asset('images/og-image.jpg');
         $seoDescription = str(strip_tags($post->excerpt ?: $post->content ?: 'Media budaya Papua Selatan dari Chapung Art Merauke.'))->limit(160);
     @endphp
-    <title>{{ $post->title }} | Chapung Art Media</title>
-    <meta name="description" content="{{ $seoDescription }}">
-    <meta property="og:title" content="{{ $post->title }} | Chapung Art Media">
-    <meta property="og:description" content="{{ $seoDescription }}">
-    <meta property="og:image" content="{{ $ogImage }}">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="{{ route('media.show', $post->slug) }}">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $post->title }} | Chapung Art Media">
-    <meta name="twitter:description" content="{{ $seoDescription }}">
-    <meta name="twitter:image" content="{{ $ogImage }}">
+    @include('partials.seo-meta', ['seo' => seo_meta('media.show', $post, [
+        'title' => $post->title.' | '.$siteName.' Media',
+        'description' => (string) $seoDescription,
+        'og_image' => $ogImage,
+        'canonical_url' => route('media.show', $post->slug),
+    ])])
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-black text-white">
     <nav class="sticky top-0 z-50 border-b border-zinc-800 bg-black/85 backdrop-blur">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-            <a href="{{ route('home') }}" class="text-2xl font-black tracking-[8px]">CHAPUNG ART</a>
+            <a href="{{ route('home') }}" class="text-2xl font-black tracking-[8px]">{{ strtoupper($siteName) }}</a>
             <div class="flex items-center gap-6 text-xs font-semibold uppercase tracking-[3px] text-zinc-300">
                 <a href="{{ route('home') }}" class="hover:text-white">Beranda</a>
                 <a href="{{ route('media.index') }}" class="text-amber-500">Media</a>

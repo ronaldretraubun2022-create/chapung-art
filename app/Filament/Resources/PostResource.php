@@ -3,18 +3,25 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PostResource\Pages;
+use App\Models\Category;
 use App\Models\Post;
+use App\Models\Tag;
+use App\Models\User;
+use BackedEnum;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use UnitEnum;
-use BackedEnum;
 
 class PostResource extends Resource
 {
+    protected static bool $shouldCheckPolicyExistence = false;
+
     protected static ?string $model = Post::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
@@ -26,75 +33,171 @@ class PostResource extends Resource
     {
         return $schema
             ->schema([
-                \Filament\Schemas\Components\Section::make('Informasi Post')
+                Section::make('Article Info')
                     ->schema([
-                        \Filament\Schemas\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('title')
+                                    ->label('Title')
                                     ->required()
-                                    ->reactive()
+                                    ->live(onBlur: true)
                                     ->afterStateUpdated(function (?string $state, callable $set): void {
-                                        if ($state !== null) {
-                                            $set('slug', Str::slug($state));
-                                        }
+                                        $set('slug', filled($state) ? Str::slug($state) : null);
                                     })
-                                    ->columnSpan(['default' => 2, 'md' => 1]),
+                                    ->maxLength(255),
 
                                 Forms\Components\TextInput::make('slug')
+                                    ->label('Slug')
                                     ->required()
                                     ->unique(ignoreRecord: true)
-                                    ->columnSpan(['default' => 2, 'md' => 1]),
+                                    ->maxLength(255),
+
+                                Forms\Components\Select::make('author_id')
+                                    ->label('Author Account')
+                                    ->options(fn (): array => User::query()
+                                        ->orderBy('name')
+                                        ->pluck('name', 'id')
+                                        ->all())
+                                    ->searchable()
+                                    ->preload()
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('author_name')
+                                    ->label('Author Name')
+                                    ->helperText('Fallback nama penulis jika tidak memilih akun author.')
+                                    ->maxLength(255)
+                                    ->nullable(),
 
                                 Forms\Components\Textarea::make('excerpt')
+                                    ->label('Excerpt')
                                     ->rows(4)
-                                    ->columnSpan(2),
-
-                                Forms\Components\RichEditor::make('content')
-                                    ->toolbarButtons([
-                                        'bold',
-                                        'italic',
-                                        'bulletList',
-                                        'orderedList',
-                                        'blockquote',
-                                        'codeBlock',
-                                        'link',
-                                        'undo',
-                                        'redo',
-                                    ])
+                                    ->nullable()
                                     ->columnSpan(2),
                             ]),
                     ])
                     ->columns(2),
 
-                \Filament\Schemas\Components\Section::make('Meta Post')
+                Section::make('Content')
                     ->schema([
-                        \Filament\Schemas\Components\Grid::make(2)
-                            ->schema([
-                                Forms\Components\TextInput::make('author_name')
-                                    ->label('Author')
-                                    ->columnSpan(['default' => 2, 'md' => 1]),
+                        Forms\Components\RichEditor::make('content')
+                            ->label('Content')
+                            ->toolbarButtons([
+                                'bold',
+                                'italic',
+                                'bulletList',
+                                'orderedList',
+                                'blockquote',
+                                'codeBlock',
+                                'link',
+                                'undo',
+                                'redo',
+                            ])
+                            ->columnSpanFull(),
+                    ]),
 
+                Section::make('Category & Tags')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                Forms\Components\Select::make('category_id')
+                                    ->label('Category')
+                                    ->options(fn (): array => Category::query()
+                                        ->where('type', 'post')
+                                        ->where('is_active', true)
+                                        ->orderBy('name')
+                                        ->pluck('name', 'id')
+                                        ->all())
+                                    ->searchable()
+                                    ->preload()
+                                    ->nullable(),
+
+                                Forms\Components\Select::make('tags')
+                                    ->label('Tags')
+                                    ->relationship(
+                                        name: 'tags',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn ($query) => $query
+                                            ->where('is_active', true)
+                                            ->where(function ($query): void {
+                                                $query->whereNull('type')
+                                                    ->orWhereIn('type', ['general', 'post']);
+                                            })
+                                            ->orderBy('name')
+                                    )
+                                    ->getOptionLabelFromRecordUsing(fn (Tag $record): string => $record->name)
+                                    ->multiple()
+                                    ->searchable()
+                                    ->preload(),
+                            ]),
+                    ]),
+
+                Section::make('Publishing')
+                    ->schema([
+                        Grid::make(4)
+                            ->schema([
                                 Forms\Components\Select::make('status')
+                                    ->label('Status')
                                     ->required()
                                     ->options([
                                         'draft' => 'Draft',
+                                        'review' => 'Review',
                                         'published' => 'Published',
                                         'archived' => 'Archived',
                                     ])
-                                    ->default('draft')
-                                    ->columnSpan(['default' => 2, 'md' => 1]),
+                                    ->default('draft'),
 
                                 Forms\Components\DateTimePicker::make('published_at')
                                     ->label('Published At')
-                                    ->columnSpan(['default' => 2, 'md' => 1]),
+                                    ->native(false)
+                                    ->nullable(),
 
-                                Forms\Components\FileUpload::make('thumbnail')
-                                    ->label('Thumbnail')
+                                Forms\Components\DateTimePicker::make('scheduled_at')
+                                    ->label('Scheduled At')
+                                    ->native(false)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('reading_time')
+                                    ->label('Reading Time')
+                                    ->suffix('min')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('views')
+                                    ->label('Views')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->default(0)
+                                    ->required(),
+
+                                Forms\Components\Toggle::make('is_featured')
+                                    ->label('Featured')
+                                    ->helperText('Centang untuk menandai post sebagai unggulan.')
+                                    ->default(false),
+                            ]),
+                    ]),
+
+                Section::make('SEO')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('seo_title')
+                                    ->label('SEO Title')
+                                    ->maxLength(255)
+                                    ->nullable(),
+
+                                Forms\Components\Textarea::make('seo_description')
+                                    ->label('SEO Description')
+                                    ->rows(4)
+                                    ->nullable(),
+
+                                Forms\Components\FileUpload::make('og_image')
+                                    ->label('OG Image')
                                     ->image()
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                     ->maxSize(4096)
                                     ->disk('public')
-                                    ->directory('posts')
+                                    ->directory('posts/og')
                                     ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
                                         'image/jpeg' => 'jpg',
                                         'image/png' => 'png',
@@ -103,17 +206,110 @@ class PostResource extends Resource
                                     })
                                     ->visibility('public')
                                     ->imageEditor()
+                                    ->imagePreviewHeight(180)
                                     ->nullable()
-                                    ->imagePreviewHeight(250)
-                                    ->columnSpan(2),
-
-                                Forms\Components\Toggle::make('is_featured')
-                                    ->label('Featured')
-                                    ->helperText('Centang untuk menandai post sebagai unggulan.')
                                     ->columnSpan(2),
                             ]),
                     ])
                     ->columns(2),
+
+                Section::make('Media')
+                    ->schema([
+                        Forms\Components\FileUpload::make('featured_image')
+                            ->label('Featured Image')
+                            ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize(4096)
+                            ->disk('public')
+                            ->directory('posts/featured')
+                            ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
+                                'image/jpeg' => 'jpg',
+                                'image/png' => 'png',
+                                'image/webp' => 'webp',
+                                default => 'bin',
+                            })
+                            ->visibility('public')
+                            ->imageEditor()
+                            ->nullable()
+                            ->imagePreviewHeight(250)
+                            ->columnSpanFull(),
+
+                        Forms\Components\FileUpload::make('thumbnail')
+                            ->label('Legacy Thumbnail')
+                            ->helperText('Dipertahankan untuk kompatibilitas konten lama.')
+                            ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize(4096)
+                            ->disk('public')
+                            ->directory('posts')
+                            ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
+                                'image/jpeg' => 'jpg',
+                                'image/png' => 'png',
+                                'image/webp' => 'webp',
+                                default => 'bin',
+                            })
+                            ->visibility('public')
+                            ->imageEditor()
+                            ->nullable()
+                            ->imagePreviewHeight(200)
+                            ->columnSpanFull(),
+
+                        Forms\Components\Repeater::make('mediaItems')
+                            ->label('Gallery Images')
+                            ->relationship('mediaItems')
+                            ->schema([
+                                Forms\Components\FileUpload::make('file_path')
+                                    ->label('Image')
+                                    ->image()
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                    ->maxSize(4096)
+                                    ->disk('public')
+                                    ->directory('posts/gallery')
+                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
+                                        'image/jpeg' => 'jpg',
+                                        'image/png' => 'png',
+                                        'image/webp' => 'webp',
+                                        default => 'bin',
+                                    })
+                                    ->visibility('public')
+                                    ->imageEditor()
+                                    ->imagePreviewHeight(180)
+                                    ->required()
+                                    ->columnSpan(2),
+
+                                Forms\Components\Hidden::make('collection_name')
+                                    ->default('gallery'),
+
+                                Forms\Components\Hidden::make('file_type')
+                                    ->default('image'),
+
+                                Forms\Components\TextInput::make('title')
+                                    ->label('Title')
+                                    ->maxLength(255)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('alt_text')
+                                    ->label('Alt Text')
+                                    ->maxLength(255)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('sort_order')
+                                    ->label('Order')
+                                    ->numeric()
+                                    ->default(0),
+
+                                Forms\Components\Toggle::make('is_cover')
+                                    ->label('Gallery Cover')
+                                    ->default(false),
+                            ])
+                            ->columns(2)
+                            ->defaultItems(0)
+                            ->reorderableWithButtons()
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Gallery image')
+                            ->addActionLabel('Tambah Gambar')
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 
@@ -121,13 +317,13 @@ class PostResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('thumbnail')
-                    ->label('Thumbnail')
+                Tables\Columns\ImageColumn::make('display_image')
+                    ->label('Image')
+                    ->disk('public')
                     ->rounded()
                     ->square()
-                    ->height(60)
-                    ->width(60)
-                    ->sortable(),
+                    ->height(56)
+                    ->width(56),
 
                 Tables\Columns\TextColumn::make('title')
                     ->label('Title')
@@ -135,10 +331,17 @@ class PostResource extends Resource
                     ->sortable()
                     ->limit(40),
 
-                Tables\Columns\TextColumn::make('author_name')
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label('Category')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('-'),
+
+                Tables\Columns\TextColumn::make('author.name')
                     ->label('Author')
                     ->searchable()
                     ->sortable()
+                    ->placeholder(fn (Post $record): string => $record->author_name ?: '-')
                     ->limit(30),
 
                 Tables\Columns\TextColumn::make('status')
@@ -146,12 +349,14 @@ class PostResource extends Resource
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'draft' => 'Draft',
+                        'review' => 'Review',
                         'published' => 'Published',
                         'archived' => 'Archived',
                         default => $state,
                     })
                     ->color(fn (string $state): string => match ($state) {
                         'draft' => 'gray',
+                        'review' => 'warning',
                         'published' => 'success',
                         'archived' => 'danger',
                         default => 'gray',
@@ -163,25 +368,31 @@ class PostResource extends Resource
                     ->dateTime('d M Y H:i')
                     ->sortable(),
 
+                Tables\Columns\TextColumn::make('scheduled_at')
+                    ->label('Scheduled')
+                    ->dateTime('d M Y H:i')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('views')
+                    ->label('Views')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('is_featured')
                     ->label('Featured')
                     ->badge()
                     ->formatStateUsing(fn (bool $state): string => $state ? 'Featured' : 'No')
                     ->color(fn (bool $state): string => $state ? 'success' : 'gray')
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Created')
-                    ->dateTime('d M Y')
-                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
                         'draft' => 'Draft',
+                        'review' => 'Review',
                         'published' => 'Published',
                         'archived' => 'Archived',
                     ]),
+
                 Tables\Filters\TernaryFilter::make('is_featured')
                     ->label('Featured'),
             ])
@@ -191,7 +402,8 @@ class PostResource extends Resource
             ])
             ->bulkActions([
                 \Filament\Actions\DeleteBulkAction::make(),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getPages(): array

@@ -42,6 +42,9 @@ return [
             'journal_mode' => null,
             'synchronous' => null,
             'transaction_mode' => 'DEFERRED',
+            'dump' => array_filter([
+                'dump_binary_path' => env('DB_SQLITE_DUMP_BINARY_PATH', file_exists('C:/laragon/bin/laragon/utils/sqlite3.exe') ? 'C:/laragon/bin/laragon/utils' : null),
+            ]),
         ],
 
         'mysql' => [
@@ -62,6 +65,10 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+            'dump' => array_filter([
+                'dump_binary_path' => env('DB_DUMP_BINARY_PATH'),
+                'useSingleTransaction' => true,
+            ]),
         ],
 
         'mariadb' => [
@@ -82,6 +89,10 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+            'dump' => array_filter([
+                'dump_binary_path' => env('DB_DUMP_BINARY_PATH'),
+                'useSingleTransaction' => true,
+            ]),
         ],
 
         'pgsql' => [

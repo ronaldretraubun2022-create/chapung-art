@@ -15,6 +15,8 @@ use BackedEnum;
 
 class CategoryResource extends Resource
 {
+    protected static bool $shouldCheckPolicyExistence = false;
+
     protected static ?string $model = Category::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-tag';

@@ -3,7 +3,11 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ArtworkResource\Pages;
+use App\Models\Artist;
 use App\Models\Artwork;
+use App\Models\Category;
+use App\Models\Collection;
+use App\Models\Tag;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -15,6 +19,8 @@ use BackedEnum;
 
 class ArtworkResource extends Resource
 {
+    protected static bool $shouldCheckPolicyExistence = false;
+
     protected static ?string $model = Artwork::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-photo';
@@ -51,6 +57,19 @@ class ArtworkResource extends Resource
                                     ->maxLength(255)
                                     ->columnSpan(['default' => 2, 'md' => 1]),
 
+                                Forms\Components\Select::make('category_id')
+                                    ->label('Kategori')
+                                    ->options(fn (): array => Category::query()
+                                        ->where('type', 'artwork')
+                                        ->where('is_active', true)
+                                        ->orderBy('name')
+                                        ->pluck('name', 'id')
+                                        ->all())
+                                    ->searchable()
+                                    ->preload()
+                                    ->nullable()
+                                    ->columnSpan(['default' => 2, 'md' => 1]),
+
                                 Forms\Components\Textarea::make('excerpt')
                                     ->label('Ringkasan')
                                     ->rows(4)
@@ -85,6 +104,50 @@ class ArtworkResource extends Resource
                                     ->nullable()
                                     ->maxLength(255)
                                     ->columnSpan(['default' => 2, 'md' => 1]),
+
+                                Forms\Components\Select::make('artist_id')
+                                    ->label('Artist')
+                                    ->options(fn (): array => Artist::query()
+                                        ->where('is_active', true)
+                                        ->orderBy('name')
+                                        ->pluck('name', 'id')
+                                        ->all())
+                                    ->searchable()
+                                    ->preload()
+                                    ->nullable()
+                                    ->helperText('Opsional. Jika kosong, Nama Seniman tetap digunakan sebagai fallback.')
+                                    ->columnSpan(['default' => 2, 'md' => 1]),
+
+                                Forms\Components\Select::make('collection_id')
+                                    ->label('Collection')
+                                    ->options(fn (): array => Collection::query()
+                                        ->where('is_active', true)
+                                        ->orderBy('name')
+                                        ->pluck('name', 'id')
+                                        ->all())
+                                    ->searchable()
+                                    ->preload()
+                                    ->nullable()
+                                    ->columnSpan(['default' => 2, 'md' => 1]),
+
+                                Forms\Components\Select::make('tags')
+                                    ->label('Tags')
+                                    ->relationship(
+                                        name: 'tags',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn ($query) => $query
+                                            ->where('is_active', true)
+                                            ->where(function ($query): void {
+                                                $query->whereNull('type')
+                                                    ->orWhereIn('type', ['general', 'artwork']);
+                                            })
+                                            ->orderBy('name')
+                                    )
+                                    ->getOptionLabelFromRecordUsing(fn (Tag $record): string => $record->name)
+                                    ->multiple()
+                                    ->searchable()
+                                    ->preload()
+                                    ->columnSpan(2),
 
                                 Forms\Components\TextInput::make('price')
                                     ->label('Harga')
@@ -151,6 +214,65 @@ class ArtworkResource extends Resource
                             ]),
                     ])
                     ->columns(2),
+
+                \Filament\Schemas\Components\Section::make('Gallery')
+                    ->schema([
+                        Forms\Components\Repeater::make('mediaItems')
+                            ->label('Gallery Images')
+                            ->relationship('mediaItems')
+                            ->schema([
+                                Forms\Components\FileUpload::make('file_path')
+                                    ->label('Image')
+                                    ->image()
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                    ->maxSize(4096)
+                                    ->disk('public')
+                                    ->directory('artworks/gallery')
+                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => Str::uuid().'.'.match ($file->getMimeType()) {
+                                        'image/jpeg' => 'jpg',
+                                        'image/png' => 'png',
+                                        'image/webp' => 'webp',
+                                        default => 'bin',
+                                    })
+                                    ->visibility('public')
+                                    ->imageEditor()
+                                    ->imagePreviewHeight(180)
+                                    ->required()
+                                    ->columnSpan(2),
+
+                                Forms\Components\Hidden::make('collection_name')
+                                    ->default('gallery'),
+
+                                Forms\Components\Hidden::make('file_type')
+                                    ->default('image'),
+
+                                Forms\Components\TextInput::make('title')
+                                    ->label('Title')
+                                    ->maxLength(255)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('alt_text')
+                                    ->label('Alt Text')
+                                    ->maxLength(255)
+                                    ->nullable(),
+
+                                Forms\Components\TextInput::make('sort_order')
+                                    ->label('Order')
+                                    ->numeric()
+                                    ->default(0),
+
+                                Forms\Components\Toggle::make('is_cover')
+                                    ->label('Gallery Cover')
+                                    ->default(false),
+                            ])
+                            ->columns(2)
+                            ->defaultItems(0)
+                            ->reorderableWithButtons()
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Gallery image')
+                            ->addActionLabel('Tambah Gambar')
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 
@@ -171,10 +293,25 @@ class ArtworkResource extends Resource
                     ->sortable()
                     ->limit(40),
 
-                Tables\Columns\TextColumn::make('artist_name')
-                    ->label('Seniman')
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label('Kategori')
                     ->searchable()
                     ->sortable()
+                    ->placeholder('-'),
+
+                Tables\Columns\TextColumn::make('collection.name')
+                    ->label('Collection')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('-')
+                    ->limit(28),
+
+                Tables\Columns\TextColumn::make('artist_display_name')
+                    ->label('Seniman')
+                    ->state(fn (Artwork $record): string => $record->artist_display_name ?: '-')
+                    ->searchable(query: fn ($query, string $search) => $query
+                        ->where('artist_name', 'like', "%{$search}%")
+                        ->orWhereHas('artist', fn ($artistQuery) => $artistQuery->where('name', 'like', "%{$search}%")))
                     ->limit(30)
                     ->placeholder('-'),
 

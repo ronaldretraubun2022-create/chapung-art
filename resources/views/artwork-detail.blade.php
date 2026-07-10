@@ -1,106 +1,73 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    @php
-        $ogImage = $artwork->thumbnail
-            ? asset('storage/' . urldecode(str_replace('%2F', '/', $artwork->thumbnail)))
-            : asset('images/og-image.jpg');
-        $seoDescription = str(strip_tags($artwork->excerpt ?: $artwork->description ?: 'Karya seni Papua Selatan dari Chapung Art Merauke.'))->limit(160);
-    @endphp
-    <title>{{ $artwork->title }} | Chapung Art Merauke</title>
-    <meta name="description" content="{{ $seoDescription }}">
-    <meta property="og:title" content="{{ $artwork->title }} | Chapung Art Merauke">
-    <meta property="og:description" content="{{ $seoDescription }}">
-    <meta property="og:image" content="{{ $ogImage }}">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="{{ route('artwork.show', $artwork->slug) }}">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $artwork->title }} | Chapung Art Merauke">
-    <meta name="twitter:description" content="{{ $seoDescription }}">
-    <meta name="twitter:image" content="{{ $ogImage }}">
+@extends('layouts.public')
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="min-h-screen bg-black text-white">
-    @php
-        $artworkPrice = $artwork->price
-            ? 'Rp ' . number_format((float) $artwork->price, 0, ',', '.')
-            : 'Harga tersedia atas permintaan';
-        $artworkLink = route('artwork.show', $artwork->slug);
-        $whatsappText = rawurlencode(
-            "Halo Chapung Art, saya tertarik dengan karya: {$artwork->title}\nHarga: {$artworkPrice}\nLink karya: {$artworkLink}"
-        );
-    @endphp
+@php
+    $mainImage = $artwork->thumbnail ?: $artwork->og_image;
+    $description = str(strip_tags($artwork->excerpt ?: $artwork->description ?: 'Karya seni Papua Selatan dari Chapung Art.'))->limit(160);
+    $price = $artwork->price ? 'Rp '.number_format((float) $artwork->price, 0, ',', '.') : 'By request';
+    $whatsapp = preg_replace('/\D+/', '', site_setting('whatsapp', '6281234567890')) ?: '6281234567890';
+    $message = rawurlencode('Halo Chapung Art, saya tertarik dengan artwork: '.$artwork->title.' - '.route('artwork.show', $artwork->slug));
+@endphp
 
-    <nav class="sticky top-0 z-50 border-b border-zinc-800 bg-black/85 backdrop-blur">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-            <a href="{{ route('home') }}" class="text-2xl font-black tracking-[8px]">CHAPUNG ART</a>
-            <div class="flex items-center gap-6 text-xs font-semibold uppercase tracking-[3px] text-zinc-300">
-                <a href="{{ route('home') }}" class="hover:text-white">Beranda</a>
-                <a href="{{ route('gallery') }}" class="hover:text-white">Gallery</a>
-            </div>
-        </div>
-    </nav>
+@section('seo')
+    @include('partials.seo-meta', ['seo' => seo_meta('artwork.show', $artwork, [
+        'title' => $artwork->title.' | '.site_setting('site_name', 'Chapung Art'),
+        'description' => (string) $description,
+        'og_image' => $mainImage ? asset('storage/'.$mainImage) : asset('images/og-image.jpg'),
+        'canonical_url' => route('artwork.show', $artwork->slug),
+    ])])
+@endsection
 
-    <main class="px-6 py-16">
-        <section class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
-            <div class="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950">
-                <div class="relative">
-                    <img
-                    src="{{ $artwork->thumbnail
-                        ? asset('storage/' . urldecode(str_replace('%2F', '/', $artwork->thumbnail)))
-                        : 'https://placehold.co/600x800/111111/FFFFFF?text=Chapung+Art'
-                    }}"
-                    alt="{{ $artwork->title }}"
-                    class="h-full max-h-[780px] w-full object-cover"
-                    loading="lazy"
-                    >
-                    <span class="absolute bottom-4 right-4 z-10 rounded-full bg-black/70 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white backdrop-blur">Chapung Art © Papua Selatan</span>
+@section('content')
+    <section class="px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+        <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.1fr_.9fr]">
+            <div>
+                <div class="group overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 p-3">
+                    @include('partials.public.image', ['path' => $mainImage, 'alt' => $artwork->title, 'ratio' => 'aspect-[4/3]', 'label' => 'Artwork'])
                 </div>
-            </div>
 
-            <div class="lg:sticky lg:top-28">
-                @if ($artwork->is_featured)
-                    <span class="mb-5 inline-flex rounded-full bg-amber-500 px-4 py-2 text-xs font-black uppercase tracking-[3px] text-black">Featured Artwork</span>
+                @if ($artwork->mediaItems->count())
+                    <div class="mt-4 grid grid-cols-3 gap-3">
+                        @foreach ($artwork->mediaItems->take(6) as $media)
+                            @include('partials.public.image', ['path' => $media->file_path, 'alt' => $media->alt_text ?: $artwork->title, 'ratio' => 'aspect-square', 'label' => 'Gallery'])
+                        @endforeach
+                    </div>
                 @endif
+            </div>
 
-                <p class="mb-4 text-sm uppercase tracking-[6px] text-amber-500">{{ $artwork->artist_name ?: 'Chapung Art' }}</p>
-                <h1 class="text-5xl font-black leading-tight md:text-7xl">{{ $artwork->title }}</h1>
+            <article class="lg:sticky lg:top-28 lg:self-start">
+                <p class="text-xs font-black uppercase tracking-[0.32em] text-yellow-600">{{ $artwork->category?->name ?: 'Artwork' }}</p>
+                <h1 class="mt-4 text-4xl font-black uppercase leading-none tracking-tight text-white sm:text-6xl">{{ $artwork->title }}</h1>
+                <p class="mt-5 text-lg text-zinc-300">{{ $artwork->artist_display_name ?: 'Chapung Art' }}</p>
+                <p class="mt-6 text-3xl font-black text-yellow-500">{{ $price }}</p>
 
-                <div class="mt-8 flex flex-wrap items-center gap-4">
-                    <p class="text-3xl font-black text-amber-400">
-                        {{ $artwork->price ? 'Rp ' . number_format((float) $artwork->price, 0, ',', '.') : 'Harga tersedia atas permintaan' }}
-                    </p>
-                    <span class="rounded-full border border-zinc-700 px-4 py-2 text-xs font-bold uppercase tracking-[3px] text-zinc-300">{{ $artwork->status }}</span>
+                <div class="mt-8 grid gap-3 border-y border-zinc-800 py-6 text-sm text-zinc-400 sm:grid-cols-2">
+                    <div><span class="block text-zinc-500">Material</span><strong class="text-white">{{ $artwork->material ?: $artwork->medium ?: '-' }}</strong></div>
+                    <div><span class="block text-zinc-500">Technique</span><strong class="text-white">{{ $artwork->technique ?: '-' }}</strong></div>
+                    <div><span class="block text-zinc-500">Dimension</span><strong class="text-white">{{ $artwork->width && $artwork->height ? $artwork->width.' x '.$artwork->height.' cm' : ($artwork->size ?: '-') }}</strong></div>
+                    <div><span class="block text-zinc-500">Stock</span><strong class="text-white">{{ $artwork->stock ?? 1 }}</strong></div>
+                    <div><span class="block text-zinc-500">Condition</span><strong class="text-white">{{ $artwork->condition ?: '-' }}</strong></div>
+                    <div><span class="block text-zinc-500">Location</span><strong class="text-white">{{ $artwork->location ?: '-' }}</strong></div>
                 </div>
 
-                <div class="mt-10 space-y-4 border-y border-zinc-800 py-8 text-zinc-300">
-                    <div class="flex justify-between gap-6">
-                        <span class="text-zinc-500">Media</span>
-                        <strong class="text-right text-white">{{ $artwork->medium ?: '-' }}</strong>
-                    </div>
-                    <div class="flex justify-between gap-6">
-                        <span class="text-zinc-500">Ukuran</span>
-                        <strong class="text-right text-white">{{ $artwork->size ?: '-' }}</strong>
-                    </div>
-                    <div class="flex justify-between gap-6">
-                        <span class="text-zinc-500">Tahun</span>
-                        <strong class="text-right text-white">{{ $artwork->year ?: '-' }}</strong>
-                    </div>
+                <div class="prose prose-invert mt-8 max-w-none prose-p:leading-8 prose-a:text-yellow-500">
+                    {!! $artwork->description ?: '<p>Deskripsi artwork belum tersedia.</p>' !!}
                 </div>
 
-                <div class="prose prose-invert mt-10 max-w-none text-zinc-300 prose-p:leading-relaxed prose-a:text-amber-400">
-                    {!! $artwork->description ?: '<p>Deskripsi karya belum tersedia.</p>' !!}
-                </div>
+                <a href="https://wa.me/{{ $whatsapp }}?text={{ $message }}" target="_blank" rel="noopener" class="mt-8 inline-flex w-full justify-center rounded-md bg-yellow-600 px-6 py-4 text-center text-xs font-black uppercase tracking-[0.2em] text-black hover:bg-yellow-500">Inquire Artwork</a>
+            </article>
+        </div>
+    </section>
 
-                <a href="https://wa.me/6281392269774?text={{ $whatsappText }}" target="_blank" rel="noopener" class="mt-10 flex w-full items-center justify-center gap-3 rounded-xl bg-yellow-600 px-8 py-4 text-center text-sm font-black uppercase tracking-[4px] text-black transition hover:bg-yellow-500">
-                    <x-heroicon-o-chat-bubble-left-right class="h-5 w-5" />
-                    <span>Hubungi Kolektor / Beli Karya</span>
-                </a>
+    @if ($relatedArtworks->count())
+        <section class="border-t border-zinc-800 px-4 py-14 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl">
+                <h2 class="text-2xl font-black uppercase tracking-tight text-white">Related Artwork</h2>
+                <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($relatedArtworks as $related)
+                        @include('partials.public.artwork-card', ['artwork' => $related])
+                    @endforeach
+                </div>
             </div>
         </section>
-    </main>
-</body>
-</html>
+    @endif
+@endsection

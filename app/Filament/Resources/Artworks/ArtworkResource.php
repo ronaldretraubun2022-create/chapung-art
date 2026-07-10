@@ -16,6 +16,8 @@ use Filament\Tables\Table;
 
 class ArtworkResource extends Resource
 {
+    protected static bool $shouldCheckPolicyExistence = false;
+
     protected static ?string $model = Artwork::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPhoto;

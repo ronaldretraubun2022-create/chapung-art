@@ -1,76 +1,65 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gallery - Chapung Art</title>
+@extends('layouts.public')
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="min-h-screen bg-black text-white">
-    <nav class="sticky top-0 z-50 border-b border-zinc-800 bg-black/85 backdrop-blur">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-            <a href="{{ route('home') }}" class="text-2xl font-black tracking-[8px]">CHAPUNG ART</a>
-            <div class="flex items-center gap-6 text-xs font-semibold uppercase tracking-[3px] text-zinc-300">
-                <a href="{{ route('home') }}" class="hover:text-white">Beranda</a>
-                <a href="{{ route('gallery') }}" class="text-amber-500">Gallery</a>
-            </div>
+@section('seo')
+    @include('partials.seo-meta', ['seo' => seo_meta('gallery', fallback: [
+        'title' => 'Artwork Gallery | '.site_setting('site_name', 'Chapung Art'),
+        'description' => 'Koleksi artwork Papua Selatan dari Chapung Art: lukisan, ukiran, dan karya visual terkurasi.',
+        'canonical_url' => route('gallery'),
+    ])])
+@endsection
+
+@section('content')
+    <section class="border-b border-zinc-800 bg-[radial-gradient(circle_at_top_right,rgba(202,138,4,.18),transparent_30rem),#050505] px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+        <div class="mx-auto max-w-7xl">
+            <p class="text-xs font-black uppercase tracking-[0.32em] text-yellow-600">Curated Marketplace</p>
+            <h1 class="mt-4 max-w-4xl text-4xl font-black uppercase leading-none tracking-tight text-white sm:text-6xl">Artwork Gallery</h1>
+            <p class="mt-6 max-w-3xl text-base leading-8 text-zinc-300 sm:text-lg">Temukan karya seni Papua Selatan yang dikurasi untuk kolektor, ruang publik, dan dokumentasi budaya.</p>
         </div>
-    </nav>
+    </section>
 
-    <main>
-        <section class="border-b border-zinc-800 px-6 py-24">
-            <div class="mx-auto max-w-7xl">
-                <p class="mb-4 text-sm uppercase tracking-[6px] text-amber-500">Curated Marketplace</p>
-                <h1 class="max-w-4xl text-5xl font-black leading-tight md:text-7xl">Gallery Karya Chapung Art</h1>
-                <p class="mt-6 max-w-3xl text-lg leading-relaxed text-zinc-400">
-                    Koleksi karya seni rupa dan visual dari Papua Selatan, dikurasi untuk kolektor, ruang publik, dan penikmat budaya.
-                </p>
-            </div>
-        </section>
+    <section class="border-b border-zinc-800 px-4 py-8 sm:px-6 lg:px-8">
+        <form method="GET" action="{{ route('gallery') }}" class="mx-auto grid max-w-7xl gap-3 md:grid-cols-[1.4fr_1fr_1fr_1fr_.8fr_auto]">
+            <input name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Search artwork, artist, material" class="rounded-md border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-yellow-600 focus:ring-yellow-600">
+            <select name="category" class="rounded-md border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white focus:border-yellow-600 focus:ring-yellow-600">
+                <option value="">All categories</option>
+                @foreach ($categories as $category)
+                    <option value="{{ $category->id }}" @selected(($filters['category'] ?? '') == $category->id)>{{ $category->name }}</option>
+                @endforeach
+            </select>
+            <select name="artist" class="rounded-md border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white focus:border-yellow-600 focus:ring-yellow-600">
+                <option value="">All artists</option>
+                @foreach ($artists as $artist)
+                    <option value="{{ $artist->id }}" @selected(($filters['artist'] ?? '') == $artist->id)>{{ $artist->name }}</option>
+                @endforeach
+            </select>
+            <select name="collection" class="rounded-md border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white focus:border-yellow-600 focus:ring-yellow-600">
+                <option value="">All collections</option>
+                @foreach ($collections as $collection)
+                    <option value="{{ $collection->id }}" @selected(($filters['collection'] ?? '') == $collection->id)>{{ $collection->name }}</option>
+                @endforeach
+            </select>
+            <select name="sort" class="rounded-md border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white focus:border-yellow-600 focus:ring-yellow-600">
+                <option value="">Newest</option>
+                <option value="featured" @selected(($filters['sort'] ?? '') === 'featured')>Featured</option>
+                <option value="price_asc" @selected(($filters['sort'] ?? '') === 'price_asc')>Price low</option>
+                <option value="price_desc" @selected(($filters['sort'] ?? '') === 'price_desc')>Price high</option>
+            </select>
+            <button class="rounded-md bg-yellow-600 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black hover:bg-yellow-500">Filter</button>
+        </form>
+    </section>
 
-        <section class="px-6 py-20">
-            <div class="mx-auto grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
-                @forelse ($artworks as $artwork)
-                    <article class="group overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/30">
-                        <div class="relative aspect-[4/5] overflow-hidden bg-zinc-900">
-                            <img
-                                src="{{ $artwork->thumbnail
-                                    ? asset('storage/' . urldecode(str_replace('%2F', '/', $artwork->thumbnail)))
-                                    : 'https://placehold.co/600x800/111111/FFFFFF?text=Chapung+Art'
-                                }}"
-                                alt="{{ $artwork->title }}"
-                                class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                                loading="lazy"
-                            >
-                            <span class="absolute bottom-4 right-4 z-10 rounded-full bg-black/70 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-white backdrop-blur">Chapung Art © Papua Selatan</span>
-                            @if ($artwork->is_featured)
-                                <span class="absolute left-4 top-4 rounded-full bg-amber-500 px-3 py-1 text-xs font-black uppercase tracking-[2px] text-black">Featured</span>
-                            @endif
-                        </div>
-                        <div class="space-y-4 p-5">
-                            <div>
-                                <h2 class="text-xl font-black leading-tight">{{ $artwork->title }}</h2>
-                                <p class="mt-2 text-sm uppercase tracking-[2px] text-zinc-500">{{ $artwork->artist_name ?: 'Chapung Art' }}</p>
-                            </div>
-                            <div class="flex items-center justify-between gap-4 text-sm">
-                                <p class="font-bold text-amber-400">
-                                    {{ $artwork->price ? 'Rp ' . number_format((float) $artwork->price, 0, ',', '.') : 'Harga tersedia atas permintaan' }}
-                                </p>
-                                <span class="rounded-full border border-zinc-700 px-3 py-1 text-xs uppercase tracking-[2px] text-zinc-300">{{ $artwork->status }}</span>
-                            </div>
-                            <a href="{{ route('artwork.show', $artwork->slug) }}" class="block border border-white px-4 py-3 text-center text-xs font-bold uppercase tracking-[3px] transition hover:bg-white hover:text-black">
-                                Detail
-                            </a>
-                        </div>
-                    </article>
-                @empty
-                    <div class="col-span-full rounded-2xl border border-zinc-800 bg-zinc-950 p-10 text-center text-zinc-400">
-                        Belum ada artwork yang tersedia.
-                    </div>
-                @endforelse
-            </div>
-        </section>
-    </main>
-</body>
-</html>
+    <section class="px-4 py-14 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl">
+            @if ($artworks->count())
+                <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    @foreach ($artworks as $artwork)
+                        @include('partials.public.artwork-card', ['artwork' => $artwork])
+                    @endforeach
+                </div>
+                <div class="mt-10">{{ $artworks->links() }}</div>
+            @else
+                @include('partials.public.empty-state', ['label' => 'Artwork', 'title' => 'Artwork tidak ditemukan'])
+            @endif
+        </div>
+    </section>
+@endsection

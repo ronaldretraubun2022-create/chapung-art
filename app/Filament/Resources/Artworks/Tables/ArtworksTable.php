@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Artworks\Tables;
 
+use App\Models\Artwork;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -32,17 +33,29 @@ class ArtworksTable
                     ->sortable()
                     ->limit(40),
 
-                TextColumn::make('artist_name')
+                TextColumn::make('artist_display_name')
                     ->label('Seniman')
+                    ->state(fn (Artwork $record): string => $record->artist_display_name ?: '-')
+                    ->searchable(query: fn ($query, string $search) => $query
+                        ->where('artist_name', 'like', "%{$search}%")
+                        ->orWhereHas('artist', fn ($artistQuery) => $artistQuery->where('name', 'like', "%{$search}%")))
+                    ->limit(30)
+                    ->placeholder('-'),
+
+                TextColumn::make('category.name')
+                    ->label('Kategori')
                     ->searchable()
                     ->sortable()
-                    ->limit(30)
                     ->placeholder('-'),
 
                 TextColumn::make('price')
                     ->label('Harga')
                     ->sortable()
                     ->formatStateUsing(fn ($state): string => $state !== null ? 'Rp ' . number_format((float) $state, 0, ',', '.') : '-'),
+
+                TextColumn::make('stock')
+                    ->label('Stock')
+                    ->sortable(),
 
                 TextColumn::make('status')
                     ->label('Status')

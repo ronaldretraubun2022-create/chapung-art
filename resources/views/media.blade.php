@@ -1,16 +1,23 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    @php
+        $siteName = site_setting('site_name', 'Chapung Art');
+    @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Media Berita - Chapung Art</title>
+    @include('partials.seo-meta', ['seo' => seo_meta('media.index', fallback: [
+        'title' => 'Media Berita - '.$siteName,
+        'description' => site_setting('site_description', 'Cerita seni, budaya, pameran, dan ruang kreatif Papua Selatan.'),
+        'canonical_url' => route('media.index'),
+    ])])
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-black text-white">
     <nav class="sticky top-0 z-50 border-b border-zinc-800 bg-black/85 backdrop-blur">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-            <a href="{{ route('home') }}" class="text-2xl font-black tracking-[8px]">CHAPUNG ART</a>
+            <a href="{{ route('home') }}" class="text-2xl font-black tracking-[8px]">{{ strtoupper($siteName) }}</a>
             <div class="flex items-center gap-6 text-xs font-semibold uppercase tracking-[3px] text-zinc-300">
                 <a href="{{ route('home') }}" class="hover:text-white">Beranda</a>
                 <a href="{{ route('gallery') }}" class="hover:text-white">Artwork</a>
