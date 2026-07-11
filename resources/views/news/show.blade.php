@@ -10,7 +10,8 @@
         'title' => $post->title.' | '.site_setting('site_name', 'Chapung Art'),
         'description' => (string) $description,
         'og_image' => $mainImage ? asset('storage/'.$mainImage) : asset('images/og-image.jpg'),
-        'canonical_url' => route('news.show', $post->slug),
+        'canonical_url' => route($showRouteName ?? 'news.show', $post->slug),
+        'schema_json' => $articleSchema ?? null,
     ])])
 @endsection
 
@@ -21,12 +22,12 @@
                 <p class="text-xs font-black uppercase tracking-[0.32em] text-yellow-600">{{ $post->category?->name ?: __('chapung.types.news') }}</p>
                 <h1 class="mt-4 text-4xl font-black uppercase leading-tight tracking-tight text-white sm:text-6xl">{{ $post->title }}</h1>
                 <div class="mt-6 flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.18em] text-zinc-500">
-                    <span>{{ $post->author?->name ?: $post->author_name ?: 'Chapung Art' }}</span>
+                    <span>{{ $post->author?->name ?: $post->author_name ?: __('chapung.pages.news.author_fallback') }}</span>
                     <span class="h-1 w-1 rounded-full bg-yellow-600"></span>
                     <time>{{ optional($post->published_at ?: $post->created_at)->format('d M Y') }}</time>
                     @if ($post->reading_time)
                         <span class="h-1 w-1 rounded-full bg-yellow-600"></span>
-                        <span>{{ $post->reading_time }} min read</span>
+                        <span>{{ __('chapung.pages.news.minutes_read', ['count' => $post->reading_time]) }}</span>
                     @endif
                 </div>
                 @if ($post->excerpt)
@@ -37,14 +38,28 @@
 
         <section class="px-4 py-10 sm:px-6 lg:px-8">
             <div class="group mx-auto max-w-6xl overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 p-3">
-                @include('partials.public.image', ['path' => $mainImage, 'alt' => $post->title, 'ratio' => 'aspect-[16/9]', 'label' => __('chapung.types.news')])
+                @include('partials.public.image', ['path' => $mainImage, 'alt' => $post->title, 'ratio' => 'aspect-[16/9]', 'label' => __('chapung.types.news'), 'width' => 1280, 'height' => 720, 'loading' => 'eager', 'fetchPriority' => 'high'])
             </div>
         </section>
 
         <section class="px-4 pb-16 sm:px-6 lg:px-8">
             <div class="prose prose-invert prose-lg mx-auto max-w-3xl prose-p:leading-8 prose-a:text-yellow-500 prose-headings:font-black prose-headings:uppercase prose-headings:text-white">
-                {!! $post->content ?: '<p>Konten berita belum tersedia.</p>' !!}
+                {!! $post->content ?: '<p>'.e(__('chapung.pages.news.empty_content')).'</p>' !!}
             </div>
+
+            @if ($post->mediaItems->count())
+                <div class="mx-auto mt-12 max-w-5xl">
+                    <div class="mb-6 max-w-3xl">
+                        <p class="text-xs font-black uppercase tracking-[0.22em] text-yellow-600">{{ __('chapung.pages.news.media_heading') }}</p>
+                        <p class="mt-3 text-sm leading-7 text-zinc-400">{{ __('chapung.pages.news.media_description') }}</p>
+                    </div>
+                    <div class="grid gap-5 md:grid-cols-2">
+                        @foreach ($post->mediaItems as $media)
+                            @include('partials.public.media-item', ['media' => $media])
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             @if ($post->tags->count())
                 <div class="mx-auto mt-10 flex max-w-3xl flex-wrap gap-2">
@@ -62,7 +77,7 @@
                 <h2 class="text-2xl font-black uppercase tracking-tight text-white">{{ __('chapung.pages.detail.related_news') }}</h2>
                 <div class="mt-6 grid gap-6 md:grid-cols-3">
                     @foreach ($relatedPosts as $related)
-                        @include('partials.public.post-card', ['post' => $related])
+                        @include('partials.public.post-card', ['post' => $related, 'showRouteName' => $showRouteName ?? 'news.show'])
                     @endforeach
                 </div>
             </div>

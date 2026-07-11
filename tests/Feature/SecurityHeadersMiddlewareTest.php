@@ -16,7 +16,7 @@ test('security headers are attached to web responses', function () {
         ->toContain("style-src 'self' 'unsafe-inline' https:")
         ->toContain("img-src 'self' data: blob: https:")
         ->toContain("connect-src 'self' https: ws: wss:")
-        ->toContain("frame-src 'self' blob: https://www.google.com https://maps.google.com")
+        ->toContain("frame-src 'self' blob: https://www.google.com https://maps.google.com https://www.youtube-nocookie.com")
         ->toContain("frame-ancestors 'self'");
 });
 
