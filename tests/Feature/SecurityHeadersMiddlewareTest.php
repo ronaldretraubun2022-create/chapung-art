@@ -28,8 +28,7 @@ test('hsts is not sent on non production http responses', function () {
 test('hsts is sent only for https production responses', function () {
     config(['app.env' => 'production']);
 
-    $this->withServerVariables(['HTTPS' => 'on'])
-        ->get('/')
+    $this->get('https://localhost/')
         ->assertOk()
         ->assertHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
 });

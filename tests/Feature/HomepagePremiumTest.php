@@ -6,7 +6,16 @@ use App\Models\Collection;
 use App\Models\HomepageSection;
 use App\Models\Photography;
 use App\Models\Post;
+use App\Support\PerformanceCache;
 use Illuminate\Support\Facades\Cache;
+
+test('homepage can be rendered without serialized eloquent collection errors', function () {
+    Cache::put(PerformanceCache::HOMEPAGE_PAYLOAD, [
+        'homepageSections' => HomepageSection::query()->get(),
+    ], 600);
+
+    $this->get('/')->assertOk();
+});
 
 test('premium homepage renders hero featured content seo and lazy images', function () {
     Cache::flush();

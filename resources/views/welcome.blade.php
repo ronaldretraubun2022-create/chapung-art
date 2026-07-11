@@ -2,13 +2,14 @@
 
 @php
     use App\Services\ImageUploadService;
+    use Illuminate\Support\Collection;
 
-    $homepageSections = $homepageSections ?? collect();
-    $featuredArtworks = collect($featuredArtworks ?? []);
-    $featuredArtists = collect($featuredArtists ?? []);
-    $featuredCollections = collect($featuredCollections ?? []);
-    $featuredPhotographies = collect($featuredPhotographies ?? []);
-    $latestPosts = collect($latestPosts ?? []);
+    $homepageSections = $homepageSections instanceof Collection ? $homepageSections : collect();
+    $featuredArtworks = $featuredArtworks instanceof Collection ? $featuredArtworks : collect();
+    $featuredArtists = $featuredArtists instanceof Collection ? $featuredArtists : collect();
+    $featuredCollections = $featuredCollections instanceof Collection ? $featuredCollections : collect();
+    $featuredPhotographies = $featuredPhotographies instanceof Collection ? $featuredPhotographies : collect();
+    $latestPosts = $latestPosts instanceof Collection ? $latestPosts : collect();
 
     $hero = $homepageSections->get('hero');
     $heroTitle = $hero?->title ?: 'CHAPUNG ART';

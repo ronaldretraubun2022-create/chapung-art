@@ -115,8 +115,8 @@ test('public storage image url works only when the file exists', function () {
     }
 });
 
-test('production environment file disables debug mode', function () {
-    $env = parse_ini_file(base_path('.env'), false, INI_SCANNER_RAW);
+test('production environment example disables debug mode', function () {
+    $env = parse_ini_file(base_path('.env.example'), false, INI_SCANNER_RAW);
 
     expect(strtolower((string) ($env['APP_ENV'] ?? null)))->toBe('production')
         ->and(strtolower((string) ($env['APP_DEBUG'] ?? null)))->toBe('false');
