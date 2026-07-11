@@ -31,7 +31,7 @@ return [
             'font-src' => array_merge(["'self'", 'data:', 'https:'], $splitSources('SECURITY_CSP_EXTRA_FONT_SRC')),
             'connect-src' => array_merge(["'self'", 'https:', 'ws:', 'wss:'], $splitSources('SECURITY_CSP_EXTRA_CONNECT_SRC')),
             'media-src' => array_merge(["'self'", 'data:', 'blob:', 'https:'], $splitSources('SECURITY_CSP_EXTRA_MEDIA_SRC')),
-            'frame-src' => array_merge(["'self'", 'blob:'], $splitSources('SECURITY_CSP_EXTRA_FRAME_SRC')),
+            'frame-src' => array_merge(["'self'", 'blob:', 'https://www.google.com', 'https://maps.google.com'], $splitSources('SECURITY_CSP_EXTRA_FRAME_SRC')),
             'worker-src' => array_merge(["'self'", 'blob:'], $splitSources('SECURITY_CSP_EXTRA_WORKER_SRC')),
             'object-src' => ["'none'"],
             'form-action' => ["'self'"],

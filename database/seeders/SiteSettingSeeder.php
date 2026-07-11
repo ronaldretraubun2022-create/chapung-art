@@ -29,7 +29,7 @@ class SiteSettingSeeder extends Seeder
             ['key' => 'tiktok', 'value' => 'https://www.tiktok.com/@chapungart', 'type' => 'url', 'group' => 'social'],
             ['key' => 'youtube', 'value' => 'https://youtube.com/@chapungart', 'type' => 'url', 'group' => 'social'],
             ['key' => 'address', 'value' => (string) config('chapung.address'), 'type' => 'textarea', 'group' => 'contact'],
-            ['key' => 'google_maps_url', 'value' => null, 'type' => 'url', 'group' => 'contact'],
+            ['key' => 'google_maps_url', 'value' => (string) config('chapung.google_maps_url'), 'type' => 'url', 'group' => 'contact'],
             ['key' => 'currency', 'value' => 'IDR', 'type' => 'text', 'group' => 'commerce'],
             ['key' => 'bank_accounts', 'value' => $bankAccounts, 'type' => 'textarea', 'group' => 'commerce'],
             ['key' => 'timezone', 'value' => 'Asia/Jayapura', 'type' => 'text', 'group' => 'general'],

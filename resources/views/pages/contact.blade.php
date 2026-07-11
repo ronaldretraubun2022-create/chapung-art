@@ -4,7 +4,10 @@
     $email = site_setting('email', (string) config('chapung.emails.info'));
     $contactNumbers = site_contact_numbers();
     $address = site_setting('address', (string) config('chapung.address'));
-    $maps = site_setting('google_maps_url');
+    $maps = trim((string) site_setting('google_maps_url', (string) config('chapung.google_maps_url')));
+    $maps = filter_var($maps, FILTER_VALIDATE_URL) ? $maps : null;
+    $mapQuery = rawurlencode(preg_replace('/\s+/', ' ', trim((string) $address)) ?: 'Chapung Art Merauke');
+    $mapEmbedUrl = 'https://www.google.com/maps?q='.$mapQuery.'&output=embed';
     $mailboxes = $mailboxes ?? [];
 @endphp
 
@@ -95,6 +98,30 @@
 
                 <button class="mt-5 rounded-md bg-yellow-600 px-6 py-4 text-xs font-black uppercase tracking-[0.18em] text-black hover:bg-yellow-500">{{ __('chapung.common.send_message') }}</button>
             </form>
+        </div>
+
+        <div class="mx-auto mt-8 max-w-7xl overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950">
+            <div class="flex flex-col gap-4 border-b border-zinc-800 p-6 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-xs font-black uppercase tracking-[0.24em] text-yellow-600">{{ __('chapung.pages.contact.maps') }}</p>
+                    <h2 class="mt-3 max-w-3xl whitespace-pre-line text-2xl font-black text-white">{{ $address }}</h2>
+                </div>
+                @if ($maps)
+                    <a href="{{ $maps }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center rounded-md border border-yellow-600 px-5 py-3 text-xs font-black uppercase tracking-[0.16em] text-yellow-500 transition hover:bg-yellow-600 hover:text-black">
+                        {{ __('chapung.common.open_location') }}
+                    </a>
+                @endif
+            </div>
+            <div class="aspect-[4/3] w-full bg-black sm:aspect-[16/7]">
+                <iframe
+                    src="{{ $mapEmbedUrl }}"
+                    title="{{ __('chapung.pages.contact.maps') }} {{ $address }}"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    class="h-full w-full border-0"
+                    allowfullscreen
+                ></iframe>
+            </div>
         </div>
     </section>
 @endsection

@@ -40,3 +40,12 @@ test('session locale renders english frontend copy', function () {
         ->assertSee('Explore Artwork')
         ->assertSee('South Papua');
 });
+
+test('public navbar shows language choices and favorite shortcut', function () {
+    $this->withSession(['locale' => 'id'])
+        ->get(route('home'))
+        ->assertOk()
+        ->assertSee('Indonesia')
+        ->assertSee('English')
+        ->assertSee('data-favorite-nav', false);
+});

@@ -14,6 +14,8 @@ return [
 
     'address' => "JL SESATE NO 242 RT.007 RW.002 BAMBU PEMALI\nMERAUKE MERAUKE, KAB. 99616",
 
+    'google_maps_url' => 'https://www.google.com/maps/search/?api=1&query=JL%20SESATE%20NO%20242%20RT.007%20RW.002%20BAMBU%20PEMALI%20MERAUKE%20MERAUKE%20KAB.%2099616',
+
     'contact_phone' => '0813-4400-1427',
     'contact_whatsapp' => '6281344001427',
 

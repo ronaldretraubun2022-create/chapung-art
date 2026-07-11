@@ -66,7 +66,12 @@ test('contact page renders department mailbox options', function () {
         ->assertSee('0813-9226-9774')
         ->assertSee('https://wa.me/6281392269774', false)
         ->assertSee('JL SESATE NO 242 RT.007 RW.002 BAMBU PEMALI')
-        ->assertSee('MERAUKE MERAUKE, KAB. 99616');
+        ->assertSee('MERAUKE MERAUKE, KAB. 99616')
+        ->assertSee('https://www.google.com/maps/search/?api=1', false)
+        ->assertSee('<iframe', false)
+        ->assertSee('https://www.google.com/maps?q=', false)
+        ->assertSee('output=embed', false)
+        ->assertSee('loading="lazy"', false);
 });
 
 test('contact form sends mail to selected department mailbox', function (string $department, string $address) {
