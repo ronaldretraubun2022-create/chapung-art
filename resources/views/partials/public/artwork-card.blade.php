@@ -14,7 +14,7 @@
         : ($isAvailable ? __('chapung.marketplace.badges.ready') : __('chapung.marketplace.badges.unavailable'));
 @endphp
 
-<article class="group relative flex h-full flex-col overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950/95 shadow-xl shadow-black/20 transition duration-300 hover:-translate-y-0.5 hover:border-yellow-600/80 hover:shadow-yellow-950/20" data-favorite-card data-artwork-slug="{{ $artwork->slug }}">
+<article class="ca-surface group relative flex h-full flex-col overflow-hidden transition duration-300 hover:-translate-y-0.5 hover:border-chapung-gold/80 hover:shadow-chapung-gold" data-favorite-card data-artwork-slug="{{ $artwork->slug }}">
     <div class="relative p-2 pb-0">
         <a href="{{ route('artwork.show', $artwork->slug) }}" class="block" aria-label="{{ __('chapung.marketplace.view_detail_for', ['title' => $artwork->title]) }}">
             @include('partials.public.image', [
@@ -34,9 +34,9 @@
             'iconClass' => 'h-5 w-5',
         ])
 
-        <span class="absolute left-4 top-4 rounded-md bg-yellow-600 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-lg shadow-black/30">
+        <x-public.badge class="absolute left-4 top-4 rounded-md shadow-lg shadow-black/30">
             {{ $badge }}
-        </span>
+        </x-public.badge>
 
         @if ($discountPercent > 0)
             <span class="absolute bottom-3 left-4 rounded-md bg-red-700 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-lg shadow-black/30">
@@ -46,7 +46,7 @@
     </div>
 
     <div class="flex flex-1 flex-col p-3 sm:p-4">
-        <a href="{{ route('artwork.show', $artwork->slug) }}" class="min-h-11 text-sm font-black leading-snug text-white transition hover:text-yellow-500 sm:text-base" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+        <a href="{{ route('artwork.show', $artwork->slug) }}" class="min-h-11 text-sm font-black leading-snug text-white transition hover:text-chapung-gold sm:text-base" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
             {{ $artwork->title }}
         </a>
 
@@ -66,12 +66,12 @@
 
         <div class="mt-3 min-h-12">
             @if ($price)
-                <p class="text-lg font-black text-yellow-500 sm:text-xl">Rp {{ number_format($price, 0, ',', '.') }}</p>
+                <p class="text-lg font-black text-chapung-gold sm:text-xl">Rp {{ number_format($price, 0, ',', '.') }}</p>
                 @if ($oldPrice)
                     <p class="mt-1 text-xs text-zinc-500 line-through">Rp {{ number_format($oldPrice, 0, ',', '.') }}</p>
                 @endif
             @else
-                <p class="text-sm font-black uppercase tracking-[0.14em] text-yellow-500">{{ __('chapung.marketplace.by_request') }}</p>
+                <p class="text-sm font-black uppercase tracking-[0.14em] text-chapung-gold">{{ __('chapung.marketplace.by_request') }}</p>
             @endif
         </div>
 
@@ -83,7 +83,7 @@
         </div>
 
         <div class="mt-auto grid gap-2 pt-4 sm:grid-cols-2">
-            <a href="{{ route('artwork.show', $artwork->slug) }}" class="inline-flex items-center justify-center gap-1.5 rounded-md border border-zinc-800 px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.13em] text-zinc-200 transition hover:border-yellow-600 hover:text-yellow-500">
+            <a href="{{ route('artwork.show', $artwork->slug) }}" class="inline-flex items-center justify-center gap-1.5 rounded-chapung border border-chapung-line px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.13em] text-zinc-200 transition hover:border-chapung-gold hover:text-chapung-gold">
                 <x-heroicon-o-eye class="h-4 w-4" aria-hidden="true" />
                 <span>{{ __('chapung.marketplace.view_detail') }}</span>
             </a>
@@ -92,7 +92,7 @@
                 @csrf
                 <input type="hidden" name="artwork_id" value="{{ $artwork->id }}">
                 <input type="hidden" name="quantity" value="1">
-                <button @disabled(! $isAvailable) class="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-yellow-600 px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.13em] text-black transition hover:bg-yellow-500 disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-500">
+                <button @disabled(! $isAvailable) class="inline-flex w-full items-center justify-center gap-1.5 rounded-chapung bg-chapung-gold px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.13em] text-black transition hover:bg-chapung-gold-soft disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-500">
                     <x-heroicon-o-shopping-bag class="h-4 w-4" aria-hidden="true" />
                     <span>{{ __('chapung.marketplace.add_to_cart') }}</span>
                 </button>

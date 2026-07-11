@@ -227,16 +227,7 @@
                 </div>
             </div>
 
-            <div data-catalog-skeleton class="hidden grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4" aria-hidden="true">
-                @for ($index = 0; $index < 8; $index++)
-                    <div class="animate-pulse rounded-lg border border-zinc-800 bg-zinc-950 p-2">
-                        <div class="aspect-[4/5] rounded-md bg-zinc-900"></div>
-                        <div class="mt-4 h-4 rounded bg-zinc-900"></div>
-                        <div class="mt-2 h-3 w-2/3 rounded bg-zinc-900"></div>
-                        <div class="mt-4 h-8 rounded bg-zinc-900"></div>
-                    </div>
-                @endfor
-            </div>
+            <x-public.loading-skeleton data-catalog-skeleton class="hidden grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4" :items="8" />
 
             <div data-catalog-results>
                 @if ($artworks->count())
