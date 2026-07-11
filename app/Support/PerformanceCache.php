@@ -23,10 +23,16 @@ class PerformanceCache
     public const HOMEPAGE_PAYLOAD = 'homepage.payload';
     public const HOMEPAGE_SECTION_IDS = 'homepage.section_ids';
     public const HOMEPAGE_FEATURED_ARTWORK_IDS = 'homepage.featured_artwork_ids';
+    public const HOMEPAGE_LATEST_ARTWORK_IDS = 'homepage.latest_artwork_ids';
+    public const HOMEPAGE_AVAILABLE_ARTWORK_IDS = 'homepage.available_artwork_ids';
     public const HOMEPAGE_FEATURED_PHOTOGRAPHY_IDS = 'homepage.featured_photography_ids';
+    public const HOMEPAGE_DIGITAL_ARTWORK_IDS = 'homepage.digital_artwork_ids';
+    public const HOMEPAGE_SOLD_ARTWORK_IDS = 'homepage.sold_artwork_ids';
     public const HOMEPAGE_FEATURED_ARTIST_IDS = 'homepage.featured_artist_ids';
+    public const HOMEPAGE_STORY_ARTIST_IDS = 'homepage.story_artist_ids';
     public const HOMEPAGE_FEATURED_COLLECTION_IDS = 'homepage.featured_collection_ids';
     public const HOMEPAGE_LATEST_POST_IDS = 'homepage.latest_post_ids';
+    public const HOMEPAGE_CATEGORY_IDS = 'homepage.category_ids';
     public const ACTIVE_COLLECTIONS = 'collections.active.options';
     public const ACTIVE_COLLECTION_IDS = 'collections.active.ids';
     public const ACTIVE_TAGS = 'tags.active.options';
@@ -65,8 +71,14 @@ class PerformanceCache
         return [
             'homepageSections' => self::homepageSections(),
             'featuredArtworks' => self::featuredArtworks(),
+            'latestArtworks' => self::latestArtworks(),
+            'availableArtworks' => self::availableArtworks(),
+            'artworkCategories' => self::homepageArtworkCategories(),
             'featuredPhotographies' => self::featuredPhotographies(),
+            'digitalArtworks' => self::digitalArtworks(),
+            'soldArtworks' => self::soldArtworks(),
             'featuredArtists' => self::featuredArtists(),
+            'storyArtists' => self::storyArtists(),
             'featuredCollections' => self::featuredCollections(),
             'latestPosts' => self::latestPosts(),
         ];
@@ -139,10 +151,16 @@ class PerformanceCache
         Cache::forget(self::HOMEPAGE_PAYLOAD);
         Cache::forget(self::HOMEPAGE_SECTION_IDS);
         Cache::forget(self::HOMEPAGE_FEATURED_ARTWORK_IDS);
+        Cache::forget(self::HOMEPAGE_LATEST_ARTWORK_IDS);
+        Cache::forget(self::HOMEPAGE_AVAILABLE_ARTWORK_IDS);
         Cache::forget(self::HOMEPAGE_FEATURED_PHOTOGRAPHY_IDS);
+        Cache::forget(self::HOMEPAGE_DIGITAL_ARTWORK_IDS);
+        Cache::forget(self::HOMEPAGE_SOLD_ARTWORK_IDS);
         Cache::forget(self::HOMEPAGE_FEATURED_ARTIST_IDS);
+        Cache::forget(self::HOMEPAGE_STORY_ARTIST_IDS);
         Cache::forget(self::HOMEPAGE_FEATURED_COLLECTION_IDS);
         Cache::forget(self::HOMEPAGE_LATEST_POST_IDS);
+        Cache::forget(self::HOMEPAGE_CATEGORY_IDS);
     }
 
     public static function flushTaxonomy(): void
@@ -179,14 +197,49 @@ class PerformanceCache
 
     private static function featuredArtworks(): EloquentCollection
     {
-        $query = Artwork::query()
-            ->select(['id', 'title', 'slug', 'artist_id', 'category_id', 'artist_name', 'thumbnail', 'price', 'status', 'is_featured', 'created_at'])
-            ->with(['artist:id,name', 'category:id,name'])
+        $query = self::homepageArtworkQuery()
             ->where('is_featured', true)
             ->latest()
-            ->take(6);
+            ->take(5);
 
         return self::homepageModels(self::HOMEPAGE_FEATURED_ARTWORK_IDS, $query);
+    }
+
+    private static function latestArtworks(): EloquentCollection
+    {
+        $query = self::homepageArtworkQuery()
+            ->latest()
+            ->take(8);
+
+        return self::homepageModels(self::HOMEPAGE_LATEST_ARTWORK_IDS, $query);
+    }
+
+    private static function availableArtworks(): EloquentCollection
+    {
+        $query = self::homepageArtworkQuery()
+            ->where('status', 'available')
+            ->where('stock', '>', 0)
+            ->orderByRaw('price IS NULL')
+            ->latest()
+            ->take(8);
+
+        return self::homepageModels(self::HOMEPAGE_AVAILABLE_ARTWORK_IDS, $query);
+    }
+
+    private static function homepageArtworkCategories(): EloquentCollection
+    {
+        $query = Category::query()
+            ->select(['id', 'name', 'slug', 'type', 'description', 'is_active'])
+            ->where('is_active', true)
+            ->where(function ($query): void {
+                $query->where('type', 'artwork')->orWhereNull('type');
+            })
+            ->withCount(['artworks' => fn ($query) => $query->where('status', 'available')->where('stock', '>', 0)])
+            ->orderByDesc('artworks_count')
+            ->orderBy('name')
+            ->take(8);
+
+        return self::homepageModels(self::HOMEPAGE_CATEGORY_IDS, $query);
     }
 
     private static function featuredPhotographies(): EloquentCollection
@@ -201,6 +254,34 @@ class PerformanceCache
         return self::homepageModels(self::HOMEPAGE_FEATURED_PHOTOGRAPHY_IDS, $query);
     }
 
+    private static function digitalArtworks(): EloquentCollection
+    {
+        $query = self::homepageArtworkQuery()
+            ->where(function ($query): void {
+                $query->where('digital_download_enabled', true)
+                    ->orWhere('medium', 'like', '%digital%')
+                    ->orWhere('medium', 'like', '%illustration%')
+                    ->orWhere('medium', 'like', '%ilustrasi%')
+                    ->orWhere('license', 'like', '%digital%');
+            })
+            ->latest()
+            ->take(4);
+
+        return self::homepageModels(self::HOMEPAGE_DIGITAL_ARTWORK_IDS, $query);
+    }
+
+    private static function soldArtworks(): EloquentCollection
+    {
+        $query = self::homepageArtworkQuery()
+            ->where(function ($query): void {
+                $query->where('status', 'sold')->orWhere('stock', '<=', 0);
+            })
+            ->latest()
+            ->take(4);
+
+        return self::homepageModels(self::HOMEPAGE_SOLD_ARTWORK_IDS, $query);
+    }
+
     private static function featuredArtists(): EloquentCollection
     {
         $query = Artist::query()
@@ -212,6 +293,21 @@ class PerformanceCache
             ->take(4);
 
         return self::homepageModels(self::HOMEPAGE_FEATURED_ARTIST_IDS, $query);
+    }
+
+    private static function storyArtists(): EloquentCollection
+    {
+        $query = Artist::query()
+            ->select(['id', 'name', 'slug', 'photo', 'bio', 'origin_area', 'city', 'province', 'specialization', 'is_active', 'created_at'])
+            ->active()
+            ->whereNotNull('bio')
+            ->where('bio', '!=', '')
+            ->withCount(['artworks', 'photographies'])
+            ->orderByDesc('is_featured')
+            ->latest()
+            ->take(3);
+
+        return self::homepageModels(self::HOMEPAGE_STORY_ARTIST_IDS, $query);
     }
 
     private static function featuredCollections(): EloquentCollection
@@ -237,6 +333,34 @@ class PerformanceCache
             ->take(3);
 
         return self::homepageModels(self::HOMEPAGE_LATEST_POST_IDS, $query);
+    }
+
+    private static function homepageArtworkQuery(): Builder
+    {
+        return Artwork::query()
+            ->select([
+                'id',
+                'title',
+                'slug',
+                'artist_id',
+                'category_id',
+                'collection_id',
+                'artist_name',
+                'thumbnail',
+                'price',
+                'status',
+                'medium',
+                'license',
+                'stock',
+                'views',
+                'likes',
+                'digital_download_enabled',
+                'is_featured',
+                'created_at',
+            ])
+            ->with(['artist:id,name,slug', 'category:id,name', 'collection:id,name,slug'])
+            ->withCount('approvedReviews')
+            ->withAvg('approvedReviews', 'rating');
     }
 
     private static function homepageModels(string $cacheKey, Builder $query): EloquentCollection

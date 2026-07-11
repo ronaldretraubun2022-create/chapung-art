@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Support\PerformanceCache;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends Model
 {
@@ -28,5 +29,15 @@ class Category extends Model
         static::deleted(function (): void {
             PerformanceCache::flushContent();
         });
+    }
+
+    public function artworks(): HasMany
+    {
+        return $this->hasMany(Artwork::class);
+    }
+
+    public function photographies(): HasMany
+    {
+        return $this->hasMany(Photography::class);
     }
 }

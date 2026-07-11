@@ -11,10 +11,12 @@
     $fetchPriority = $fetchPriority ?? 'auto';
     $alt = ImageUploadService::altText($alt, $label);
     $normalizedPath = ImageUploadService::normalizePath($path);
-    $imageUrl = $normalizedPath ? asset('storage/'.$normalizedPath) : ImageUploadService::fallbackUrl();
+    $fallbackUrl = ImageUploadService::fallbackUrl();
+    $imageUrl = $normalizedPath ? asset('storage/'.$normalizedPath) : $fallbackUrl;
 @endphp
 
 <div class="relative {{ $ratio }} overflow-hidden rounded-md bg-zinc-900">
-    <img src="{{ $imageUrl }}" alt="{{ $alt }}" width="{{ $width }}" height="{{ $height }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="{{ $loading }}" decoding="async" fetchpriority="{{ $fetchPriority }}">
+    <div class="ca-skeleton absolute inset-0 rounded-none"></div>
+    <img src="{{ $imageUrl }}" alt="{{ $alt }}" width="{{ $width }}" height="{{ $height }}" class="relative h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="{{ $loading }}" decoding="async" fetchpriority="{{ $fetchPriority }}" onload="this.previousElementSibling?.classList.add('hidden')" onerror="this.onerror=null;this.src='{{ $fallbackUrl }}';this.previousElementSibling?.classList.add('hidden')">
     <span class="absolute bottom-3 right-3 rounded-md bg-black/70 px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white backdrop-blur">Papua Selatan</span>
 </div>

@@ -9,9 +9,10 @@
     $discountPercent = $hasDiscount ? 12 : 0;
     $oldPrice = $hasDiscount ? round($price / (1 - ($discountPercent / 100)), -3) : null;
     $isAvailable = ($artwork->status ?? 'available') === 'available' && (int) ($artwork->stock ?? 0) > 0;
-    $badge = $artwork->is_featured
+    $badge = $badge ?? ($artwork->is_featured
         ? __('chapung.marketplace.badges.curated')
-        : ($isAvailable ? __('chapung.marketplace.badges.ready') : __('chapung.marketplace.badges.unavailable'));
+        : ($isAvailable ? __('chapung.marketplace.badges.ready') : __('chapung.marketplace.badges.unavailable')));
+    $artist = $artwork->relationLoaded('artist') ? $artwork->artist : null;
 @endphp
 
 <article class="ca-surface group relative flex h-full flex-col overflow-hidden transition duration-300 hover:-translate-y-0.5 hover:border-chapung-gold/80 hover:shadow-chapung-gold" data-favorite-card data-artwork-slug="{{ $artwork->slug }}">
@@ -50,9 +51,15 @@
             {{ $artwork->title }}
         </a>
 
-        <p class="mt-2 truncate text-xs font-bold text-zinc-400 sm:text-sm">
-            {{ $artwork->artist_display_name ?: __('chapung.home.artist_fallback') }}
-        </p>
+        @if ($artist?->slug)
+            <a href="{{ route('artists.show', $artist->slug) }}" class="mt-2 truncate text-xs font-bold text-zinc-400 transition hover:text-chapung-gold sm:text-sm">
+                {{ $artwork->artist_display_name ?: __('chapung.home.artist_fallback') }}
+            </a>
+        @else
+            <p class="mt-2 truncate text-xs font-bold text-zinc-400 sm:text-sm">
+                {{ $artwork->artist_display_name ?: __('chapung.home.artist_fallback') }}
+            </p>
+        @endif
 
         <div class="mt-3 flex items-center gap-1.5 text-xs text-zinc-400" aria-label="{{ __('chapung.marketplace.rating') }}">
             <span class="inline-flex items-center text-yellow-500" aria-hidden="true">
