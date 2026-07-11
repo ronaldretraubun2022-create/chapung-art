@@ -115,4 +115,28 @@
     .ca-alert {
         @apply rounded-chapung border px-4 py-3 text-sm font-bold shadow-chapung-soft;
     }
+
+    .ca-masonry {
+        column-count: 1;
+        column-gap: 0.75rem;
+    }
+
+    @screen sm {
+        .ca-masonry {
+            column-count: 2;
+            column-gap: 1rem;
+        }
+    }
+
+    @screen lg {
+        .ca-masonry {
+            column-count: 3;
+        }
+    }
+
+    @screen 2xl {
+        .ca-masonry {
+            column-count: 4;
+        }
+    }
 }

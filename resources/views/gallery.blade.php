@@ -231,7 +231,7 @@
 
             <div data-catalog-results>
                 @if ($artworks->count())
-                    <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
+                    <div class="ca-masonry" data-gallery-masonry>
                         @foreach ($artworks as $artwork)
                             @include('partials.public.artwork-card', ['artwork' => $artwork])
                         @endforeach

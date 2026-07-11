@@ -172,7 +172,47 @@ test('artworks route renders premium marketplace catalog ui and safe fallback im
         ->assertSee('aria-label="Favorite"', false)
         ->assertSee('Add to Cart')
         ->assertSee(asset('images/og-image.jpg'), false)
+        ->assertSee('data-gallery-masonry', false)
         ->assertSee('data-catalog-skeleton', false);
+});
+
+test('gallery artwork card shows year and sold artwork without purchase action', function () {
+    $category = Category::create([
+        'name' => 'Mixed Media',
+        'slug' => 'mixed-media-card',
+        'type' => 'artwork',
+        'is_active' => true,
+    ]);
+
+    $artist = Artist::create([
+        'name' => 'Maria Kaize',
+        'slug' => 'maria-kaize',
+        'is_active' => true,
+    ]);
+
+    Artwork::create([
+        'title' => 'Sold Gallery Artwork',
+        'slug' => 'sold-gallery-artwork',
+        'category_id' => $category->id,
+        'artist_id' => $artist->id,
+        'price' => 750000,
+        'status' => 'sold',
+        'medium' => 'Mixed media',
+        'year' => 2025,
+        'stock' => 3,
+    ]);
+
+    $this->withSession(['locale' => 'en'])
+        ->get(route('gallery'))
+        ->assertOk()
+        ->assertSee('Sold Gallery Artwork')
+        ->assertSee('Maria Kaize')
+        ->assertSee('Mixed Media')
+        ->assertSee('Mixed media')
+        ->assertSee('2025')
+        ->assertSee('data-artwork-status="sold"', false)
+        ->assertSee('<button disabled', false)
+        ->assertSee('Sold');
 });
 
 test('marketplace catalog filters by type price location rating stock and commerce flags', function () {

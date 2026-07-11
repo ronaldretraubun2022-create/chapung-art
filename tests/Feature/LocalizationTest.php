@@ -37,7 +37,7 @@ test('session locale renders english frontend copy', function () {
         ->get(route('home'))
         ->assertOk()
         ->assertSee('lang="en"', false)
-        ->assertSee('Explore Artwork')
+        ->assertSee('Available Artworks')
         ->assertSee('South Papua');
 });
 

@@ -41,7 +41,7 @@ class ArtworkController extends Controller
             ->withQueryString();
 
         $featuredArtworks = Artwork::with(['artist', 'category'])
-            ->select(['id', 'title', 'slug', 'artist_id', 'category_id', 'artist_name', 'thumbnail', 'price', 'status', 'is_featured', 'created_at'])
+            ->select(['id', 'title', 'slug', 'artist_id', 'category_id', 'artist_name', 'thumbnail', 'price', 'status', 'medium', 'stock', 'year', 'width', 'height', 'is_featured', 'created_at'])
             ->withCount('approvedReviews')
             ->withAvg('approvedReviews', 'rating')
             ->when($request->user(), fn ($query, $user) => $query->withExists([
@@ -143,12 +143,15 @@ class ArtworkController extends Controller
                 'status',
                 'medium',
                 'material',
+                'year',
                 'location',
                 'license',
                 'digital_download_enabled',
                 'stock',
                 'views',
                 'likes',
+                'width',
+                'height',
                 'certificate_number',
                 'is_featured',
                 'created_at',
