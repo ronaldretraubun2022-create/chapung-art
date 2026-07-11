@@ -1,0 +1,106 @@
+PHASE 3 CODEX PROMPT
+
+KONTEKS PRODUK WAJIB
+
+Project:
+C:\laragon\www\chapung-art
+
+Chapung Art adalah galeri dan marketplace resmi komunitas seniman/perupa.
+
+Produk utama:
+- Lukisan
+- Fotografi seni
+- Karya digital
+- Ilustrasi
+- Patung
+- Kriya
+- Mixed media
+- Art print
+
+Model operasional:
+- Hanya 5 orang internal yang memiliki akses dashboard.
+- Perupa atau anggota komunitas tidak memasukkan karya secara mandiri.
+- Semua karya yang dimasukkan oleh pengelola dianggap resmi dan siap dipublikasikan.
+- Tidak ada fitur kurator, pilihan kurator, antrean kurasi, atau approval berlapis.
+- Desain boleh terinspirasi dari struktur visual Fotografer Indonesia, tetapi tidak boleh menyalin source code, aset, logo, identitas, atau tampilan secara identik.
+- Fokus utama selalu karya para perupa, profil perupa, kategori karya, dan proses penjualan.
+
+PRINSIP TANPA BIAYA TAMBAHAN
+
+- Pertahankan domain dan hosting yang sudah aktif.
+- Pertahankan Laravel, Filament, database, Blade, Vite, Tailwind CSS, dan dependency yang sudah tersedia.
+- Gunakan hanya library, font, ikon, CDN, dan layanan gratis.
+- Jangan menggunakan template premium.
+- Jangan menggunakan plugin berbayar.
+- Jangan menggunakan font berbayar.
+- Jangan menggunakan payment gateway berbayar.
+- Jangan menggunakan API ongkir berbayar.
+- Jangan menyarankan upgrade hosting.
+- Gunakan pembayaran transfer manual dan pengelolaan ongkir manual bila sistem saat ini memakainya.
+
+ATURAN UMUM WAJIB
+
+1. Kerjakan hanya phase yang diminta.
+2. Jangan menghapus fitur yang sudah berjalan.
+3. Jangan merusak keranjang, checkout, pembayaran, invoice, stok, order, pengiriman, notifikasi, atau autentikasi.
+4. Jangan mengubah `.env`.
+5. Jangan memasukkan secret, token, password, atau credential ke source code.
+6. Jangan melakukan `git commit`.
+7. Jangan melakukan `git push`.
+8. Jangan melakukan refactor besar di luar scope.
+9. Jangan memasang dependency baru kecuali benar-benar wajib, gratis, kompatibel, dan tidak ada solusi native; prioritaskan tanpa dependency baru.
+10. Pertahankan kompatibilitas mobile-first dan aksesibilitas dasar.
+11. Gunakan komponen reusable dan hindari duplikasi.
+12. Catat semua file yang dibuat dan diubah.
+13. Jalankan validasi yang relevan.
+14. Jika menemukan masalah lama di luar scope, dokumentasikan tanpa memperluas pekerjaan.
+
+Lakukan PHASE 3 — Navbar, Mobile Menu, Search, dan Footer.
+
+TUJUAN
+
+Membuat navigasi publik modern, mobile-first, dan fokus pada penemuan karya.
+
+TUGAS
+
+1. Buat navbar responsif dengan:
+   - logo Chapung Art
+   - Beranda
+   - Karya
+   - Perupa
+   - Kategori
+   - Koleksi
+   - Berita/Event jika route tersedia
+   - search trigger
+   - cart indicator
+   - login/admin hanya bila sesuai akses
+2. Buat mobile menu yang dapat dibuka dan ditutup dengan keyboard.
+3. Integrasikan search existing tanpa mengubah backend secara berisiko.
+4. Search harus menampilkan loading, empty, dan error state bila flow mendukung.
+5. Buat footer lengkap:
+   - identitas Chapung Art
+   - menu utama
+   - kategori
+   - informasi kontak yang sudah ada
+   - sosial media yang sudah dikonfigurasi
+   - copyright dinamis
+6. Jangan menampilkan menu pendaftaran perupa mandiri.
+7. Jangan membuat label kurator.
+
+OUTPUT
+
+Buat:
+docs/PHASE_03_NAVIGATION.md
+
+VALIDASI
+
+- desktop navbar
+- mobile menu
+- keyboard navigation
+- search
+- cart count
+- semua link footer
+- php artisan test
+- npm run build
+
+Jangan mengerjakan PHASE 4.

@@ -1,0 +1,135 @@
+PHASE 14 CODEX PROMPT
+
+KONTEKS PRODUK WAJIB
+
+Project:
+C:\laragon\www\chapung-art
+
+Chapung Art adalah galeri dan marketplace resmi komunitas seniman/perupa.
+
+Produk utama:
+- Lukisan
+- Fotografi seni
+- Karya digital
+- Ilustrasi
+- Patung
+- Kriya
+- Mixed media
+- Art print
+
+Model operasional:
+- Hanya 5 orang internal yang memiliki akses dashboard.
+- Perupa atau anggota komunitas tidak memasukkan karya secara mandiri.
+- Semua karya yang dimasukkan oleh pengelola dianggap resmi dan siap dipublikasikan.
+- Tidak ada fitur kurator, pilihan kurator, antrean kurasi, atau approval berlapis.
+- Desain boleh terinspirasi dari struktur visual Fotografer Indonesia, tetapi tidak boleh menyalin source code, aset, logo, identitas, atau tampilan secara identik.
+- Fokus utama selalu karya para perupa, profil perupa, kategori karya, dan proses penjualan.
+
+PRINSIP TANPA BIAYA TAMBAHAN
+
+- Pertahankan domain dan hosting yang sudah aktif.
+- Pertahankan Laravel, Filament, database, Blade, Vite, Tailwind CSS, dan dependency yang sudah tersedia.
+- Gunakan hanya library, font, ikon, CDN, dan layanan gratis.
+- Jangan menggunakan template premium.
+- Jangan menggunakan plugin berbayar.
+- Jangan menggunakan font berbayar.
+- Jangan menggunakan payment gateway berbayar.
+- Jangan menggunakan API ongkir berbayar.
+- Jangan menyarankan upgrade hosting.
+- Gunakan pembayaran transfer manual dan pengelolaan ongkir manual bila sistem saat ini memakainya.
+
+ATURAN UMUM WAJIB
+
+1. Kerjakan hanya phase yang diminta.
+2. Jangan menghapus fitur yang sudah berjalan.
+3. Jangan merusak keranjang, checkout, pembayaran, invoice, stok, order, pengiriman, notifikasi, atau autentikasi.
+4. Jangan mengubah `.env`.
+5. Jangan memasukkan secret, token, password, atau credential ke source code.
+6. Jangan melakukan `git commit`.
+7. Jangan melakukan `git push`.
+8. Jangan melakukan refactor besar di luar scope.
+9. Jangan memasang dependency baru kecuali benar-benar wajib, gratis, kompatibel, dan tidak ada solusi native; prioritaskan tanpa dependency baru.
+10. Pertahankan kompatibilitas mobile-first dan aksesibilitas dasar.
+11. Gunakan komponen reusable dan hindari duplikasi.
+12. Catat semua file yang dibuat dan diubah.
+13. Jalankan validasi yang relevan.
+14. Jika menemukan masalah lama di luar scope, dokumentasikan tanpa memperluas pekerjaan.
+
+Lakukan PHASE 14 — Manual QA dan Production Build.
+
+TUJUAN
+
+Melakukan pemeriksaan akhir sebelum deployment tanpa menambah fitur baru.
+
+TUGAS
+
+1. Jangan membuat fitur baru.
+2. Audit semua perubahan phase 1–13.
+3. Uji route publik utama:
+   - homepage
+   - gallery
+   - artwork detail
+   - artists
+   - artist detail
+   - collections
+   - photography/digital products
+   - cart
+   - checkout
+   - invoice
+   - news
+   - event/video
+4. Uji dashboard dan hak akses lima pengelola.
+5. Uji:
+   - mobile
+   - desktop
+   - dark/light mode
+   - search
+   - filter
+   - add/remove cart
+   - checkout validation
+   - sold artwork
+   - empty state
+   - broken image
+   - 404
+   - 500 handling yang tersedia
+6. Jalankan:
+   - php artisan route:list
+   - php artisan test
+   - npm run build
+7. Periksa:
+   - git status
+   - git diff --stat
+   - file `.env` tidak berubah
+   - tidak ada secret
+   - tidak ada dependency berbayar
+8. Buat checklist deployment untuk hosting existing.
+9. Jangan deploy otomatis.
+10. Jangan commit atau push.
+
+OUTPUT
+
+Buat:
+docs/PHASE_14_FINAL_QA.md
+
+Struktur:
+- Executive Summary
+- Test Environment
+- Automated Test Results
+- Manual QA Checklist
+- Accessibility Check
+- Security Check
+- Performance Check
+- Production Build Result
+- Known Issues
+- Deployment Checklist
+- Rollback Checklist
+- Final Recommendation
+
+HASIL AKHIR
+
+Tampilkan:
+- file berubah
+- hasil test
+- hasil build
+- masalah tersisa
+- status siap deploy atau belum siap deploy

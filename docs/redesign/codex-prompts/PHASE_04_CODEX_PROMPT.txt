@@ -1,0 +1,105 @@
+PHASE 4 CODEX PROMPT
+
+KONTEKS PRODUK WAJIB
+
+Project:
+C:\laragon\www\chapung-art
+
+Chapung Art adalah galeri dan marketplace resmi komunitas seniman/perupa.
+
+Produk utama:
+- Lukisan
+- Fotografi seni
+- Karya digital
+- Ilustrasi
+- Patung
+- Kriya
+- Mixed media
+- Art print
+
+Model operasional:
+- Hanya 5 orang internal yang memiliki akses dashboard.
+- Perupa atau anggota komunitas tidak memasukkan karya secara mandiri.
+- Semua karya yang dimasukkan oleh pengelola dianggap resmi dan siap dipublikasikan.
+- Tidak ada fitur kurator, pilihan kurator, antrean kurasi, atau approval berlapis.
+- Desain boleh terinspirasi dari struktur visual Fotografer Indonesia, tetapi tidak boleh menyalin source code, aset, logo, identitas, atau tampilan secara identik.
+- Fokus utama selalu karya para perupa, profil perupa, kategori karya, dan proses penjualan.
+
+PRINSIP TANPA BIAYA TAMBAHAN
+
+- Pertahankan domain dan hosting yang sudah aktif.
+- Pertahankan Laravel, Filament, database, Blade, Vite, Tailwind CSS, dan dependency yang sudah tersedia.
+- Gunakan hanya library, font, ikon, CDN, dan layanan gratis.
+- Jangan menggunakan template premium.
+- Jangan menggunakan plugin berbayar.
+- Jangan menggunakan font berbayar.
+- Jangan menggunakan payment gateway berbayar.
+- Jangan menggunakan API ongkir berbayar.
+- Jangan menyarankan upgrade hosting.
+- Gunakan pembayaran transfer manual dan pengelolaan ongkir manual bila sistem saat ini memakainya.
+
+ATURAN UMUM WAJIB
+
+1. Kerjakan hanya phase yang diminta.
+2. Jangan menghapus fitur yang sudah berjalan.
+3. Jangan merusak keranjang, checkout, pembayaran, invoice, stok, order, pengiriman, notifikasi, atau autentikasi.
+4. Jangan mengubah `.env`.
+5. Jangan memasukkan secret, token, password, atau credential ke source code.
+6. Jangan melakukan `git commit`.
+7. Jangan melakukan `git push`.
+8. Jangan melakukan refactor besar di luar scope.
+9. Jangan memasang dependency baru kecuali benar-benar wajib, gratis, kompatibel, dan tidak ada solusi native; prioritaskan tanpa dependency baru.
+10. Pertahankan kompatibilitas mobile-first dan aksesibilitas dasar.
+11. Gunakan komponen reusable dan hindari duplikasi.
+12. Catat semua file yang dibuat dan diubah.
+13. Jalankan validasi yang relevan.
+14. Jika menemukan masalah lama di luar scope, dokumentasikan tanpa memperluas pekerjaan.
+
+Lakukan PHASE 4 — Homepage Marketplace Seni.
+
+TUJUAN
+
+Mengubah homepage menjadi etalase utama karya para perupa.
+
+STRUKTUR PRIORITAS
+
+1. Hero karya unggulan
+2. Karya terbaru
+3. Karya tersedia
+4. Kategori karya
+5. Perupa pilihan
+6. Koleksi karya
+7. Fotografi dan karya digital
+8. Karya terjual
+9. Cerita perupa
+10. Pameran, berita, atau video pendukung
+11. Footer existing
+
+TUGAS
+
+- Gunakan data dinamis yang sudah tersedia.
+- Jangan membuat data palsu bila database sudah menyediakan data.
+- Hero harus tetap ringan dan tidak memakai library berbayar.
+- Prioritaskan foto karya.
+- Harga dan status tersedia harus terlihat pada section penjualan.
+- Konten berita/event tidak boleh lebih dominan daripada karya.
+- Tambahkan skeleton, empty state, dan fallback image.
+- Jangan memakai istilah kurator.
+
+OUTPUT
+
+Buat:
+docs/PHASE_04_HOMEPAGE.md
+
+VALIDASI
+
+- homepage desktop
+- homepage mobile
+- data kosong
+- gambar rusak
+- link ke detail karya
+- link ke perupa
+- php artisan test
+- npm run build
+
+Jangan mengerjakan PHASE 5.

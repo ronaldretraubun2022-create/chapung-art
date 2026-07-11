@@ -1,0 +1,105 @@
+PHASE 5 CODEX PROMPT
+
+KONTEKS PRODUK WAJIB
+
+Project:
+C:\laragon\www\chapung-art
+
+Chapung Art adalah galeri dan marketplace resmi komunitas seniman/perupa.
+
+Produk utama:
+- Lukisan
+- Fotografi seni
+- Karya digital
+- Ilustrasi
+- Patung
+- Kriya
+- Mixed media
+- Art print
+
+Model operasional:
+- Hanya 5 orang internal yang memiliki akses dashboard.
+- Perupa atau anggota komunitas tidak memasukkan karya secara mandiri.
+- Semua karya yang dimasukkan oleh pengelola dianggap resmi dan siap dipublikasikan.
+- Tidak ada fitur kurator, pilihan kurator, antrean kurasi, atau approval berlapis.
+- Desain boleh terinspirasi dari struktur visual Fotografer Indonesia, tetapi tidak boleh menyalin source code, aset, logo, identitas, atau tampilan secara identik.
+- Fokus utama selalu karya para perupa, profil perupa, kategori karya, dan proses penjualan.
+
+PRINSIP TANPA BIAYA TAMBAHAN
+
+- Pertahankan domain dan hosting yang sudah aktif.
+- Pertahankan Laravel, Filament, database, Blade, Vite, Tailwind CSS, dan dependency yang sudah tersedia.
+- Gunakan hanya library, font, ikon, CDN, dan layanan gratis.
+- Jangan menggunakan template premium.
+- Jangan menggunakan plugin berbayar.
+- Jangan menggunakan font berbayar.
+- Jangan menggunakan payment gateway berbayar.
+- Jangan menggunakan API ongkir berbayar.
+- Jangan menyarankan upgrade hosting.
+- Gunakan pembayaran transfer manual dan pengelolaan ongkir manual bila sistem saat ini memakainya.
+
+ATURAN UMUM WAJIB
+
+1. Kerjakan hanya phase yang diminta.
+2. Jangan menghapus fitur yang sudah berjalan.
+3. Jangan merusak keranjang, checkout, pembayaran, invoice, stok, order, pengiriman, notifikasi, atau autentikasi.
+4. Jangan mengubah `.env`.
+5. Jangan memasukkan secret, token, password, atau credential ke source code.
+6. Jangan melakukan `git commit`.
+7. Jangan melakukan `git push`.
+8. Jangan melakukan refactor besar di luar scope.
+9. Jangan memasang dependency baru kecuali benar-benar wajib, gratis, kompatibel, dan tidak ada solusi native; prioritaskan tanpa dependency baru.
+10. Pertahankan kompatibilitas mobile-first dan aksesibilitas dasar.
+11. Gunakan komponen reusable dan hindari duplikasi.
+12. Catat semua file yang dibuat dan diubah.
+13. Jalankan validasi yang relevan.
+14. Jika menemukan masalah lama di luar scope, dokumentasikan tanpa memperluas pekerjaan.
+
+Lakukan PHASE 5 — Kartu Karya dan Galeri Masonry.
+
+TUJUAN
+
+Membuat tampilan galeri karya yang kuat secara visual dan tetap mendukung penjualan.
+
+TUGAS
+
+1. Buat komponen kartu karya reusable yang menampilkan:
+   - gambar
+   - judul
+   - nama perupa
+   - kategori/medium
+   - tahun bila tersedia
+   - harga
+   - status tersedia/terjual
+   - tombol lihat detail
+   - tombol tambah ke keranjang bila existing flow mendukung
+2. Buat grid atau masonry memakai CSS modern atau library gratis yang sudah ada.
+3. Tambahkan:
+   - hover/focus state
+   - lazy loading
+   - aspect ratio stabil
+   - fallback image
+   - sold badge
+4. Integrasikan filter dan sort existing.
+5. Tambahkan realtime search hanya bila backend/frontend existing mendukung dengan aman.
+6. Pastikan karya terjual tetap tampil tetapi tidak dapat dibeli.
+7. Jangan mengubah business rule stok.
+
+OUTPUT
+
+Buat:
+docs/PHASE_05_GALLERY.md
+
+VALIDASI
+
+- gallery desktop/mobile
+- filter
+- sort
+- search
+- sold state
+- empty state
+- add to cart
+- php artisan test
+- npm run build
+
+Jangan mengerjakan PHASE 6.

@@ -1,0 +1,116 @@
+PHASE 13 CODEX PROMPT
+
+KONTEKS PRODUK WAJIB
+
+Project:
+C:\laragon\www\chapung-art
+
+Chapung Art adalah galeri dan marketplace resmi komunitas seniman/perupa.
+
+Produk utama:
+- Lukisan
+- Fotografi seni
+- Karya digital
+- Ilustrasi
+- Patung
+- Kriya
+- Mixed media
+- Art print
+
+Model operasional:
+- Hanya 5 orang internal yang memiliki akses dashboard.
+- Perupa atau anggota komunitas tidak memasukkan karya secara mandiri.
+- Semua karya yang dimasukkan oleh pengelola dianggap resmi dan siap dipublikasikan.
+- Tidak ada fitur kurator, pilihan kurator, antrean kurasi, atau approval berlapis.
+- Desain boleh terinspirasi dari struktur visual Fotografer Indonesia, tetapi tidak boleh menyalin source code, aset, logo, identitas, atau tampilan secara identik.
+- Fokus utama selalu karya para perupa, profil perupa, kategori karya, dan proses penjualan.
+
+PRINSIP TANPA BIAYA TAMBAHAN
+
+- Pertahankan domain dan hosting yang sudah aktif.
+- Pertahankan Laravel, Filament, database, Blade, Vite, Tailwind CSS, dan dependency yang sudah tersedia.
+- Gunakan hanya library, font, ikon, CDN, dan layanan gratis.
+- Jangan menggunakan template premium.
+- Jangan menggunakan plugin berbayar.
+- Jangan menggunakan font berbayar.
+- Jangan menggunakan payment gateway berbayar.
+- Jangan menggunakan API ongkir berbayar.
+- Jangan menyarankan upgrade hosting.
+- Gunakan pembayaran transfer manual dan pengelolaan ongkir manual bila sistem saat ini memakainya.
+
+ATURAN UMUM WAJIB
+
+1. Kerjakan hanya phase yang diminta.
+2. Jangan menghapus fitur yang sudah berjalan.
+3. Jangan merusak keranjang, checkout, pembayaran, invoice, stok, order, pengiriman, notifikasi, atau autentikasi.
+4. Jangan mengubah `.env`.
+5. Jangan memasukkan secret, token, password, atau credential ke source code.
+6. Jangan melakukan `git commit`.
+7. Jangan melakukan `git push`.
+8. Jangan melakukan refactor besar di luar scope.
+9. Jangan memasang dependency baru kecuali benar-benar wajib, gratis, kompatibel, dan tidak ada solusi native; prioritaskan tanpa dependency baru.
+10. Pertahankan kompatibilitas mobile-first dan aksesibilitas dasar.
+11. Gunakan komponen reusable dan hindari duplikasi.
+12. Catat semua file yang dibuat dan diubah.
+13. Jalankan validasi yang relevan.
+14. Jika menemukan masalah lama di luar scope, dokumentasikan tanpa memperluas pekerjaan.
+
+Lakukan PHASE 13 — SEO, Performa, dan Optimasi Gambar.
+
+TUJUAN
+
+Meningkatkan discoverability dan kecepatan tanpa layanan berbayar.
+
+TUGAS
+
+SEO:
+- title dinamis
+- meta description
+- canonical
+- Open Graph
+- Twitter Card
+- schema.org yang sesuai:
+  - Organization
+  - WebSite
+  - BreadcrumbList
+  - Product/VisualArtwork bila data mendukung
+- sitemap existing
+- robots.txt existing
+
+Performa:
+- lazy loading
+- width/height image
+- responsive image bila aman
+- asset build
+- hapus CSS/JS mati hanya jika terverifikasi
+- defer script yang aman
+- optimasi font
+- cache headers hanya bila konfigurasi hosting memungkinkan
+
+Gambar:
+- gunakan WebP/AVIF hanya jika pipeline existing mendukung
+- jangan merusak file original
+- buat fallback
+- jangan menambah layanan optimasi berbayar
+
+Keamanan:
+- jangan bocorkan storage private
+- jangan membuat mixed content
+- pertahankan HTTPS
+
+OUTPUT
+
+Buat:
+docs/PHASE_13_SEO_PERFORMANCE.md
+
+VALIDASI
+
+- npm run build
+- php artisan test
+- HTML metadata
+- structured data validity
+- image fallback
+- route utama
+- catat hasil Lighthouse manual bila tersedia, jangan mengarang angka
+
+Jangan mengerjakan PHASE 14.
