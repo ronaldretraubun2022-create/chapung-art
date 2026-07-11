@@ -55,6 +55,14 @@ const initGlobalSearch = () => {
         const status = form.querySelector('[data-search-status]');
         const results = form.querySelector('[data-search-results]');
         const endpoint = form.dataset.searchUrl;
+        const messages = {
+            idle: form.dataset.messageIdle || 'Type to search',
+            min: form.dataset.messageMin || 'Type at least 2 characters',
+            loading: form.dataset.messageLoading || 'Searching',
+            empty: form.dataset.messageEmpty || 'No results found',
+            error: form.dataset.messageError || 'Search unavailable',
+            results: form.dataset.messageResults || 'results',
+        };
         let controller;
 
         if (! input || ! panel || ! status || ! results || ! endpoint) {
@@ -75,15 +83,21 @@ const initGlobalSearch = () => {
             status.textContent = message;
         };
 
+        const setLoading = (loading) => {
+            status.classList.toggle('animate-pulse', loading);
+            input.setAttribute('aria-busy', loading ? 'true' : 'false');
+        };
+
         const render = (payload) => {
             results.replaceChildren();
+            setLoading(false);
 
             if (! payload.total) {
-                setStatus(payload.query ? 'No results found' : 'Type to search');
+                setStatus(payload.query ? messages.empty : messages.idle);
                 return;
             }
 
-            setStatus(`${payload.total} results`);
+            setStatus(`${payload.total} ${messages.results}`);
 
             Object.values(payload.groups).forEach((group) => {
                 if (! group.items.length) {
@@ -108,7 +122,8 @@ const initGlobalSearch = () => {
                 }
 
                 results.replaceChildren();
-                setStatus('Type at least 2 characters');
+                setLoading(false);
+                setStatus(messages.min);
                 showPanel();
                 return;
             }
@@ -118,7 +133,8 @@ const initGlobalSearch = () => {
             }
 
             controller = new AbortController();
-            setStatus('Searching');
+            setLoading(true);
+            setStatus(messages.loading);
             showPanel();
 
             try {
@@ -142,7 +158,8 @@ const initGlobalSearch = () => {
                 }
 
                 results.replaceChildren();
-                setStatus('Search unavailable');
+                setLoading(false);
+                setStatus(messages.error);
             }
         }, 300);
 

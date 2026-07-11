@@ -171,7 +171,7 @@
         </div>
     </section>
 
-    <section class="border-b border-zinc-800 px-4 py-16 sm:px-6 lg:px-8">
+    <section id="collections" class="scroll-mt-24 border-b border-zinc-800 px-4 py-16 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-7xl">
             <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>
