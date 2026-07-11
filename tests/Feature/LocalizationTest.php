@@ -29,7 +29,7 @@ test('set locale middleware falls back to indonesian for invalid session locale'
         ->get(route('home'))
         ->assertOk()
         ->assertSessionHas('locale', 'id')
-        ->assertSee('Jelajahi Karya');
+        ->assertSee('Karya Tersedia');
 });
 
 test('session locale renders english frontend copy', function () {

@@ -5,6 +5,7 @@ use App\Models\Artwork;
 use App\Models\Category;
 use App\Models\Collection;
 use App\Models\Tag;
+use App\Services\CartService;
 
 function productDetailArtwork(array $overrides = []): Artwork
 {
@@ -113,6 +114,15 @@ test('artwork detail renders complete marketplace product page', function () {
         ->assertSee('View artist')
         ->assertSee('Buy now')
         ->assertSee('Add to Cart')
+        ->assertSee('Official')
+        ->assertSee('Share WhatsApp')
+        ->assertSee('Share Facebook')
+        ->assertSee('facebook.com/sharer/sharer.php', false)
+        ->assertSee('https://wa.me/?text=', false)
+        ->assertSee('data-artwork-detail', false)
+        ->assertSee('data-artwork-zoom-trigger', false)
+        ->assertSee('data-artwork-zoom-modal', false)
+        ->assertSee('data-mobile-sticky-purchase', false)
         ->assertSee('Related Artwork')
         ->assertSee('Related Detail Artwork')
         ->assertSee(asset('storage/artworks/detail-main.jpg'), false)
@@ -127,10 +137,51 @@ test('artwork detail uses safe fallback image when preview is empty', function (
         'thumbnail' => null,
         'og_image' => null,
     ]);
+    $artwork->mediaItems()->delete();
 
     $this->withSession(['locale' => 'en'])
         ->get(route('artwork.show', $artwork->slug))
         ->assertOk()
         ->assertSee('Fallback Detail Artwork')
+        ->assertSee('Main artwork image is not available yet')
         ->assertSee(asset('images/og-image.jpg'), false);
+});
+
+test('sold artwork detail shows archive state without purchase actions', function () {
+    $artwork = productDetailArtwork([
+        'title' => 'Sold Detail Artwork',
+        'slug' => 'sold-detail-artwork',
+        'status' => 'sold',
+        'stock' => 0,
+        'certificate_number' => null,
+    ]);
+
+    $this->withSession(['locale' => 'en'])
+        ->get(route('artwork.show', $artwork->slug))
+        ->assertOk()
+        ->assertSee('Sold Detail Artwork')
+        ->assertSee('Artwork sold')
+        ->assertSee('not available for checkout')
+        ->assertSee('data-mobile-sticky-purchase', false)
+        ->assertSee('<button type="submit" disabled', false)
+        ->assertDontSee('Available on request')
+        ->assertDontSee('href="'.route('checkout.create').'"', false);
+});
+
+test('add to cart from artwork detail uses existing cart flow', function () {
+    $artwork = productDetailArtwork([
+        'title' => 'Cart Detail Artwork',
+        'slug' => 'cart-detail-artwork',
+        'stock' => 2,
+        'status' => 'available',
+    ]);
+
+    $this->from(route('artwork.show', $artwork->slug))
+        ->post(route('cart.store'), [
+            'artwork_id' => $artwork->id,
+            'quantity' => 1,
+        ])
+        ->assertRedirect(route('artwork.show', $artwork->slug));
+
+    expect(app(CartService::class)->summary()['count'])->toBe(1);
 });

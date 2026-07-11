@@ -4,6 +4,7 @@
     use App\Services\ImageUploadService;
 
     $mainImage = $artwork->thumbnail ?: $artwork->og_image;
+    $publicUrl = route('artwork.show', $artwork->slug);
     $galleryImages = collect([[
         'path' => $mainImage,
         'alt' => $artwork->title,
@@ -15,26 +16,51 @@
             'title' => $media->title ?: __('chapung.product_detail.gallery_image'),
         ]))
         ->filter(fn ($image) => filled($image['path']))
+        ->unique('path')
         ->take(7)
+        ->map(function ($image) {
+            $normalizedPath = ImageUploadService::normalizePath($image['path']);
+
+            return [
+                ...$image,
+                'url' => $normalizedPath ? asset('storage/'.$normalizedPath) : ImageUploadService::fallbackUrl(),
+                'is_fallback' => ! $normalizedPath,
+            ];
+        })
         ->values();
     $galleryImages = $galleryImages->isNotEmpty() ? $galleryImages : collect([[
         'path' => null,
         'alt' => $artwork->title,
         'title' => __('chapung.product_detail.main_image'),
+        'url' => ImageUploadService::fallbackUrl(),
+        'is_fallback' => true,
     ]]);
+    $selectedImage = $galleryImages->first();
+    $hasFallbackOnly = $galleryImages->count() === 1 && ($selectedImage['is_fallback'] ?? false);
     $description = str(strip_tags($artwork->excerpt ?: $artwork->description ?: __('chapung.pages.detail.artwork_description')))->limit(160);
     $priceValue = filled($artwork->price) ? (float) $artwork->price : null;
     $price = $priceValue ? 'Rp '.number_format($priceValue, 0, ',', '.') : __('chapung.marketplace.by_request');
     $discountPercent = $priceValue && $artwork->is_featured ? 12 : 0;
     $oldPrice = $discountPercent > 0 ? round($priceValue / (1 - ($discountPercent / 100)), -3) : null;
-    $canAddToCart = $artwork->status === 'available' && (int) ($artwork->stock ?? 0) > 0;
+    $status = (string) ($artwork->status ?? 'available');
+    $stockCount = max(0, (int) ($artwork->stock ?? 0));
+    $canAddToCart = $status === 'available' && $stockCount > 0;
+    $isSold = $status === 'sold';
+    $statusLabel = match ($status) {
+        'available' => __('chapung.home.status_available'),
+        'sold' => __('chapung.home.status_sold'),
+        'reserved' => __('chapung.product_detail.status_reserved'),
+        default => str($status)->headline()->toString(),
+    };
     $approvedReviews = $artwork->relationLoaded('approvedReviews') ? $artwork->approvedReviews : collect();
     $reviewCount = (int) ($artwork->approved_reviews_count ?? $approvedReviews->count());
     $rating = $artwork->approved_reviews_avg_rating !== null
         ? (float) $artwork->approved_reviews_avg_rating
         : ($approvedReviews->isNotEmpty() ? (float) $approvedReviews->avg('rating') : 0);
     $whatsapp = preg_replace('/\D+/', '', site_setting('whatsapp', (string) config('chapung.contact_whatsapp'))) ?: (string) config('chapung.contact_whatsapp');
-    $message = rawurlencode('Halo Chapung Art, saya tertarik dengan artwork: '.$artwork->title.' - '.route('artwork.show', $artwork->slug));
+    $message = rawurlencode('Halo Chapung Art, saya tertarik dengan artwork: '.$artwork->title.' - '.$publicUrl);
+    $shareMessage = rawurlencode($artwork->title.' - '.$publicUrl);
+    $facebookShareUrl = 'https://www.facebook.com/sharer/sharer.php?u='.rawurlencode($publicUrl);
     $artist = $artwork->artist;
     $artistLocation = collect([$artist?->city, $artist?->province, $artist?->country])->filter()->implode(', ');
     $specifications = collect([
@@ -82,24 +108,32 @@
         </div>
     </section>
 
-    <section class="px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-        <div class="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,.92fr)] xl:gap-12">
+    <section class="px-4 py-8 pb-28 sm:px-6 lg:px-8 lg:py-12" data-artwork-detail>
+        <div class="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,.92fr)] xl:gap-12" x-data="{ images: @js($galleryImages), selected: @js($selectedImage), zoomOpen: false, loading: true }">
             <div class="space-y-4">
-                <div class="group overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 p-2 shadow-2xl shadow-black/30">
-                    @include('partials.public.image', [
-                        'path' => $mainImage,
-                        'alt' => $artwork->title,
-                        'ratio' => 'aspect-[4/5] lg:aspect-[5/4]',
-                        'label' => __('chapung.types.artwork'),
-                        'width' => 1100,
-                        'height' => 1100,
-                        'fetchPriority' => 'high',
-                    ])
+                <div class="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 p-2 shadow-2xl shadow-black/30">
+                    <button type="button" class="group relative block w-full overflow-hidden rounded-md bg-zinc-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-600" x-on:click="zoomOpen = true" aria-label="{{ __('chapung.product_detail.zoom_open') }}" data-artwork-zoom-trigger>
+                        <div class="ca-skeleton absolute inset-0 rounded-none" x-show="loading" aria-hidden="true"></div>
+                        <img :src="selected.url" :alt="selected.alt" width="1200" height="1000" class="aspect-[4/5] h-full w-full object-cover transition duration-500 group-hover:scale-[1.03] lg:aspect-[5/4]" loading="eager" decoding="async" fetchpriority="high" x-on:load="loading = false" x-on:error="$event.target.src='{{ ImageUploadService::fallbackUrl() }}'; loading = false">
+                        <span class="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-md bg-black/75 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-white backdrop-blur">
+                            <x-heroicon-o-magnifying-glass-plus class="h-4 w-4" aria-hidden="true" />
+                            {{ __('chapung.product_detail.zoom_open') }}
+                        </span>
+                        @if ($isSold)
+                            <span class="absolute right-3 top-3 rounded-md bg-red-800 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white shadow-lg shadow-black/40">{{ __('chapung.home.status_sold') }}</span>
+                        @endif
+                    </button>
                 </div>
 
-                <div class="grid grid-cols-4 gap-3 sm:grid-cols-6" aria-label="{{ __('chapung.product_detail.gallery') }}">
+                @if ($hasFallbackOnly)
+                    <div class="rounded-lg border border-zinc-800 bg-black/40 p-4 text-sm font-bold text-zinc-400" role="status">
+                        {{ __('chapung.product_detail.fallback_image') }}
+                    </div>
+                @endif
+
+                <div class="grid grid-cols-4 gap-3 sm:grid-cols-6" aria-label="{{ __('chapung.product_detail.gallery') }}" data-artwork-gallery>
                     @foreach ($galleryImages as $image)
-                        <a href="{{ ImageUploadService::normalizePath($image['path']) ? asset('storage/'.ImageUploadService::normalizePath($image['path'])) : ImageUploadService::fallbackUrl() }}" target="_blank" rel="noopener" class="group rounded-lg border border-zinc-800 bg-zinc-950 p-1 transition hover:border-yellow-600" aria-label="{{ $image['title'] }}">
+                        <button type="button" x-on:click="selected = images[{{ $loop->index }}]; loading = true" class="group rounded-lg border border-zinc-800 bg-zinc-950 p-1 transition hover:border-yellow-600 focus-visible:border-yellow-600" :class="selected.url === images[{{ $loop->index }}].url ? 'border-yellow-600' : ''" aria-label="{{ $image['title'] }}">
                             @include('partials.public.image', [
                                 'path' => $image['path'],
                                 'alt' => $image['alt'],
@@ -108,8 +142,15 @@
                                 'width' => 240,
                                 'height' => 240,
                             ])
-                        </a>
+                        </button>
                     @endforeach
+                </div>
+
+                <div x-show="zoomOpen" x-cloak x-transition.opacity class="fixed inset-0 z-[80] flex items-center justify-center bg-black/90 p-4" role="dialog" aria-modal="true" aria-label="{{ __('chapung.product_detail.zoom_open') }}" x-on:keydown.escape.window="zoomOpen = false" data-artwork-zoom-modal>
+                    <button type="button" class="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-md border border-white/15 bg-black text-white hover:border-yellow-600 hover:text-yellow-500" x-on:click="zoomOpen = false" aria-label="{{ __('chapung.product_detail.zoom_close') }}">
+                        <x-heroicon-o-x-mark class="h-5 w-5" aria-hidden="true" />
+                    </button>
+                    <img :src="selected.url" :alt="selected.alt" class="max-h-[86vh] max-w-[94vw] rounded-lg object-contain shadow-2xl shadow-black" width="1600" height="1200" x-on:error="$event.target.src='{{ ImageUploadService::fallbackUrl() }}'">
                 </div>
             </div>
 
@@ -117,12 +158,23 @@
                 <div class="rounded-lg border border-zinc-800 bg-zinc-950 p-5 shadow-2xl shadow-black/30 sm:p-6">
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="rounded-full bg-yellow-600 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-black">
-                            {{ $artwork->is_featured ? __('chapung.marketplace.badges.curated') : __('chapung.marketplace.badges.ready') }}
+                            {{ $artwork->is_featured ? __('chapung.home.official_badge') : __('chapung.marketplace.badges.ready') }}
                         </span>
-                        <span class="rounded-full border border-zinc-800 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-zinc-400">
-                            {{ ucfirst((string) $artwork->status) }}
+                        <span class="rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] {{ $isSold ? 'border-red-800 bg-red-950/60 text-red-200' : 'border-zinc-800 text-zinc-400' }}">
+                            {{ $statusLabel }}
                         </span>
                     </div>
+
+                    @if (! $canAddToCart)
+                        <div class="mt-5 rounded-lg border {{ $isSold ? 'border-red-800/70 bg-red-950/30' : 'border-yellow-600/40 bg-yellow-600/10' }} p-4" role="status">
+                            <p class="text-sm font-black uppercase tracking-[0.16em] {{ $isSold ? 'text-red-200' : 'text-yellow-500' }}">
+                                {{ $isSold ? __('chapung.product_detail.sold_title') : __('chapung.product_detail.unavailable_title') }}
+                            </p>
+                            <p class="mt-2 text-sm leading-6 text-zinc-400">
+                                {{ $isSold ? __('chapung.product_detail.sold_note') : __('chapung.product_detail.unavailable_note') }}
+                            </p>
+                        </div>
+                    @endif
 
                     <h1 class="mt-5 text-3xl font-black uppercase leading-tight tracking-tight text-white sm:text-5xl">{{ $artwork->title }}</h1>
 
@@ -170,16 +222,18 @@
                     <div class="mt-6 grid gap-3 rounded-lg border border-zinc-800 bg-black/40 p-4 text-sm sm:grid-cols-3">
                         <div>
                             <p class="text-xs font-bold uppercase tracking-[0.14em] text-zinc-500">{{ __('chapung.pages.cart.stock') }}</p>
-                            <p class="mt-1 font-black text-white">{{ max(0, (int) ($artwork->stock ?? 0)) }}</p>
+                            <p class="mt-1 font-black text-white">{{ $isSold ? $statusLabel : $stockCount }}</p>
                         </div>
                         <div>
                             <p class="text-xs font-bold uppercase tracking-[0.14em] text-zinc-500">{{ __('chapung.product_detail.location') }}</p>
                             <p class="mt-1 font-black text-white">{{ $artwork->location ?: __('chapung.brand.region') }}</p>
                         </div>
-                        <div>
-                            <p class="text-xs font-bold uppercase tracking-[0.14em] text-zinc-500">{{ __('chapung.product_detail.certificate') }}</p>
-                            <p class="mt-1 font-black text-white">{{ $artwork->certificate_number ?: __('chapung.product_detail.available_on_request') }}</p>
-                        </div>
+                        @if ($artwork->certificate_number)
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-[0.14em] text-zinc-500">{{ __('chapung.product_detail.certificate') }}</p>
+                                <p class="mt-1 font-black text-white">{{ $artwork->certificate_number }}</p>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
@@ -201,16 +255,34 @@
                     </div>
 
                     <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                        <a href="{{ route('checkout.create') }}" class="inline-flex items-center justify-center gap-2 rounded-md border border-zinc-800 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-zinc-200 hover:border-yellow-600 hover:text-yellow-500">
-                            <x-heroicon-o-credit-card class="h-4 w-4" aria-hidden="true" />
-                            {{ __('chapung.product_detail.buy_cta') }}
-                        </a>
+                        @if ($canAddToCart)
+                            <a href="{{ route('checkout.create') }}" class="inline-flex items-center justify-center gap-2 rounded-md border border-zinc-800 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-zinc-200 hover:border-yellow-600 hover:text-yellow-500">
+                                <x-heroicon-o-credit-card class="h-4 w-4" aria-hidden="true" />
+                                {{ __('chapung.product_detail.buy_cta') }}
+                            </a>
+                        @else
+                            <span class="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-md border border-zinc-800 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+                                <x-heroicon-o-credit-card class="h-4 w-4" aria-hidden="true" />
+                                {{ $statusLabel }}
+                            </span>
+                        @endif
                         @include('partials.public.favorite-button', [
                             'artwork' => $artwork,
                             'showLabel' => true,
                             'class' => 'inline-flex w-full items-center justify-center gap-2 rounded-md border border-zinc-800 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-zinc-200 hover:border-yellow-600 hover:text-yellow-500',
                             'iconClass' => 'h-4 w-4',
                         ])
+                    </div>
+
+                    <div class="mt-4 grid gap-3 sm:grid-cols-2" aria-label="{{ __('chapung.product_detail.share_title') }}">
+                        <a href="https://wa.me/?text={{ $shareMessage }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 rounded-md border border-zinc-800 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-zinc-200 hover:border-yellow-600 hover:text-yellow-500">
+                            <x-heroicon-o-share class="h-4 w-4" aria-hidden="true" />
+                            {{ __('chapung.product_detail.share_whatsapp') }}
+                        </a>
+                        <a href="{{ $facebookShareUrl }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 rounded-md border border-zinc-800 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-zinc-200 hover:border-yellow-600 hover:text-yellow-500">
+                            <x-heroicon-o-share class="h-4 w-4" aria-hidden="true" />
+                            {{ __('chapung.product_detail.share_facebook') }}
+                        </a>
                     </div>
 
                     @if ($hasDigitalDownload ?? false)
@@ -246,6 +318,34 @@
             </article>
         </div>
     </section>
+
+    <div class="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-800 bg-black/95 px-4 py-3 shadow-2xl shadow-black backdrop-blur lg:hidden" data-mobile-sticky-purchase>
+        <div class="mx-auto flex max-w-7xl items-center gap-3">
+            <div class="min-w-0 flex-1">
+                <p class="truncate text-xs font-bold text-zinc-400">{{ $artwork->title }}</p>
+                <p class="mt-1 text-base font-black text-yellow-500">{{ $price }}</p>
+            </div>
+
+            @if ($canAddToCart)
+                <form method="POST" action="{{ route('cart.store') }}" class="flex shrink-0 items-center gap-2">
+                    @csrf
+                    <input type="hidden" name="artwork_id" value="{{ $artwork->id }}">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-yellow-600 px-4 text-[11px] font-black uppercase tracking-[0.14em] text-black hover:bg-yellow-500">
+                        <x-heroicon-o-shopping-bag class="h-4 w-4" aria-hidden="true" />
+                        {{ __('chapung.pages.detail.add_to_cart') }}
+                    </button>
+                </form>
+                <a href="{{ route('checkout.create') }}" class="inline-flex h-11 shrink-0 items-center justify-center rounded-md border border-zinc-700 px-3 text-[11px] font-black uppercase tracking-[0.14em] text-zinc-100 hover:border-yellow-600 hover:text-yellow-500">
+                    {{ __('chapung.pages.cart.checkout') }}
+                </a>
+            @else
+                <span class="inline-flex h-11 shrink-0 cursor-not-allowed items-center justify-center rounded-md border border-zinc-800 px-4 text-[11px] font-black uppercase tracking-[0.14em] text-zinc-500">
+                    {{ $statusLabel }}
+                </span>
+            @endif
+        </div>
+    </div>
 
     <section class="border-t border-zinc-800 px-4 py-12 sm:px-6 lg:px-8">
         <div class="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[.9fr_1.1fr]">
