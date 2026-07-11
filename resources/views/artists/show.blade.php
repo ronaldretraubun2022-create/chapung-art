@@ -243,6 +243,48 @@
                 @endif
             </div>
 
+            <div class="grid gap-8 lg:grid-cols-2">
+                <section class="rounded-lg border border-zinc-800 bg-zinc-950/55 p-4 sm:p-5">
+                    <div class="flex items-end justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-600">{{ __('chapung.home.status_available') }}</p>
+                            <h2 class="mt-2 text-2xl font-black uppercase tracking-tight text-white">{{ __('chapung.home.available_artworks') }}</h2>
+                        </div>
+                        <span class="text-sm text-zinc-500">{{ number_format($availableArtworksPreview->count()) }}</span>
+                    </div>
+
+                    @if ($availableArtworksPreview->count())
+                        <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
+                            @foreach ($availableArtworksPreview as $artwork)
+                                @include('partials.public.artwork-card', ['artwork' => $artwork, 'badge' => __('chapung.home.status_available')])
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="mt-6">@include('partials.public.empty-state', ['label' => __('chapung.home.status_available'), 'title' => __('chapung.home.empty_available_artwork')])</div>
+                    @endif
+                </section>
+
+                <section class="rounded-lg border border-zinc-800 bg-zinc-950/55 p-4 sm:p-5">
+                    <div class="flex items-end justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-600">{{ __('chapung.home.status_sold') }}</p>
+                            <h2 class="mt-2 text-2xl font-black uppercase tracking-tight text-white">{{ __('chapung.home.sold_artworks') }}</h2>
+                        </div>
+                        <span class="text-sm text-zinc-500">{{ number_format($soldArtworksPreview->count()) }}</span>
+                    </div>
+
+                    @if ($soldArtworksPreview->count())
+                        <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
+                            @foreach ($soldArtworksPreview as $artwork)
+                                @include('partials.public.artwork-card', ['artwork' => $artwork, 'badge' => __('chapung.home.status_sold')])
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="mt-6">@include('partials.public.empty-state', ['label' => __('chapung.home.status_sold'), 'title' => __('chapung.home.empty_sold_artwork')])</div>
+                    @endif
+                </section>
+            </div>
+
             <div>
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div>

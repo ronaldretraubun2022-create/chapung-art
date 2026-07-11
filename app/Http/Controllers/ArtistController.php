@@ -87,6 +87,36 @@ class ArtistController extends Controller
             ->first();
         $reviewCount = (int) ($reviewStats->review_count ?? 0);
         $rating = (float) ($reviewStats->rating ?? 0);
+        $artworkCardQuery = function () use ($artist, $request) {
+            return $artist->artworks()
+                ->select([
+                    'id',
+                    'title',
+                    'slug',
+                    'artist_id',
+                    'category_id',
+                    'collection_id',
+                    'artist_name',
+                    'thumbnail',
+                    'price',
+                    'status',
+                    'medium',
+                    'year',
+                    'width',
+                    'height',
+                    'stock',
+                    'views',
+                    'likes',
+                    'is_featured',
+                    'created_at',
+                ])
+                ->with(['artist:id,name,slug', 'category:id,name', 'collection:id,name,slug'])
+                ->withCount('approvedReviews')
+                ->withAvg('approvedReviews', 'rating')
+                ->when($request->user(), fn ($query, $user) => $query->withExists([
+                    'favoritedByUsers as is_favorited' => fn ($favorites) => $favorites->whereKey($user->id),
+                ]));
+        };
 
         return view('artists.show', [
             'artist' => $artist,
@@ -109,17 +139,23 @@ class ArtistController extends Controller
                 ->latest()
                 ->take(3)
                 ->get(),
-            'artworks' => $artist->artworks()
-                ->select(['id', 'title', 'slug', 'artist_id', 'category_id', 'collection_id', 'artist_name', 'thumbnail', 'price', 'status', 'medium', 'stock', 'views', 'likes', 'is_featured', 'created_at'])
-                ->with(['artist:id,name', 'category:id,name', 'collection:id,name,slug'])
-                ->withCount('approvedReviews')
-                ->withAvg('approvedReviews', 'rating')
-                ->when($request->user(), fn ($query, $user) => $query->withExists([
-                    'favoritedByUsers as is_favorited' => fn ($favorites) => $favorites->whereKey($user->id),
-                ]))
+            'artworks' => $artworkCardQuery()
                 ->latest()
                 ->paginate(8, ['*'], 'artworks_page')
                 ->withQueryString(),
+            'availableArtworksPreview' => $artworkCardQuery()
+                ->where('status', 'available')
+                ->where('stock', '>', 0)
+                ->latest()
+                ->take(4)
+                ->get(),
+            'soldArtworksPreview' => $artworkCardQuery()
+                ->where(function ($query): void {
+                    $query->where('status', 'sold')->orWhere('stock', '<=', 0);
+                })
+                ->latest()
+                ->take(4)
+                ->get(),
             'collections' => Collection::query()
                 ->select(['id', 'name', 'slug', 'description', 'cover_image', 'banner_image', 'is_active', 'created_at'])
                 ->active()

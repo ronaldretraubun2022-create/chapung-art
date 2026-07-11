@@ -18,7 +18,7 @@
         <div class="mx-auto max-w-7xl">
             <p class="text-xs font-black uppercase tracking-[0.32em] text-yellow-600">{{ __('chapung.types.collection') }}</p>
             <h1 class="mt-4 max-w-4xl text-4xl font-black uppercase leading-none tracking-tight text-white sm:text-6xl">{{ $collection->name }}</h1>
-            <p class="mt-6 max-w-3xl text-base leading-8 text-zinc-300 sm:text-lg">{{ $collection->description ?: 'Kurasi karya seni dan fotografi dari Chapung Art.' }}</p>
+            <p class="mt-6 max-w-3xl text-base leading-8 text-zinc-300 sm:text-lg">{{ $collection->description ?: __('chapung.home.collection_fallback') }}</p>
         </div>
     </section>
 

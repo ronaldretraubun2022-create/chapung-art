@@ -31,26 +31,9 @@
     <section class="px-4 py-14 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-7xl">
             @if ($artists->count())
-                <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                     @foreach ($artists as $artist)
-                        <article class="group rounded-lg border border-zinc-800 bg-zinc-950 p-5 transition hover:border-yellow-600/70">
-                            <a href="{{ route('artists.show', $artist->slug) }}" class="block">
-                                <div class="flex gap-4">
-                                    <div class="h-20 w-20 shrink-0 overflow-hidden rounded-md bg-zinc-900">
-                                        @if ($artist->photo)
-                                            <img src="{{ asset('storage/'.$artist->photo) }}" alt="{{ $artist->name }}" width="640" height="800" class="h-full w-full object-cover" loading="lazy" decoding="async">
-                                        @else
-                                            <div class="grid h-full w-full place-items-center text-sm font-black text-yellow-600">{{ str($artist->name)->substr(0, 2)->upper() }}</div>
-                                        @endif
-                                    </div>
-                                    <div class="min-w-0">
-                                        <h2 class="text-xl font-black uppercase tracking-tight text-white">{{ $artist->name }}</h2>
-                                        <p class="mt-2 text-sm text-zinc-400">{{ $artist->specialization ?: $artist->origin_area ?: $artist->city }}</p>
-                                        <p class="mt-3 text-xs uppercase tracking-[0.16em] text-zinc-500">{{ $artist->artworks_count }} {{ __('chapung.pages.artists.artworks') }} / {{ $artist->photographies_count }} {{ __('chapung.pages.artists.photos') }}</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </article>
+                        @include('partials.public.artist-card', ['artist' => $artist])
                     @endforeach
                 </div>
                 <div class="mt-10">{{ $artists->links() }}</div>

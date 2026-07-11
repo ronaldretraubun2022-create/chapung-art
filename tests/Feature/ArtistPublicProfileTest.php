@@ -46,6 +46,17 @@ test('artist public profile shows cover photo biography artworks collections and
         'is_featured' => true,
     ]);
 
+    Artwork::create([
+        'title' => 'Arsip Rawa Terjual',
+        'slug' => 'arsip-rawa-terjual',
+        'artist_id' => $artist->id,
+        'collection_id' => $collection->id,
+        'thumbnail' => 'artworks/arsip.jpg',
+        'price' => 950000,
+        'status' => 'sold',
+        'stock' => 0,
+    ]);
+
     ArtworkReview::create([
         'artwork_id' => $artwork->id,
         'reviewer_name' => 'Verified Collector',
@@ -73,6 +84,9 @@ test('artist public profile shows cover photo biography artworks collections and
         ->assertSee('Artist Bio')
         ->assertSee('Store Info')
         ->assertSee('Jejak Sungai Maro')
+        ->assertSee('Available Artworks')
+        ->assertSee('Sold Artworks')
+        ->assertSee('Arsip Rawa Terjual')
         ->assertSee('Tanah Selatan')
         ->assertSee('artworks/jejak.jpg')
         ->assertSee('<meta property="og:image" content="'.asset('storage/artworks/jejak.jpg').'">', false)
@@ -114,6 +128,30 @@ test('artist profile paginates artworks safely', function () {
         ->assertOk()
         ->assertSee('Karya Artist 1')
         ->assertSee('Artwork');
+});
+
+test('artist index renders marketplace profile cards with safe fallback data', function () {
+    $artist = publicProfileArtist([
+        'name' => 'Card Artist',
+        'slug' => 'card-artist',
+        'photo' => null,
+        'specialization' => null,
+        'origin_area' => 'Merauke',
+    ]);
+
+    Artwork::create([
+        'title' => 'Card Artist Work',
+        'slug' => 'card-artist-work',
+        'artist_id' => $artist->id,
+    ]);
+
+    $this->withSession(['locale' => 'en'])
+        ->get(route('artists.index'))
+        ->assertOk()
+        ->assertSee('Card Artist')
+        ->assertSee('Merauke')
+        ->assertSee(route('artists.show', $artist->slug), false)
+        ->assertSee('1 artworks / 0 photos');
 });
 
 test('inactive artist profile is not public', function () {
