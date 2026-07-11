@@ -178,7 +178,9 @@
                 @error('checkout_token') <p class="text-sm font-bold text-red-400">{{ $message }}</p> @enderror
                 @error('quantity') <p class="text-sm font-bold text-red-400">{{ $message }}</p> @enderror
 
-                <button type="submit" class="w-full rounded-md bg-yellow-600 px-6 py-4 text-xs font-black uppercase tracking-[0.18em] text-black hover:bg-yellow-500">{{ __('chapung.pages.checkout.place_order') }}</button>
+                <button type="submit" data-commerce-submit data-loading-label="{{ __('chapung.pages.checkout.processing') }}" class="w-full rounded-md bg-yellow-600 px-6 py-4 text-xs font-black uppercase tracking-[0.18em] text-black hover:bg-yellow-500 disabled:cursor-wait disabled:opacity-70">
+                    <span data-submit-label>{{ __('chapung.pages.checkout.place_order') }}</span>
+                </button>
             </form>
 
             <aside class="h-fit rounded-lg border border-zinc-800 bg-zinc-950 p-5 lg:sticky lg:top-28">

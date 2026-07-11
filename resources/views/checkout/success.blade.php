@@ -11,7 +11,7 @@
 @section('content')
     <section class="border-b border-zinc-800 bg-[radial-gradient(circle_at_top_right,rgba(202,138,4,.18),transparent_30rem),#050505] px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
         <div class="mx-auto max-w-4xl text-center">
-            <p class="text-xs font-black uppercase tracking-[0.32em] text-yellow-600">Order Created</p>
+            <p class="text-xs font-black uppercase tracking-[0.32em] text-yellow-600">{{ __('chapung.pages.order.created') }}</p>
             <h1 class="mt-4 text-4xl font-black uppercase tracking-tight text-white sm:text-6xl">{{ $order->order_number }}</h1>
             <p class="mt-5 text-sm leading-7 text-zinc-400">{{ __('chapung.pages.order.success_message') }}</p>
         </div>
@@ -26,7 +26,7 @@
                         <div class="flex justify-between gap-4 py-4 text-sm">
                             <div>
                                 <p class="font-black uppercase tracking-tight text-white">{{ $item->title }}</p>
-                                <p class="mt-1 text-zinc-500">Qty {{ $item->quantity }} x Rp {{ number_format((float) $item->price, 0, ',', '.') }}</p>
+                                <p class="mt-1 text-zinc-500">{{ __('chapung.pages.checkout.qty') }} {{ $item->quantity }} x Rp {{ number_format((float) $item->price, 0, ',', '.') }}</p>
                             </div>
                             <strong class="shrink-0 text-yellow-500">Rp {{ number_format((float) $item->total, 0, ',', '.') }}</strong>
                         </div>
@@ -35,10 +35,10 @@
             </div>
 
             <aside class="h-fit rounded-lg border border-zinc-800 bg-zinc-950 p-5">
-                <h2 class="text-lg font-black uppercase tracking-tight text-white">Summary</h2>
+                <h2 class="text-lg font-black uppercase tracking-tight text-white">{{ __('chapung.pages.order.summary') }}</h2>
                 <div class="mt-5 space-y-3 border-y border-zinc-800 py-5 text-sm">
                     <div class="flex justify-between gap-4 text-zinc-400"><span>{{ __('chapung.pages.order.status') }}</span><strong class="text-white">{{ ucfirst($order->status) }}</strong></div>
-                    <div class="flex justify-between gap-4 text-zinc-400"><span>Payment</span><strong class="text-white">{{ ucfirst($order->payment_status) }}</strong></div>
+                    <div class="flex justify-between gap-4 text-zinc-400"><span>{{ __('chapung.orders.payment') }}</span><strong class="text-white">{{ ucfirst($order->payment_status) }}</strong></div>
                     <div class="flex justify-between gap-4 text-zinc-400"><span>{{ __('chapung.pages.cart.subtotal') }}</span><strong class="text-white">Rp {{ number_format((float) $order->subtotal, 0, ',', '.') }}</strong></div>
                     <div class="flex justify-between gap-4 text-zinc-400"><span>{{ __('chapung.pages.cart.discount') }}</span><strong class="text-white">- Rp {{ number_format((float) $order->discount_total, 0, ',', '.') }}</strong></div>
                     <div class="flex justify-between gap-4 text-zinc-400"><span>{{ __('chapung.pages.cart.shipping_estimate') }}</span><strong class="text-white">Rp {{ number_format((float) $order->shipping_total, 0, ',', '.') }}</strong></div>
@@ -47,7 +47,7 @@
                 @if ($order->notes)
                     <div class="mt-5 rounded-md border border-zinc-800 bg-black/40 p-4 text-xs leading-6 text-zinc-400 whitespace-pre-line">{{ $order->notes }}</div>
                 @endif
-                <a href="{{ route('gallery') }}" class="mt-5 inline-flex w-full justify-center rounded-md bg-yellow-600 px-5 py-4 text-xs font-black uppercase tracking-[0.18em] text-black hover:bg-yellow-500">Back to Gallery</a>
+                <a href="{{ route('gallery') }}" class="mt-5 inline-flex w-full justify-center rounded-md bg-yellow-600 px-5 py-4 text-xs font-black uppercase tracking-[0.18em] text-black hover:bg-yellow-500">{{ __('chapung.pages.order.back_to_gallery') }}</a>
                 @auth
                     <a href="{{ route('orders.show', $order) }}" class="mt-3 inline-flex w-full justify-center rounded-md border border-zinc-700 px-5 py-4 text-xs font-black uppercase tracking-[0.18em] text-zinc-200 hover:border-yellow-600 hover:text-yellow-500">{{ __('chapung.orders.detail') }}</a>
                     <a href="{{ route('invoice.show', $order) }}" class="mt-3 inline-flex w-full justify-center rounded-md border border-yellow-600/60 px-5 py-4 text-xs font-black uppercase tracking-[0.18em] text-yellow-500 hover:bg-yellow-600 hover:text-black">{{ __('chapung.pages.order.view_invoice') }}</a>

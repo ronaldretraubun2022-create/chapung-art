@@ -55,6 +55,8 @@ test('checkout form renders with order summary', function () {
         ->assertSee('Payment Method')
         ->assertSee('Transfer Bank')
         ->assertSee('Rp 300.000')
+        ->assertSee('data-commerce-submit', false)
+        ->assertSee('data-loading-label="Processing order"', false)
         ->assertSessionHas('checkout.token');
 });
 
@@ -208,10 +210,15 @@ test('checkout success page displays order number and totals', function () {
     $this->withSession(['locale' => 'en'])
         ->get(route('checkout.success', $order->order_number))
         ->assertOk()
+        ->assertSeeText('Order Created')
         ->assertSee($order->order_number)
         ->assertSee('Rp 175.000')
         ->assertSee('Shipping estimate')
-        ->assertSee('Order Items');
+        ->assertSee('Order Items')
+        ->assertSeeText('Summary')
+        ->assertSeeText('Payment')
+        ->assertSee('Back to Gallery')
+        ->assertSee(route('gallery'), false);
 
     $this->withSession(['locale' => 'en'])
         ->get(route('checkout.success', $order->order_number))

@@ -280,7 +280,29 @@ const initFavorites = () => {
     });
 };
 
+const initCommerceForms = () => {
+    document.querySelectorAll('[data-commerce-submit]').forEach((button) => {
+        const form = button.closest('form');
+        const label = button.querySelector('[data-submit-label]');
+        const loadingLabel = button.dataset.loadingLabel;
+
+        if (! form) {
+            return;
+        }
+
+        form.addEventListener('submit', () => {
+            button.setAttribute('disabled', 'disabled');
+            button.setAttribute('aria-busy', 'true');
+
+            if (label && loadingLabel) {
+                label.textContent = loadingLabel;
+            }
+        });
+    });
+};
+
 document.addEventListener('DOMContentLoaded', initGlobalSearch);
 document.addEventListener('DOMContentLoaded', initFavorites);
+document.addEventListener('DOMContentLoaded', initCommerceForms);
 
 Alpine.start();
