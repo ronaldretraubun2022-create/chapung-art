@@ -84,7 +84,8 @@ function globalSearchFixtures(): void
 test('live global search returns grouped public results', function () {
     globalSearchFixtures();
 
-    $this->getJson(route('search.live', ['q' => 'Wasur']))
+    $this->withSession(['locale' => 'en'])
+        ->getJson(route('search.live', ['q' => 'Wasur']))
         ->assertOk()
         ->assertJsonPath('query', 'Wasur')
         ->assertJsonPath('groups.artworks.label', 'Artwork')
@@ -105,7 +106,8 @@ test('live global search returns grouped public results', function () {
 test('search page renders all content groups and keeps draft content private', function () {
     globalSearchFixtures();
 
-    $this->get(route('search.index', ['q' => 'Wasur']))
+    $this->withSession(['locale' => 'en'])
+        ->get(route('search.index', ['q' => 'Wasur']))
         ->assertOk()
         ->assertSee('Search Chapung Art')
         ->assertSee('Wasur Morning Artwork')
@@ -126,7 +128,8 @@ test('public layout includes realtime global search hooks', function () {
 });
 
 test('live search normalizes empty query safely', function () {
-    $this->getJson(route('search.live', ['q' => '   ']))
+    $this->withSession(['locale' => 'en'])
+        ->getJson(route('search.live', ['q' => '   ']))
         ->assertOk()
         ->assertJsonPath('query', '')
         ->assertJsonPath('total', 0);

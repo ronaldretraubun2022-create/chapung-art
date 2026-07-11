@@ -15,12 +15,16 @@ class InvoiceService
         $order->ensureInvoiceNumber();
         $order->loadMissing(['customer', 'items']);
 
+        $sitePhone = collect(site_contact_numbers())->pluck('phone')->implode(' / ')
+            ?: site_setting('phone', (string) config('chapung.contact_phone'));
+
         return [
             'site_name' => site_setting('site_name', 'Chapung Art'),
             'site_description' => site_setting('site_description', 'Galeri seni, fotografi budaya, dan media kreatif Papua Selatan.'),
             'site_email' => site_setting('email', (string) config('chapung.emails.info')),
-            'site_phone' => site_setting('phone', site_setting('whatsapp', '')),
-            'site_address' => site_setting('address', 'Merauke, Papua Selatan'),
+            'site_phone' => $sitePhone,
+            'site_address' => site_setting('address', (string) config('chapung.address')),
+            'bank_accounts' => site_bank_accounts(),
             'order' => $order,
         ];
     }
@@ -71,10 +75,33 @@ class InvoiceService
             'Payment Status: '.Str::headline($order->payment_status),
             'Order Status: '.Str::headline($order->status),
             '',
+            'Payment Information',
+            ...$this->bankAccountLines($data['bank_accounts'] ?? []),
+            '',
             (string) $data['site_description'],
             trim((string) $data['site_address']),
             trim((string) $data['site_email'].' '.(string) $data['site_phone']),
         ];
+    }
+
+    /**
+     * @param  array<int, array{bank: string, account_number: string, account_name: string}>  $bankAccounts
+     * @return array<int, string>
+     */
+    private function bankAccountLines(array $bankAccounts): array
+    {
+        return collect($bankAccounts)
+            ->flatMap(function (array $account): array {
+                $line = $account['bank'].': '.$account['account_number'];
+
+                if (filled($account['account_name'])) {
+                    $line .= ' a.n. '.$account['account_name'];
+                }
+
+                return [$line];
+            })
+            ->values()
+            ->all();
     }
 
     /**

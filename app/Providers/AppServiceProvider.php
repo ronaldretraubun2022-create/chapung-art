@@ -6,6 +6,7 @@ use App\Models\AdminNotification;
 use App\Models\ActivityLog;
 use App\Models\Artist;
 use App\Models\Artwork;
+use App\Models\ArtworkReview;
 use App\Models\Category;
 use App\Models\Certificate;
 use App\Models\Collection;
@@ -14,6 +15,7 @@ use App\Models\Exhibition;
 use App\Models\HomepageSection;
 use App\Models\MediaItem;
 use App\Models\Order;
+use App\Models\OrderStatusHistory;
 use App\Models\PageView;
 use App\Models\Payment;
 use App\Models\Photography;
@@ -64,6 +66,7 @@ class AppServiceProvider extends ServiceProvider
             AdminNotification::class,
             Artist::class,
             Artwork::class,
+            ArtworkReview::class,
             Category::class,
             Certificate::class,
             Collection::class,
@@ -72,6 +75,7 @@ class AppServiceProvider extends ServiceProvider
             HomepageSection::class,
             MediaItem::class,
             Order::class,
+            OrderStatusHistory::class,
             PageView::class,
             Payment::class,
             Photography::class,

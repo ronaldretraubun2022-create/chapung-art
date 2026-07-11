@@ -8,8 +8,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     @include('partials.seo-meta', ['seo' => seo_meta('certificates.verify', $certificate, [
-        'title' => 'Certificate Verification - '.$siteName,
-        'description' => 'Verifikasi Certificate of Authenticity Chapung Art.',
+        'title' => __('chapung.pages.certificate.title').' - '.$siteName,
+        'description' => __('chapung.pages.certificate.description'),
         'canonical_url' => route('certificates.verify', $certificateNumber),
         'robots' => $certificate ? 'index, follow' : 'noindex, follow',
     ])])
@@ -18,7 +18,7 @@
 <body class="min-h-screen bg-black text-white">
     <main class="flex min-h-screen items-center px-6 py-16">
         <section class="mx-auto w-full max-w-3xl rounded-3xl border border-zinc-800 bg-zinc-950 p-8 shadow-2xl shadow-black/30 md:p-12">
-            <p class="text-xs font-black uppercase tracking-[0.32em] text-yellow-600">Certificate Verification</p>
+            <p class="text-xs font-black uppercase tracking-[0.32em] text-yellow-600">{{ __('chapung.pages.certificate.title') }}</p>
 
             @if ($certificate)
                 <div class="mt-6 flex flex-wrap items-center gap-3">
@@ -30,7 +30,7 @@
 
                 <div class="mt-8 grid gap-4 text-sm text-zinc-300 md:grid-cols-2">
                     <div class="rounded-2xl border border-zinc-800 bg-black p-5">
-                        <span class="text-xs font-black uppercase tracking-[0.24em] text-yellow-600">Artwork</span>
+                        <span class="text-xs font-black uppercase tracking-[0.24em] text-yellow-600">{{ __('chapung.types.artwork') }}</span>
                         <p class="mt-3 text-lg font-bold text-white">{{ $certificate->artwork?->title ?: '-' }}</p>
                     </div>
                     <div class="rounded-2xl border border-zinc-800 bg-black p-5">
@@ -47,7 +47,7 @@
                     </div>
                 </div>
             @else
-                <h1 class="mt-6 text-3xl font-black uppercase tracking-tight md:text-5xl">Certificate Not Found</h1>
+                <h1 class="mt-6 text-3xl font-black uppercase tracking-tight md:text-5xl">{{ __('chapung.pages.certificate.not_found') }}</h1>
                 <p class="mt-5 text-zinc-300">Nomor sertifikat {{ $certificateNumber }} tidak ditemukan atau belum terdaftar.</p>
             @endif
 

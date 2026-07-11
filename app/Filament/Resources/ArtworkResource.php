@@ -8,6 +8,7 @@ use App\Models\Artwork;
 use App\Models\Category;
 use App\Models\Collection;
 use App\Models\Tag;
+use App\Services\DigitalDownloadService;
 use App\Services\ImageUploadService;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -203,6 +204,27 @@ class ArtworkResource extends Resource
                                     ->helperText('Centang untuk menandai karya sebagai unggulan.')
                                     ->default(false)
                                     ->columnSpan(2),
+
+                                Forms\Components\Toggle::make('digital_download_enabled')
+                                    ->label('Aktifkan Download Digital')
+                                    ->helperText('File disimpan di private storage dan hanya dapat diunduh oleh pembeli terotorisasi.')
+                                    ->default(false)
+                                    ->columnSpan(['default' => 2, 'md' => 1]),
+
+                                Forms\Components\FileUpload::make('digital_file_path')
+                                    ->label('File Digital Private')
+                                    ->disk('local')
+                                    ->directory('artworks/digital')
+                                    ->visibility('private')
+                                    ->acceptedFileTypes(DigitalDownloadService::allowedMimeTypes())
+                                    ->maxSize(DigitalDownloadService::maxKilobytes())
+                                    ->storeFileNamesIn('digital_file_name')
+                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => app(DigitalDownloadService::class)->uniqueFileName($file))
+                                    ->saveUploadedFileUsing(fn ($component, $file): ?string => app(DigitalDownloadService::class)->storeFilamentUpload($component, $file))
+                                    ->deleteUploadedFileUsing(fn (?string $file): mixed => app(DigitalDownloadService::class)->delete($file))
+                                    ->helperText('Format aman: PDF, JPEG, PNG, WebP. Jangan unggah ZIP, executable, atau file master yang tidak untuk pembeli.')
+                                    ->nullable()
+                                    ->columnSpan(2),
                             ]),
                     ])
                     ->columns(2),
@@ -325,6 +347,11 @@ class ArtworkResource extends Resource
                     ->boolean()
                     ->sortable(),
 
+                Tables\Columns\IconColumn::make('digital_download_enabled')
+                    ->label('Digital')
+                    ->boolean()
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime('d M Y')
@@ -341,6 +368,9 @@ class ArtworkResource extends Resource
 
                 Tables\Filters\TernaryFilter::make('is_featured')
                     ->label('Karya Unggulan'),
+
+                Tables\Filters\TernaryFilter::make('digital_download_enabled')
+                    ->label('Download Digital'),
             ])
             ->actions([
                 \Filament\Actions\EditAction::make(),

@@ -42,6 +42,8 @@ class CheckoutService
             ]);
         }
 
+        $this->cart->setShippingEstimate((string) $payload['shipping_area']);
+
         $order = DB::transaction(function () use ($payload, $cartItems): Order {
             $artworkIds = array_keys($cartItems);
             $artworks = Artwork::query()
@@ -83,6 +85,7 @@ class CheckoutService
                 ];
             }
 
+            $adjustments = $this->cart->adjustmentsFor($subtotal);
             $customer = $this->createOrUpdateCustomer($payload);
 
             $order = Order::create([
@@ -91,11 +94,11 @@ class CheckoutService
                 'customer_email' => (string) $payload['customer_email'],
                 'customer_phone' => (string) $payload['customer_phone'],
                 'subtotal' => $subtotal,
-                'discount_total' => 0,
-                'shipping_total' => 0,
+                'discount_total' => (float) $adjustments['discount_total'],
+                'shipping_total' => (float) $adjustments['shipping_total'],
                 'status' => 'pending',
                 'payment_status' => 'unpaid',
-                'notes' => $this->orderNotes($payload),
+                'notes' => $this->orderNotes($payload, $adjustments),
             ]);
 
             foreach ($lines as $line) {
@@ -142,8 +145,8 @@ class CheckoutService
                 'whatsapp' => $payload['customer_whatsapp'] ?: $payload['customer_phone'],
                 'province' => (string) $payload['province'],
                 'city' => (string) $payload['city'],
-                'address' => (string) $payload['address'],
-                'notes' => $payload['notes'] ?? null,
+                'address' => $this->fullAddress($payload),
+                'notes' => $this->customerNotes($payload),
                 'is_active' => true,
             ]
         );
@@ -152,14 +155,66 @@ class CheckoutService
     /**
      * @param  array<string, mixed>  $payload
      */
-    private function orderNotes(array $payload): ?string
+    private function orderNotes(array $payload, array $adjustments): ?string
     {
         $parts = array_filter([
-            'Alamat: '.$payload['address'].', '.$payload['city'].', '.$payload['province'],
+            'Alamat: '.$this->fullAddress($payload),
+            'Pengiriman: '.$this->shippingLabel($payload, $adjustments),
+            filled($payload['shipping_notes'] ?? null) ? 'Catatan pengiriman: '.$payload['shipping_notes'] : null,
+            'Pembayaran: '.$this->paymentLabel((string) $payload['payment_method']),
+            filled($adjustments['coupon_code'] ?? null) ? 'Kupon: '.$adjustments['coupon_code'].' / '.$adjustments['coupon_label'] : null,
             filled($payload['customer_whatsapp'] ?? null) ? 'WhatsApp: '.$payload['customer_whatsapp'] : null,
             filled($payload['notes'] ?? null) ? 'Catatan: '.$payload['notes'] : null,
         ]);
 
         return $parts === [] ? null : implode("\n", $parts);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    private function fullAddress(array $payload): string
+    {
+        return collect([
+            $payload['address'] ?? null,
+            $payload['district'] ?? null,
+            $payload['city'] ?? null,
+            $payload['province'] ?? null,
+            $payload['postal_code'] ?? null,
+        ])->filter(fn (mixed $value): bool => filled($value))
+            ->map(fn (mixed $value): string => trim((string) $value))
+            ->implode(', ');
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    private function customerNotes(array $payload): ?string
+    {
+        $notes = array_filter([
+            filled($payload['district'] ?? null) ? 'Distrik: '.$payload['district'] : null,
+            filled($payload['postal_code'] ?? null) ? 'Kode pos: '.$payload['postal_code'] : null,
+            filled($payload['notes'] ?? null) ? (string) $payload['notes'] : null,
+        ]);
+
+        return $notes === [] ? null : implode("\n", $notes);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>  $adjustments
+     */
+    private function shippingLabel(array $payload, array $adjustments): string
+    {
+        $area = (string) ($payload['shipping_area'] ?? '');
+        $label = (string) ($adjustments['shipping_label'] ?? config('chapung.cart.shipping_estimates.'.$area.'.label', $area));
+        $amount = (float) ($adjustments['shipping_total'] ?? 0);
+
+        return trim($label.' / Rp '.number_format($amount, 0, ',', '.'));
+    }
+
+    private function paymentLabel(string $method): string
+    {
+        return (string) config('chapung.checkout.payment_methods.'.$method.'.label', $method);
     }
 }

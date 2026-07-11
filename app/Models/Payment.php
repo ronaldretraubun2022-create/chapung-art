@@ -34,7 +34,17 @@ class Payment extends Model
     {
         static::saved(function (Payment $payment): void {
             if ($payment->status === 'paid' && $payment->order) {
-                $payment->order->forceFill(['payment_status' => 'paid'])->saveQuietly();
+                $order = $payment->order;
+                $previousPaymentStatus = $order->payment_status;
+                $order->forceFill(['payment_status' => 'paid'])->saveQuietly();
+
+                if ($previousPaymentStatus !== 'paid') {
+                    $order->recordStatusHistory(
+                        'Pembayaran diverifikasi dari payment #'.$payment->id.'.',
+                        'payment',
+                        paymentStatusFrom: $previousPaymentStatus,
+                    );
+                }
             }
 
             if ($payment->wasRecentlyCreated) {

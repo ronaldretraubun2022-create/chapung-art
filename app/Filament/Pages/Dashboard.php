@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Widgets\AnalyticsOverviewWidget;
+use App\Filament\Widgets\OrderManagementOverviewWidget;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Widgets\Widget;
 use Filament\Widgets\WidgetConfiguration;
@@ -31,6 +32,7 @@ class Dashboard extends BaseDashboard
     public function getHeaderWidgets(): array
     {
         return [
+            OrderManagementOverviewWidget::class,
             AnalyticsOverviewWidget::class,
         ];
     }

@@ -2,6 +2,7 @@
 
 use App\Models\Artist;
 use App\Models\Artwork;
+use App\Models\ArtworkReview;
 use App\Models\Collection;
 
 function publicProfileArtist(array $overrides = []): Artist
@@ -32,26 +33,65 @@ test('artist public profile shows cover photo biography artworks collections and
         'is_active' => true,
     ]);
 
-    Artwork::create([
+    $artwork = Artwork::create([
         'title' => 'Jejak Sungai Maro',
         'slug' => 'jejak-sungai-maro',
         'artist_id' => $artist->id,
         'collection_id' => $collection->id,
         'thumbnail' => 'artworks/jejak.jpg',
         'price' => 1500000,
+        'stock' => 3,
+        'views' => 80,
+        'likes' => 12,
         'is_featured' => true,
     ]);
 
-    $this->get(route('artists.show', $artist->slug))
+    ArtworkReview::create([
+        'artwork_id' => $artwork->id,
+        'reviewer_name' => 'Verified Collector',
+        'reviewer_email' => 'collector@example.test',
+        'rating' => 5,
+        'title' => 'Karya yang kuat',
+        'body' => 'Karya ini hadir dengan kualitas visual yang kuat.',
+        'status' => ArtworkReview::STATUS_APPROVED,
+        'is_verified_purchase' => true,
+    ]);
+
+    $this->withSession(['locale' => 'en'])
+        ->get(route('artists.show', $artist->slug))
         ->assertOk()
+        ->assertSee('Artist Storefront')
+        ->assertSee('Verified Chapung Art profile')
         ->assertSee('Maria Ndiken')
         ->assertSee('Perupa Merauke yang mendokumentasikan cerita visual Papua Selatan.', false)
+        ->assertSee('Available artworks')
+        ->assertSee('Collector rating')
+        ->assertSee('Reviews & Collector Signals')
+        ->assertSee('Karya ini hadir dengan kualitas visual yang kuat.')
+        ->assertSee('Contact Artist')
+        ->assertSee('Favorite Store')
+        ->assertSee('Artist Bio')
+        ->assertSee('Store Info')
         ->assertSee('Jejak Sungai Maro')
         ->assertSee('Tanah Selatan')
         ->assertSee('artworks/jejak.jpg')
         ->assertSee('<meta property="og:image" content="'.asset('storage/artworks/jejak.jpg').'">', false)
         ->assertSee('<meta property="og:type" content="website">', false)
         ->assertSee('<script type="application/ld+json">', false);
+});
+
+test('artist storefront renders empty review state safely', function () {
+    $artist = publicProfileArtist([
+        'name' => 'Empty Review Artist',
+        'slug' => 'empty-review-artist',
+    ]);
+
+    $this->withSession(['locale' => 'en'])
+        ->get(route('artists.show', $artist->slug))
+        ->assertOk()
+        ->assertSee('Reviews & Collector Signals')
+        ->assertSee('No written reviews or collector signals are available yet.')
+        ->assertSee('Artwork Catalog');
 });
 
 test('artist profile paginates artworks safely', function () {
@@ -69,7 +109,8 @@ test('artist profile paginates artworks safely', function () {
         ]);
     }
 
-    $this->get(route('artists.show', ['slug' => $artist->slug, 'artworks_page' => 2]))
+    $this->withSession(['locale' => 'en'])
+        ->get(route('artists.show', ['slug' => $artist->slug, 'artworks_page' => 2]))
         ->assertOk()
         ->assertSee('Karya Artist 1')
         ->assertSee('Artwork');

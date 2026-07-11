@@ -1,6 +1,6 @@
 <article class="group rounded-lg border border-zinc-800 bg-zinc-950 p-3 shadow-xl shadow-black/20 transition hover:border-yellow-600/70">
     <a href="{{ route('photography.show', $photo->slug) }}" class="block">
-        @include('partials.public.image', ['path' => $photo->thumbnail, 'alt' => $photo->title, 'label' => 'Photography'])
+        @include('partials.public.image', ['path' => $photo->thumbnail, 'alt' => $photo->title, 'label' => __('chapung.types.photography')])
         <div class="p-2 pt-4">
             <h3 class="text-lg font-black uppercase tracking-tight text-white">{{ $photo->title }}</h3>
             <p class="mt-2 text-sm text-zinc-400">{{ $photo->artist_display_name ?: 'Chapung Art' }}</p>

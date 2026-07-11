@@ -15,6 +15,66 @@ if (! function_exists('site_setting')) {
     }
 }
 
+if (! function_exists('site_bank_accounts')) {
+    /**
+     * @return array<int, array{bank: string, account_number: string, account_name: string}>
+     */
+    function site_bank_accounts(): array
+    {
+        $accounts = site_setting('bank_accounts');
+
+        if (is_string($accounts)) {
+            $decoded = json_decode($accounts, true);
+            $accounts = is_array($decoded) ? $decoded : [];
+        }
+
+        if (! is_array($accounts) || $accounts === []) {
+            $accounts = config('chapung.bank_accounts', []);
+        }
+
+        return collect($accounts)
+            ->filter(fn (mixed $account): bool => is_array($account))
+            ->map(fn (array $account): array => [
+                'bank' => trim((string) ($account['bank'] ?? '')),
+                'account_number' => preg_replace('/\D+/', '', (string) ($account['account_number'] ?? '')) ?: '',
+                'account_name' => trim((string) ($account['account_name'] ?? '')),
+            ])
+            ->filter(fn (array $account): bool => $account['bank'] !== '' && $account['account_number'] !== '')
+            ->values()
+            ->all();
+    }
+}
+
+if (! function_exists('site_contact_numbers')) {
+    /**
+     * @return array<int, array{label: string, phone: string, whatsapp: string}>
+     */
+    function site_contact_numbers(): array
+    {
+        $contacts = site_setting('contact_numbers');
+
+        if (is_string($contacts)) {
+            $decoded = json_decode($contacts, true);
+            $contacts = is_array($decoded) ? $decoded : [];
+        }
+
+        if (! is_array($contacts) || $contacts === []) {
+            $contacts = config('chapung.contact_numbers', []);
+        }
+
+        return collect($contacts)
+            ->filter(fn (mixed $contact): bool => is_array($contact))
+            ->map(fn (array $contact): array => [
+                'label' => trim((string) ($contact['label'] ?? 'Admin')),
+                'phone' => trim((string) ($contact['phone'] ?? '')),
+                'whatsapp' => preg_replace('/\D+/', '', (string) ($contact['whatsapp'] ?? $contact['phone'] ?? '')) ?: '',
+            ])
+            ->filter(fn (array $contact): bool => $contact['phone'] !== '' && $contact['whatsapp'] !== '')
+            ->values()
+            ->all();
+    }
+}
+
 if (! function_exists('seo_meta')) {
     function seo_meta(?string $routeName = null, ?Model $seoable = null, array $fallback = []): array
     {

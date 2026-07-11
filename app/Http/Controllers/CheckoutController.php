@@ -32,6 +32,7 @@ class CheckoutController extends Controller
         return view('checkout.create', [
             'cart' => $summary,
             'checkoutToken' => $token,
+            'paymentMethods' => config('chapung.checkout.payment_methods', []),
         ]);
     }
 

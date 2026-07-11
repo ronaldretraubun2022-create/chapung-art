@@ -49,7 +49,8 @@ test('admin emails support comma separated addresses from centralized config', f
 });
 
 test('contact page renders department mailbox options', function () {
-    $this->get(route('contact'))
+    $this->withSession(['locale' => 'en'])
+        ->get(route('contact'))
         ->assertOk()
         ->assertSee('Contact Form')
         ->assertSee('Admin')
@@ -59,7 +60,13 @@ test('contact page renders department mailbox options', function () {
         ->assertSee('Media')
         ->assertSee('Support')
         ->assertSee('Finance')
-        ->assertSee('Contact');
+        ->assertSee('Contact')
+        ->assertSee('0813-4400-1427')
+        ->assertSee('https://wa.me/6281344001427', false)
+        ->assertSee('0813-9226-9774')
+        ->assertSee('https://wa.me/6281392269774', false)
+        ->assertSee('JL SESATE NO 242 RT.007 RW.002 BAMBU PEMALI')
+        ->assertSee('MERAUKE MERAUKE, KAB. 99616');
 });
 
 test('contact form sends mail to selected department mailbox', function (string $department, string $address) {

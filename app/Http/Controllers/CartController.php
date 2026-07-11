@@ -60,4 +60,52 @@ class CartController extends Controller
             'message' => 'Item dihapus dari cart.',
         ]);
     }
+
+    public function applyCoupon(Request $request, CartService $cart): RedirectResponse
+    {
+        $validated = $request->validate([
+            'coupon_code' => ['required', 'string', 'max:32'],
+        ]);
+
+        $cart->applyCoupon((string) $validated['coupon_code']);
+
+        return back()->with('toast', [
+            'type' => 'success',
+            'message' => 'Kupon berhasil diterapkan.',
+        ]);
+    }
+
+    public function removeCoupon(CartService $cart): RedirectResponse
+    {
+        $cart->removeCoupon();
+
+        return back()->with('toast', [
+            'type' => 'success',
+            'message' => 'Kupon dihapus.',
+        ]);
+    }
+
+    public function estimateShipping(Request $request, CartService $cart): RedirectResponse
+    {
+        $validated = $request->validate([
+            'shipping_area' => ['required', 'string', 'max:40'],
+        ]);
+
+        $cart->setShippingEstimate((string) $validated['shipping_area']);
+
+        return back()->with('toast', [
+            'type' => 'success',
+            'message' => 'Estimasi ongkir diperbarui.',
+        ]);
+    }
+
+    public function removeShipping(CartService $cart): RedirectResponse
+    {
+        $cart->removeShippingEstimate();
+
+        return back()->with('toast', [
+            'type' => 'success',
+            'message' => 'Estimasi ongkir dihapus.',
+        ]);
+    }
 }

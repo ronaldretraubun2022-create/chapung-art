@@ -79,6 +79,11 @@ class ArtworksTable
                     ->boolean()
                     ->sortable(),
 
+                IconColumn::make('digital_download_enabled')
+                    ->label('Digital')
+                    ->boolean()
+                    ->sortable(),
+
                 TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime('d M Y')
@@ -95,6 +100,9 @@ class ArtworksTable
 
                 TernaryFilter::make('is_featured')
                     ->label('Karya Unggulan'),
+
+                TernaryFilter::make('digital_download_enabled')
+                    ->label('Download Digital'),
             ])
             ->recordActions([
                 EditAction::make(),

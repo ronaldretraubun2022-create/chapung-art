@@ -1,9 +1,9 @@
 <article class="group overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl shadow-black/20 transition hover:border-yellow-600/70">
     <a href="{{ route('news.show', $post->slug) }}" class="block">
-        @include('partials.public.image', ['path' => $post->display_image, 'alt' => $post->title, 'ratio' => 'aspect-[16/10]', 'label' => 'News'])
+        @include('partials.public.image', ['path' => $post->display_image, 'alt' => $post->title, 'ratio' => 'aspect-[16/10]', 'label' => __('chapung.types.news')])
         <div class="p-5">
             <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.16em] text-zinc-500">
-                <span>{{ $post->category?->name ?: 'News' }}</span>
+                <span>{{ $post->category?->name ?: __('chapung.types.news') }}</span>
                 <span class="h-1 w-1 rounded-full bg-yellow-600"></span>
                 <time>{{ optional($post->published_at ?: $post->created_at)->format('d M Y') }}</time>
             </div>

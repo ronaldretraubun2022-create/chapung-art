@@ -29,23 +29,23 @@ class SearchService
 
         $groups = collect([
             'artworks' => [
-                'label' => 'Artwork',
+                'label' => __('chapung.types.artwork'),
                 'items' => $this->artworks($term, $limit),
             ],
             'artists' => [
-                'label' => 'Artist',
+                'label' => __('chapung.types.artist'),
                 'items' => $this->artists($term, $limit),
             ],
             'photographies' => [
-                'label' => 'Photography',
+                'label' => __('chapung.types.photography'),
                 'items' => $this->photographies($term, $limit),
             ],
             'news' => [
-                'label' => 'News',
+                'label' => __('chapung.types.news'),
                 'items' => $this->news($term, $limit),
             ],
             'collections' => [
-                'label' => 'Collection',
+                'label' => __('chapung.types.collection'),
                 'items' => $this->collections($term, $limit),
             ],
         ]);
@@ -105,7 +105,7 @@ class SearchService
                 type: 'artwork',
                 title: $artwork->title,
                 url: route('artwork.show', $artwork->slug),
-                subtitle: $artwork->artist_display_name ?: 'Artwork',
+                subtitle: $artwork->artist_display_name ?: __('chapung.types.artwork'),
                 image: $artwork->thumbnail,
                 excerpt: $artwork->excerpt ?: $artwork->description,
             ));
@@ -130,7 +130,7 @@ class SearchService
                 type: 'artist',
                 title: $artist->name,
                 url: route('artists.show', $artist->slug),
-                subtitle: $artist->specialization ?: $artist->origin_area ?: 'Artist',
+                subtitle: $artist->specialization ?: $artist->origin_area ?: __('chapung.types.artist'),
                 image: $artist->photo,
                 excerpt: $artist->bio,
             ));
@@ -160,7 +160,7 @@ class SearchService
                 type: 'photography',
                 title: $photo->title,
                 url: route('photography.show', $photo->slug),
-                subtitle: $photo->artist_display_name ?: $photo->location ?: 'Photography',
+                subtitle: $photo->artist_display_name ?: $photo->location ?: __('chapung.types.photography'),
                 image: $photo->thumbnail,
                 excerpt: $photo->excerpt ?: $photo->description,
             ));
@@ -184,7 +184,7 @@ class SearchService
                 type: 'news',
                 title: $post->title,
                 url: route('news.show', $post->slug),
-                subtitle: $post->author_name ?: 'News',
+                subtitle: $post->author_name ?: __('chapung.types.news'),
                 image: $post->display_image,
                 excerpt: $post->excerpt ?: $post->content,
             ));
@@ -206,7 +206,7 @@ class SearchService
                 type: 'collection',
                 title: $collection->name,
                 url: route('collections.show', $collection->slug),
-                subtitle: 'Collection',
+                subtitle: __('chapung.types.collection'),
                 image: $collection->banner_image ?: $collection->cover_image,
                 excerpt: $collection->description,
             ));
@@ -238,11 +238,11 @@ class SearchService
             'query' => $term,
             'total' => 0,
             'groups' => collect([
-                'artworks' => ['label' => 'Artwork', 'items' => collect()],
-                'artists' => ['label' => 'Artist', 'items' => collect()],
-                'photographies' => ['label' => 'Photography', 'items' => collect()],
-                'news' => ['label' => 'News', 'items' => collect()],
-                'collections' => ['label' => 'Collection', 'items' => collect()],
+                'artworks' => ['label' => __('chapung.types.artwork'), 'items' => collect()],
+                'artists' => ['label' => __('chapung.types.artist'), 'items' => collect()],
+                'photographies' => ['label' => __('chapung.types.photography'), 'items' => collect()],
+                'news' => ['label' => __('chapung.types.news'), 'items' => collect()],
+                'collections' => ['label' => __('chapung.types.collection'), 'items' => collect()],
             ]),
         ];
     }

@@ -25,6 +25,7 @@ class RolePermissionSeeder extends Seeder
         'admin_notification',
         'artist',
         'artwork',
+        'artwork_review',
         'backup',
         'category',
         'certificate',
@@ -126,6 +127,7 @@ class RolePermissionSeeder extends Seeder
         return $this->permissionsFor([
             'artist',
             'artwork',
+            'artwork_review',
             'category',
             'certificate',
             'collection',
@@ -143,6 +145,7 @@ class RolePermissionSeeder extends Seeder
     {
         return $this->permissionsFor([
             'artwork',
+            'artwork_review',
             'certificate',
             'collection',
             'media_item',

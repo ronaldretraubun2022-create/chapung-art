@@ -12,9 +12,9 @@
     $latestPosts = $latestPosts instanceof Collection ? $latestPosts : collect();
 
     $hero = $homepageSections->get('hero');
-    $heroTitle = $hero?->title ?: 'CHAPUNG ART';
-    $heroSubtitle = $hero?->subtitle ?: 'Galeri Seni Rupa, fotografi budaya, dan media kreatif Papua Selatan.';
-    $heroContent = $hero?->content ?: 'Ruang digital untuk karya seni rupa, dokumentasi budaya, dan cerita visual dari Papua Selatan.';
+    $heroTitle = $hero?->title ?: __('chapung.home.hero_title');
+    $heroSubtitle = $hero?->subtitle ?: __('chapung.home.hero_subtitle');
+    $heroContent = $hero?->content ?: __('chapung.home.hero_content');
     $heroImage = ImageUploadService::normalizePath($hero?->image);
     $heroImageUrl = $heroImage ? asset('storage/'.$heroImage) : asset('images/og-image.jpg');
     $heroArtwork = $featuredArtworks->first();
@@ -41,20 +41,20 @@
 @section('content')
     <section class="relative min-h-[calc(100svh-7rem)] overflow-hidden border-b border-zinc-800 bg-black">
         <div class="absolute inset-0">
-            <img src="{{ $heroImageUrl }}" alt="{{ ImageUploadService::altText($heroTitle, 'Chapung Art hero') }}" width="1800" height="1200" class="h-full w-full object-cover opacity-55" loading="eager" decoding="async" fetchpriority="high">
+            <img src="{{ $heroImageUrl }}" alt="{{ ImageUploadService::altText($heroTitle, __('chapung.home.hero_title')) }}" width="1800" height="1200" class="h-full w-full object-cover opacity-55" loading="eager" decoding="async" fetchpriority="high">
             <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/72 to-black"></div>
         </div>
 
         <div class="relative mx-auto grid min-h-[calc(100svh-7rem)] max-w-7xl content-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.1fr_.9fr] lg:px-8 lg:py-20">
             <article class="max-w-4xl">
-                <p class="text-xs font-black uppercase tracking-[0.32em] text-yellow-500">Merauke / Papua Selatan</p>
+                <p class="text-xs font-black uppercase tracking-[0.32em] text-yellow-500">{{ __('chapung.home.hero_region') }}</p>
                 <h1 class="mt-5 text-5xl font-black uppercase leading-none text-white sm:text-7xl lg:text-8xl">{{ $heroTitle }}</h1>
                 <p class="mt-6 max-w-3xl text-lg font-semibold leading-8 text-zinc-100 sm:text-2xl sm:leading-10">{{ $heroSubtitle }}</p>
                 <p class="mt-5 max-w-2xl text-base leading-8 text-zinc-300">{{ $heroContent }}</p>
 
                 <div class="mt-9 flex flex-col gap-3 sm:flex-row">
-                    <a href="{{ route('gallery') }}" class="rounded-md bg-yellow-600 px-6 py-4 text-center text-xs font-black uppercase tracking-[0.18em] text-black transition hover:bg-yellow-500">Explore Artwork</a>
-                    <a href="{{ route('artists.index') }}" class="rounded-md border border-white/30 bg-black/30 px-6 py-4 text-center text-xs font-black uppercase tracking-[0.18em] text-white backdrop-blur transition hover:border-yellow-600 hover:text-yellow-500">Meet Artists</a>
+                    <a href="{{ route('gallery') }}" class="rounded-md bg-yellow-600 px-6 py-4 text-center text-xs font-black uppercase tracking-[0.18em] text-black transition hover:bg-yellow-500">{{ __('chapung.home.explore_artwork') }}</a>
+                    <a href="{{ route('artists.index') }}" class="rounded-md border border-white/30 bg-black/30 px-6 py-4 text-center text-xs font-black uppercase tracking-[0.18em] text-white backdrop-blur transition hover:border-yellow-600 hover:text-yellow-500">{{ __('chapung.home.meet_artists') }}</a>
                 </div>
             </article>
 
@@ -64,7 +64,7 @@
                         @include('partials.public.image', [
                             'path' => $heroArtworkImage ?: $heroImage,
                             'alt' => $heroArtwork->title,
-                            'label' => 'Featured Artwork',
+                            'label' => __('chapung.home.featured_label'),
                             'ratio' => 'aspect-[4/5]',
                             'width' => 960,
                             'height' => 1200,
@@ -72,7 +72,7 @@
                             'fetchPriority' => 'high',
                         ])
                         <div class="pt-5">
-                            <p class="text-xs font-black uppercase tracking-[0.22em] text-yellow-500">Featured Artwork</p>
+                            <p class="text-xs font-black uppercase tracking-[0.22em] text-yellow-500">{{ __('chapung.home.featured_artwork') }}</p>
                             <h2 class="mt-2 text-2xl font-black uppercase text-white">{{ $heroArtwork->title }}</h2>
                             <p class="mt-2 text-sm text-zinc-300">{{ $heroArtwork->artist_display_name ?: 'Chapung Art' }}</p>
                         </div>
@@ -80,7 +80,7 @@
                         @include('partials.public.image', [
                             'path' => $heroImage,
                             'alt' => $heroTitle,
-                            'label' => 'Chapung Art',
+                            'label' => __('chapung.home.hero_title'),
                             'ratio' => 'aspect-[4/5]',
                             'width' => 960,
                             'height' => 1200,
@@ -92,15 +92,15 @@
 
                 <dl class="grid grid-cols-3 gap-3">
                     <div class="rounded-lg border border-white/10 bg-black/45 p-4 backdrop-blur">
-                        <dt class="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">Artwork</dt>
+                        <dt class="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">{{ __('chapung.home.artwork_count') }}</dt>
                         <dd class="mt-2 text-2xl font-black text-white">{{ $featuredArtworks->count() }}</dd>
                     </div>
                     <div class="rounded-lg border border-white/10 bg-black/45 p-4 backdrop-blur">
-                        <dt class="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">Artists</dt>
+                        <dt class="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">{{ __('chapung.home.artists_count') }}</dt>
                         <dd class="mt-2 text-2xl font-black text-white">{{ $featuredArtists->count() }}</dd>
                     </div>
                     <div class="rounded-lg border border-white/10 bg-black/45 p-4 backdrop-blur">
-                        <dt class="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">Stories</dt>
+                        <dt class="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">{{ __('chapung.home.stories_count') }}</dt>
                         <dd class="mt-2 text-2xl font-black text-white">{{ $latestPosts->count() }}</dd>
                     </div>
                 </dl>
@@ -112,12 +112,12 @@
         <div class="mx-auto max-w-7xl">
             <div class="grid gap-6 lg:grid-cols-[.85fr_1.15fr] lg:items-end">
                 <div>
-                    <p class="text-xs font-black uppercase tracking-[0.3em] text-yellow-600">Featured Artwork</p>
-                    <h2 class="mt-3 text-3xl font-black uppercase text-white sm:text-5xl">Curated Works</h2>
+                    <p class="text-xs font-black uppercase tracking-[0.3em] text-yellow-600">{{ __('chapung.home.featured_artwork') }}</p>
+                    <h2 class="mt-3 text-3xl font-black uppercase text-white sm:text-5xl">{{ __('chapung.home.curated_works') }}</h2>
                 </div>
                 <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                    <p class="max-w-2xl text-sm leading-7 text-zinc-400">Karya pilihan dari ekosistem Chapung Art, dikurasi untuk memperlihatkan bahasa visual, material, dan cerita dari Papua Selatan.</p>
-                    <a href="{{ route('gallery') }}" class="text-xs font-black uppercase tracking-[0.18em] text-yellow-500 hover:text-yellow-400">View all</a>
+                    <p class="max-w-2xl text-sm leading-7 text-zinc-400">{{ __('chapung.home.featured_artwork_description') }}</p>
+                    <a href="{{ route('gallery') }}" class="text-xs font-black uppercase tracking-[0.18em] text-yellow-500 hover:text-yellow-400">{{ __('chapung.home.view_all') }}</a>
                 </div>
             </div>
 
@@ -128,7 +128,7 @@
                     @endforeach
                 </div>
             @else
-                <div class="mt-8">@include('partials.public.empty-state', ['label' => 'Artwork', 'title' => 'Belum ada featured artwork'])</div>
+                <div class="mt-8">@include('partials.public.empty-state', ['label' => __('chapung.home.artwork_count'), 'title' => __('chapung.home.empty_featured_artwork')])</div>
             @endif
         </div>
     </section>
@@ -137,10 +137,10 @@
         <div class="mx-auto max-w-7xl">
             <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>
-                    <p class="text-xs font-black uppercase tracking-[0.3em] text-yellow-600">Featured Artist</p>
-                    <h2 class="mt-3 text-3xl font-black uppercase text-white sm:text-5xl">Creative Profiles</h2>
+                    <p class="text-xs font-black uppercase tracking-[0.3em] text-yellow-600">{{ __('chapung.home.featured_artist') }}</p>
+                    <h2 class="mt-3 text-3xl font-black uppercase text-white sm:text-5xl">{{ __('chapung.home.creative_profiles') }}</h2>
                 </div>
-                <a href="{{ route('artists.index') }}" class="text-xs font-black uppercase tracking-[0.18em] text-yellow-500 hover:text-yellow-400">View artists</a>
+                <a href="{{ route('artists.index') }}" class="text-xs font-black uppercase tracking-[0.18em] text-yellow-500 hover:text-yellow-400">{{ __('chapung.home.view_artists') }}</a>
             </div>
 
             @if ($featuredArtists->count())
@@ -151,14 +151,14 @@
                                 @include('partials.public.image', [
                                     'path' => $artist->photo,
                                     'alt' => $artist->name,
-                                    'label' => 'Artist',
+                                    'label' => __('chapung.types.artist'),
                                     'ratio' => 'aspect-[4/5]',
                                     'width' => 800,
                                     'height' => 1000,
                                 ])
                                 <div class="pt-5">
                                     <h3 class="text-xl font-black uppercase text-white">{{ $artist->name }}</h3>
-                                    <p class="mt-2 text-sm leading-6 text-zinc-400">{{ $artist->specialization ?: $artist->origin_area ?: 'Chapung Art Artist' }}</p>
+                                    <p class="mt-2 text-sm leading-6 text-zinc-400">{{ $artist->specialization ?: $artist->origin_area ?: __('chapung.home.artist_fallback') }}</p>
                                     <p class="mt-4 text-xs font-black uppercase tracking-[0.16em] text-yellow-600">{{ $artist->artworks_count }} artworks / {{ $artist->photographies_count }} photos</p>
                                 </div>
                             </a>
@@ -166,7 +166,7 @@
                     @endforeach
                 </div>
             @else
-                @include('partials.public.empty-state', ['label' => 'Artists', 'title' => 'Belum ada featured artist'])
+                @include('partials.public.empty-state', ['label' => __('chapung.home.artists_count'), 'title' => __('chapung.home.empty_featured_artist')])
             @endif
         </div>
     </section>
@@ -175,10 +175,10 @@
         <div class="mx-auto max-w-7xl">
             <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>
-                    <p class="text-xs font-black uppercase tracking-[0.3em] text-yellow-600">Collections</p>
-                    <h2 class="mt-3 text-3xl font-black uppercase text-white sm:text-5xl">Curated Themes</h2>
+                    <p class="text-xs font-black uppercase tracking-[0.3em] text-yellow-600">{{ __('chapung.home.collections') }}</p>
+                    <h2 class="mt-3 text-3xl font-black uppercase text-white sm:text-5xl">{{ __('chapung.home.curated_themes') }}</h2>
                 </div>
-                <p class="max-w-xl text-sm leading-7 text-zinc-400 md:text-right">Seri kuratorial untuk menjelajahi karya seni, fotografi, dan arsip budaya dalam satu alur visual.</p>
+                <p class="max-w-xl text-sm leading-7 text-zinc-400 md:text-right">{{ __('chapung.home.collections_description') }}</p>
             </div>
 
             @if ($featuredCollections->count())
@@ -190,14 +190,14 @@
                                 @include('partials.public.image', [
                                     'path' => $collectionImage,
                                     'alt' => $collection->name,
-                                    'label' => 'Collection',
+                                    'label' => __('chapung.types.collection'),
                                     'ratio' => 'aspect-[16/11]',
                                     'width' => 960,
                                     'height' => 660,
                                 ])
                                 <div class="p-2 pt-4">
                                     <h3 class="text-lg font-black uppercase text-white">{{ $collection->name }}</h3>
-                                    <p class="mt-2 line-clamp-3 text-sm leading-6 text-zinc-400">{{ $collection->description ?: 'Kurasi karya Chapung Art Papua Selatan.' }}</p>
+                                    <p class="mt-2 line-clamp-3 text-sm leading-6 text-zinc-400">{{ $collection->description ?: __('chapung.home.collection_fallback') }}</p>
                                     <p class="mt-4 text-xs font-black uppercase tracking-[0.16em] text-yellow-600">{{ $collection->artworks_count }} artworks / {{ $collection->photographies_count }} photos</p>
                                 </div>
                             </a>
@@ -205,7 +205,7 @@
                     @endforeach
                 </div>
             @else
-                @include('partials.public.empty-state', ['label' => 'Collections', 'title' => 'Belum ada featured collection'])
+                @include('partials.public.empty-state', ['label' => __('chapung.home.collections'), 'title' => __('chapung.home.empty_featured_collection')])
             @endif
         </div>
     </section>
@@ -214,10 +214,10 @@
         <div class="mx-auto max-w-7xl">
             <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>
-                    <p class="text-xs font-black uppercase tracking-[0.3em] text-yellow-600">Photography</p>
-                    <h2 class="mt-3 text-3xl font-black uppercase text-white sm:text-5xl">Visual Archive</h2>
+                    <p class="text-xs font-black uppercase tracking-[0.3em] text-yellow-600">{{ __('chapung.home.photography') }}</p>
+                    <h2 class="mt-3 text-3xl font-black uppercase text-white sm:text-5xl">{{ __('chapung.home.visual_archive') }}</h2>
                 </div>
-                <a href="{{ route('photography.index') }}" class="text-xs font-black uppercase tracking-[0.18em] text-yellow-500 hover:text-yellow-400">View photography</a>
+                <a href="{{ route('photography.index') }}" class="text-xs font-black uppercase tracking-[0.18em] text-yellow-500 hover:text-yellow-400">{{ __('chapung.home.view_photography') }}</a>
             </div>
 
             @if ($featuredPhotographies->count())
@@ -227,7 +227,7 @@
                     @endforeach
                 </div>
             @else
-                @include('partials.public.empty-state', ['label' => 'Photography', 'title' => 'Belum ada featured photography'])
+                @include('partials.public.empty-state', ['label' => __('chapung.home.photography'), 'title' => __('chapung.home.empty_featured_photography')])
             @endif
         </div>
     </section>
@@ -236,10 +236,10 @@
         <div class="mx-auto max-w-7xl">
             <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>
-                    <p class="text-xs font-black uppercase tracking-[0.3em] text-yellow-600">News</p>
-                    <h2 class="mt-3 text-3xl font-black uppercase text-white sm:text-5xl">Latest Stories</h2>
+                    <p class="text-xs font-black uppercase tracking-[0.3em] text-yellow-600">{{ __('chapung.home.news') }}</p>
+                    <h2 class="mt-3 text-3xl font-black uppercase text-white sm:text-5xl">{{ __('chapung.home.latest_stories') }}</h2>
                 </div>
-                <a href="{{ route('news.index') }}" class="text-xs font-black uppercase tracking-[0.18em] text-yellow-500 hover:text-yellow-400">Read all</a>
+                <a href="{{ route('news.index') }}" class="text-xs font-black uppercase tracking-[0.18em] text-yellow-500 hover:text-yellow-400">{{ __('chapung.home.read_all') }}</a>
             </div>
 
             @if ($latestPosts->count())
@@ -249,7 +249,7 @@
                     @endforeach
                 </div>
             @else
-                @include('partials.public.empty-state', ['label' => 'News', 'title' => 'Belum ada berita published'])
+                @include('partials.public.empty-state', ['label' => __('chapung.home.news'), 'title' => __('chapung.home.empty_published_news')])
             @endif
         </div>
     </section>
@@ -258,12 +258,12 @@
         <div class="mx-auto grid max-w-7xl gap-8 border-y border-zinc-800 py-12 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
                 <p class="text-xs font-black uppercase tracking-[0.3em] text-yellow-600">Chapung Art</p>
-                <h2 class="mt-3 max-w-4xl text-3xl font-black uppercase leading-tight text-white sm:text-5xl">Temukan karya, profil kreator, dan arsip visual Papua Selatan.</h2>
-                <p class="mt-5 max-w-2xl text-sm leading-7 text-zinc-400">{{ $totalFeaturedContent }} pilihan konten tampil di homepage premium saat ini.</p>
+                <h2 class="mt-3 max-w-4xl text-3xl font-black uppercase leading-tight text-white sm:text-5xl">{{ __('chapung.home.cta_title') }}</h2>
+                <p class="mt-5 max-w-2xl text-sm leading-7 text-zinc-400">{{ __('chapung.home.cta_count', ['count' => $totalFeaturedContent]) }}</p>
             </div>
             <div class="flex flex-col gap-3 sm:flex-row lg:flex-col">
-                <a href="{{ route('gallery') }}" class="rounded-md bg-yellow-600 px-6 py-4 text-center text-xs font-black uppercase tracking-[0.18em] text-black transition hover:bg-yellow-500">Explore Gallery</a>
-                <a href="{{ route('contact') }}" class="rounded-md border border-zinc-700 px-6 py-4 text-center text-xs font-black uppercase tracking-[0.18em] text-white transition hover:border-yellow-600 hover:text-yellow-500">Contact</a>
+                <a href="{{ route('gallery') }}" class="rounded-md bg-yellow-600 px-6 py-4 text-center text-xs font-black uppercase tracking-[0.18em] text-black transition hover:bg-yellow-500">{{ __('chapung.home.explore_gallery') }}</a>
+                <a href="{{ route('contact') }}" class="rounded-md border border-zinc-700 px-6 py-4 text-center text-xs font-black uppercase tracking-[0.18em] text-white transition hover:border-yellow-600 hover:text-yellow-500">{{ __('chapung.home.contact') }}</a>
             </div>
         </div>
     </section>

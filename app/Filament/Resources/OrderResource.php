@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers\PaymentsRelationManager;
 use App\Filament\Resources\OrderResource\RelationManagers\ShipmentsRelationManager;
+use App\Filament\Resources\OrderResource\RelationManagers\StatusHistoriesRelationManager;
 use App\Models\Customer;
 use App\Models\Order;
 use BackedEnum;
@@ -42,6 +43,14 @@ class OrderResource extends Resource
                                 Forms\Components\TextInput::make('order_number')
                                     ->label('Order Number')
                                     ->helperText('Otomatis dibuat saat order disimpan.')
+                                    ->disabled()
+                                    ->dehydrated(false)
+                                    ->placeholder('Auto generated')
+                                    ->columnSpan(['default' => 2, 'md' => 1]),
+
+                                Forms\Components\TextInput::make('invoice_number')
+                                    ->label('Invoice Number')
+                                    ->helperText('Otomatis dibuat dan dapat diunduh dari action invoice.')
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->placeholder('Auto generated')
@@ -229,6 +238,13 @@ class OrderResource extends Resource
                     ->badge()
                     ->color('warning'),
 
+                Tables\Columns\TextColumn::make('invoice_number')
+                    ->label('Invoice')
+                    ->searchable()
+                    ->copyable()
+                    ->placeholder('-')
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('customer_name')
                     ->label('Customer')
                     ->searchable()
@@ -285,6 +301,36 @@ class OrderResource extends Resource
             ->emptyStateHeading('Belum ada order')
             ->emptyStateDescription('Buat order marketplace untuk pembelian artwork atau photography.')
             ->actions([
+                \Filament\Actions\Action::make('invoice')
+                    ->label('Invoice')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->url(fn (Order $record): string => route('invoice.show', $record))
+                    ->openUrlInNewTab(),
+
+                \Filament\Actions\Action::make('mark_paid')
+                    ->label('Mark Paid')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn (Order $record): bool => $record->payment_status !== 'paid')
+                    ->action(fn (Order $record): bool => $record->forceFill(['payment_status' => 'paid'])->save()),
+
+                \Filament\Actions\Action::make('mark_processing')
+                    ->label('Process')
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->color('info')
+                    ->requiresConfirmation()
+                    ->visible(fn (Order $record): bool => ! in_array($record->status, ['processing', 'shipped', 'completed', 'cancelled'], true))
+                    ->action(fn (Order $record): bool => $record->forceFill(['status' => 'processing'])->save()),
+
+                \Filament\Actions\Action::make('mark_completed')
+                    ->label('Complete')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn (Order $record): bool => $record->status !== 'completed')
+                    ->action(fn (Order $record): bool => $record->forceFill(['status' => 'completed'])->save()),
+
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\DeleteAction::make(),
             ])
@@ -308,29 +354,18 @@ class OrderResource extends Resource
         return [
             PaymentsRelationManager::class,
             ShipmentsRelationManager::class,
+            StatusHistoriesRelationManager::class,
         ];
     }
 
     public static function statusOptions(): array
     {
-        return [
-            'pending' => 'Pending',
-            'confirmed' => 'Confirmed',
-            'processing' => 'Processing',
-            'shipped' => 'Shipped',
-            'completed' => 'Completed',
-            'cancelled' => 'Cancelled',
-        ];
+        return Order::STATUSES;
     }
 
     public static function paymentStatusOptions(): array
     {
-        return [
-            'unpaid' => 'Unpaid',
-            'paid' => 'Paid',
-            'failed' => 'Failed',
-            'refunded' => 'Refunded',
-        ];
+        return Order::PAYMENT_STATUSES;
     }
 
     private static function updateItemTotal(callable $get, callable $set): void

@@ -7,7 +7,26 @@
     $profilePhoto = ImageUploadService::normalizePath($artist->photo);
     $coverUrl = $coverImage ? asset('storage/'.$coverImage) : ImageUploadService::fallbackUrl();
     $profileUrl = $profilePhoto ? asset('storage/'.$profilePhoto) : null;
-    $seoDescription = (string) str(strip_tags($artist->bio ?: $artist->specialization ?: 'Profil kreator Chapung Art Papua Selatan.'))->limit(160);
+    $seoDescription = (string) str(strip_tags($artist->bio ?: $artist->specialization ?: __('chapung.artist_store.bio_empty')))->limit(160);
+    $location = collect([$artist->origin_area, $artist->city, $artist->province, $artist->country])->filter()->unique()->implode(', ') ?: __('chapung.artist_store.location_fallback');
+    $rating = (float) ($storefrontStats['rating'] ?? 0);
+    $reviewCount = (int) ($storefrontStats['review_count'] ?? 0);
+    $whatsapp = preg_replace('/\D+/', '', site_setting('whatsapp', (string) config('chapung.contact_whatsapp'))) ?: (string) config('chapung.contact_whatsapp');
+    $message = rawurlencode('Halo Chapung Art, saya ingin bertanya tentang toko seniman '.$artist->name.' - '.route('artists.show', $artist->slug));
+    $socialLinks = collect([
+        ['label' => 'Instagram', 'url' => $artist->instagram],
+        ['label' => 'Facebook', 'url' => $artist->facebook],
+        ['label' => 'Website', 'url' => $artist->website],
+    ])->filter(fn ($link) => filled($link['url']))
+        ->map(function (array $link): array {
+            $url = trim((string) $link['url']);
+
+            if (! str_starts_with($url, 'http://') && ! str_starts_with($url, 'https://')) {
+                $url = 'https://'.ltrim($url, '/');
+            }
+
+            return [...$link, 'url' => $url];
+        });
 @endphp
 
 @section('seo')
@@ -40,73 +59,164 @@
 @section('content')
     <section class="relative border-b border-zinc-800 bg-black">
         <div class="absolute inset-0">
-            <img src="{{ $coverUrl }}" alt="{{ ImageUploadService::altText($artist->name, 'Artist cover') }}" width="1600" height="900" class="h-full w-full object-cover opacity-45" loading="eager" decoding="async" fetchpriority="high">
-            <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/70 to-black"></div>
+            <img src="{{ $coverUrl }}" alt="{{ ImageUploadService::altText($artist->name, __('chapung.artist_store.label')) }}" width="1600" height="900" class="h-full w-full object-cover opacity-50" loading="eager" decoding="async" fetchpriority="high">
+            <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/70 to-black"></div>
         </div>
 
-        <div class="relative mx-auto grid min-h-[34rem] max-w-7xl content-end gap-8 px-4 pb-10 pt-28 sm:px-6 lg:grid-cols-[18rem_1fr] lg:px-8 lg:pb-14 lg:pt-36">
+        <div class="relative mx-auto grid min-h-[38rem] max-w-7xl content-end gap-8 px-4 pb-10 pt-28 sm:px-6 lg:grid-cols-[18rem_1fr] lg:px-8 lg:pb-14 lg:pt-36">
             <div class="w-44 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-950 p-2 shadow-2xl shadow-black/40 sm:w-56 lg:w-full">
                 @if ($profileUrl)
-                    <img src="{{ $profileUrl }}" alt="{{ ImageUploadService::altText($artist->name, 'Artist portrait') }}" width="800" height="1000" class="aspect-[4/5] w-full rounded-md object-cover" loading="eager" decoding="async">
+                    <img src="{{ $profileUrl }}" alt="{{ ImageUploadService::altText($artist->name, __('chapung.types.artist')) }}" width="800" height="1000" class="aspect-[4/5] w-full rounded-md object-cover" loading="eager" decoding="async">
                 @else
                     <div class="grid aspect-[4/5] w-full place-items-center rounded-md bg-[radial-gradient(circle_at_top,rgba(202,138,4,.22),transparent_20rem),#101010] text-5xl font-black text-yellow-600">{{ str($artist->name)->substr(0, 2)->upper() }}</div>
                 @endif
             </div>
 
-            <article class="max-w-4xl self-end">
-                <p class="text-xs font-black uppercase tracking-[0.32em] text-yellow-500">{{ $artist->origin_area ?: 'Chapung Art Artist' }}</p>
-                <h1 class="mt-4 text-4xl font-black uppercase leading-none tracking-tight text-white sm:text-6xl lg:text-7xl">{{ $artist->name }}</h1>
-                <p class="mt-5 max-w-3xl text-base leading-8 text-zinc-200 sm:text-xl">{{ $artist->specialization ?: 'Seni rupa, fotografi budaya, dan cerita visual Papua Selatan.' }}</p>
+            <article class="max-w-5xl self-end">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="rounded-full bg-yellow-600 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-black">{{ __('chapung.artist_store.label') }}</span>
+                    <span class="rounded-full border border-zinc-700 bg-black/40 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-zinc-200">{{ __('chapung.artist_store.verified') }}</span>
+                </div>
+                <h1 class="mt-5 text-4xl font-black uppercase leading-none tracking-tight text-white sm:text-6xl lg:text-7xl">{{ $artist->name }}</h1>
+                <p class="mt-4 max-w-3xl text-base leading-8 text-zinc-200 sm:text-xl">{{ $artist->specialization ?: __('chapung.home.artist_fallback') }}</p>
+                <p class="mt-3 inline-flex items-center gap-2 text-sm font-bold text-zinc-300">
+                    <x-heroicon-o-map-pin class="h-4 w-4 text-yellow-600" aria-hidden="true" />
+                    {{ $location }}
+                </p>
 
-                <dl class="mt-8 grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 lg:grid-cols-4">
-                    <div class="border-l border-yellow-600/70 pl-4">
-                        <dt class="text-xs uppercase tracking-[0.16em] text-zinc-500">Artwork</dt>
-                        <dd class="mt-1 text-lg font-black text-white">{{ number_format($artist->artworks_count) }}</dd>
-                    </div>
-                    <div class="border-l border-yellow-600/70 pl-4">
-                        <dt class="text-xs uppercase tracking-[0.16em] text-zinc-500">Photography</dt>
-                        <dd class="mt-1 text-lg font-black text-white">{{ number_format($artist->photographies_count) }}</dd>
-                    </div>
-                    <div class="border-l border-yellow-600/70 pl-4">
-                        <dt class="text-xs uppercase tracking-[0.16em] text-zinc-500">City</dt>
-                        <dd class="mt-1 font-bold text-white">{{ $artist->city ?: '-' }}</dd>
-                    </div>
-                    <div class="border-l border-yellow-600/70 pl-4">
-                        <dt class="text-xs uppercase tracking-[0.16em] text-zinc-500">Province</dt>
-                        <dd class="mt-1 font-bold text-white">{{ $artist->province ?: '-' }}</dd>
-                    </div>
-                </dl>
+                <div class="mt-8 flex flex-wrap gap-3">
+                    <a href="https://wa.me/{{ $whatsapp }}?text={{ $message }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 rounded-md bg-yellow-600 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black hover:bg-yellow-500">
+                        <x-heroicon-o-chat-bubble-left-right class="h-4 w-4" aria-hidden="true" />
+                        {{ __('chapung.artist_store.contact') }}
+                    </a>
+                    <button type="button" class="inline-flex items-center justify-center gap-2 rounded-md border border-zinc-700 bg-black/40 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-zinc-200 hover:border-yellow-600 hover:text-yellow-500" aria-pressed="false">
+                        <x-heroicon-o-heart class="h-4 w-4" aria-hidden="true" />
+                        {{ __('chapung.artist_store.follow') }}
+                    </button>
+                    @if ($artist->website)
+                        <a href="{{ $socialLinks->firstWhere('label', 'Website')['url'] ?? $artist->website }}" target="_blank" rel="nofollow noopener" class="inline-flex items-center justify-center gap-2 rounded-md border border-zinc-700 bg-black/40 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-zinc-200 hover:border-yellow-600 hover:text-yellow-500">
+                            <x-heroicon-o-globe-alt class="h-4 w-4" aria-hidden="true" />
+                            {{ __('chapung.artist_store.visit_website') }}
+                        </a>
+                    @endif
+                </div>
             </article>
         </div>
     </section>
 
+    <section class="border-b border-zinc-800 bg-zinc-950 px-4 py-6 sm:px-6 lg:px-8">
+        <dl class="mx-auto grid max-w-7xl gap-3 sm:grid-cols-2 lg:grid-cols-6">
+            <div class="rounded-lg border border-zinc-800 bg-black/40 p-4">
+                <dt class="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">{{ __('chapung.artist_store.available_artworks') }}</dt>
+                <dd class="mt-2 text-2xl font-black text-white">{{ number_format((int) $storefrontStats['available_artworks']) }}</dd>
+            </div>
+            <div class="rounded-lg border border-zinc-800 bg-black/40 p-4">
+                <dt class="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">{{ __('chapung.artist_store.collector_rating') }}</dt>
+                <dd class="mt-2 text-2xl font-black text-yellow-500">{{ number_format($rating, 1) }}</dd>
+            </div>
+            <div class="rounded-lg border border-zinc-800 bg-black/40 p-4">
+                <dt class="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">{{ __('chapung.artist_store.collector_reviews') }}</dt>
+                <dd class="mt-2 text-2xl font-black text-white">{{ number_format($reviewCount) }}</dd>
+            </div>
+            <div class="rounded-lg border border-zinc-800 bg-black/40 p-4">
+                <dt class="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">{{ __('chapung.artist_store.views') }}</dt>
+                <dd class="mt-2 text-2xl font-black text-white">{{ number_format((int) $storefrontStats['views_total']) }}</dd>
+            </div>
+            <div class="rounded-lg border border-zinc-800 bg-black/40 p-4">
+                <dt class="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">{{ __('chapung.artist_store.likes') }}</dt>
+                <dd class="mt-2 text-2xl font-black text-white">{{ number_format((int) $storefrontStats['likes_total']) }}</dd>
+            </div>
+            <div class="rounded-lg border border-zinc-800 bg-black/40 p-4">
+                <dt class="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">{{ __('chapung.artist_store.average_price') }}</dt>
+                <dd class="mt-2 text-xl font-black text-yellow-500">Rp {{ number_format((float) $storefrontStats['average_price'], 0, ',', '.') }}</dd>
+            </div>
+        </dl>
+    </section>
+
     <section class="border-b border-zinc-800 px-4 py-12 sm:px-6 lg:px-8">
-        <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1fr_22rem]">
-            <article>
-                <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-600">Biography</p>
+        <div class="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_24rem]">
+            <article class="rounded-lg border border-zinc-800 bg-zinc-950 p-6">
+                <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-600">{{ __('chapung.artist_store.bio') }}</p>
                 <div class="prose prose-invert mt-5 max-w-none prose-p:leading-8 prose-a:text-yellow-500">
-                    {!! $artist->bio ?: '<p>Bio artist belum tersedia.</p>' !!}
+                    {!! $artist->bio ?: '<p>'.e(__('chapung.artist_store.bio_empty')).'</p>' !!}
                 </div>
             </article>
 
-            <aside class="space-y-6 border-t border-zinc-800 pt-8 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.18em] text-zinc-500">Origin</p>
-                    <p class="mt-2 font-bold text-white">{{ $artist->origin_area ?: $artist->city ?: 'Papua Selatan' }}</p>
-                </div>
-                <div>
-                    <p class="text-xs uppercase tracking-[0.18em] text-zinc-500">Education</p>
-                    <p class="mt-2 text-zinc-300">{{ $artist->education ?: '-' }}</p>
-                </div>
-                <div>
-                    <p class="text-xs uppercase tracking-[0.18em] text-zinc-500">Website</p>
-                    @if ($artist->website)
-                        <a href="{{ $artist->website }}" rel="nofollow noopener" target="_blank" class="mt-2 inline-flex text-sm font-bold text-yellow-500 hover:text-yellow-400">{{ $artist->website }}</a>
-                    @else
-                        <p class="mt-2 text-zinc-300">-</p>
+            <aside class="rounded-lg border border-zinc-800 bg-zinc-950 p-6">
+                <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-600">{{ __('chapung.artist_store.store_info') }}</p>
+                <dl class="mt-5 space-y-4 text-sm">
+                    <div>
+                        <dt class="text-xs font-black uppercase tracking-[0.16em] text-zinc-500">{{ __('chapung.artist_store.origin') }}</dt>
+                        <dd class="mt-1 font-bold text-white">{{ $location }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-black uppercase tracking-[0.16em] text-zinc-500">{{ __('chapung.artist_store.specialization') }}</dt>
+                        <dd class="mt-1 text-zinc-300">{{ $artist->specialization ?: '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-black uppercase tracking-[0.16em] text-zinc-500">{{ __('chapung.artist_store.education') }}</dt>
+                        <dd class="mt-1 text-zinc-300">{{ $artist->education ?: '-' }}</dd>
+                    </div>
+                    @if ($artist->achievements)
+                        <div>
+                            <dt class="text-xs font-black uppercase tracking-[0.16em] text-zinc-500">{{ __('chapung.artist_store.achievements') }}</dt>
+                            <dd class="mt-1 whitespace-pre-line text-zinc-300">{{ $artist->achievements }}</dd>
+                        </div>
                     @endif
-                </div>
+                    @if ($artist->exhibitions)
+                        <div>
+                            <dt class="text-xs font-black uppercase tracking-[0.16em] text-zinc-500">{{ __('chapung.artist_store.exhibitions') }}</dt>
+                            <dd class="mt-1 whitespace-pre-line text-zinc-300">{{ $artist->exhibitions }}</dd>
+                        </div>
+                    @endif
+                    <div>
+                        <dt class="text-xs font-black uppercase tracking-[0.16em] text-zinc-500">{{ __('chapung.artist_store.member_since') }}</dt>
+                        <dd class="mt-1 text-zinc-300">{{ optional($artist->created_at)->format('Y') ?: '-' }}</dd>
+                    </div>
+                </dl>
+
+                @if ($socialLinks->isNotEmpty())
+                    <div class="mt-6 flex flex-wrap gap-2">
+                        @foreach ($socialLinks as $link)
+                            <a href="{{ $link['url'] }}" target="_blank" rel="nofollow noopener" class="rounded-md border border-zinc-800 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-zinc-300 hover:border-yellow-600 hover:text-yellow-500">{{ $link['label'] }}</a>
+                        @endforeach
+                    </div>
+                @endif
             </aside>
+        </div>
+    </section>
+
+    <section class="border-b border-zinc-800 px-4 py-12 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-600">{{ __('chapung.artist_store.reviews_title') }}</p>
+                    <h2 class="mt-2 text-2xl font-black uppercase tracking-tight text-white">{{ number_format($rating, 1) }} / 5.0</h2>
+                </div>
+                <p class="max-w-2xl text-sm leading-6 text-zinc-500">{{ __('chapung.artist_store.reviews_description') }}</p>
+            </div>
+
+            @if ($reviewSignals->count())
+                <div class="mt-6 grid gap-4 md:grid-cols-3">
+                    @foreach ($reviewSignals as $signal)
+                        @php($reviewArtwork = $signal->artwork)
+                        <article class="rounded-lg border border-zinc-800 bg-zinc-950 p-5">
+                            <div class="flex items-center gap-1 text-yellow-500" aria-hidden="true">
+                                @for ($star = 1; $star <= 5; $star++)
+                                    <x-heroicon-s-star class="h-4 w-4 {{ $star <= $signal->rating ? 'text-yellow-500' : 'text-zinc-700' }}" />
+                                @endfor
+                            </div>
+                            <h3 class="mt-4 text-lg font-black uppercase tracking-tight text-white">{{ $signal->title ?: ($reviewArtwork?->title ?? __('chapung.reviews.default_title')) }}</h3>
+                            <p class="mt-2 text-sm leading-6 text-zinc-400">{{ str($signal->body)->limit(150) }}</p>
+                            @if ($reviewArtwork)
+                                <a href="{{ route('artwork.show', $reviewArtwork->slug) }}" class="mt-4 inline-flex text-xs font-black uppercase tracking-[0.16em] text-yellow-500 hover:text-yellow-400">{{ __('chapung.artist_store.view_store_item') }}</a>
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+            @else
+                <div class="mt-6">@include('partials.public.empty-state', ['label' => __('chapung.artist_store.collector_reviews'), 'title' => __('chapung.artist_store.review_empty')])</div>
+            @endif
         </div>
     </section>
 
@@ -115,31 +225,31 @@
             <div>
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-600">Selected Work</p>
-                        <h2 class="mt-2 text-2xl font-black uppercase tracking-tight text-white">Artwork</h2>
+                        <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-600">{{ __('chapung.artist_store.selected_work') }}</p>
+                        <h2 class="mt-2 text-2xl font-black uppercase tracking-tight text-white">{{ __('chapung.artist_store.all_artworks') }}</h2>
                     </div>
-                    <p class="text-sm text-zinc-500">{{ number_format($artworks->total()) }} karya</p>
+                    <p class="text-sm text-zinc-500">{{ __('chapung.artist_store.artwork_count', ['count' => number_format($artworks->total())]) }}</p>
                 </div>
 
                 @if ($artworks->count())
-                    <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
                         @foreach ($artworks as $artwork)
                             @include('partials.public.artwork-card', ['artwork' => $artwork])
                         @endforeach
                     </div>
                     <div class="mt-8">{{ $artworks->links() }}</div>
                 @else
-                    <div class="mt-6">@include('partials.public.empty-state', ['label' => 'Artwork', 'title' => 'Belum ada artwork'])</div>
+                    <div class="mt-6">@include('partials.public.empty-state', ['label' => __('chapung.types.artwork'), 'title' => __('chapung.common.empty_title')])</div>
                 @endif
             </div>
 
             <div>
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-600">Curated Series</p>
-                        <h2 class="mt-2 text-2xl font-black uppercase tracking-tight text-white">Collections</h2>
+                        <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-600">{{ __('chapung.artist_store.curated_series') }}</p>
+                        <h2 class="mt-2 text-2xl font-black uppercase tracking-tight text-white">{{ __('chapung.types.collections') }}</h2>
                     </div>
-                    <p class="text-sm text-zinc-500">{{ number_format($collections->total()) }} collection</p>
+                    <p class="text-sm text-zinc-500">{{ __('chapung.artist_store.collection_count', ['count' => number_format($collections->total())]) }}</p>
                 </div>
 
                 @if ($collections->count())
@@ -151,15 +261,15 @@
                                     @include('partials.public.image', [
                                         'path' => $collectionImage,
                                         'alt' => $collection->name,
-                                        'label' => 'Collection',
+                                        'label' => __('chapung.types.collection'),
                                         'ratio' => 'aspect-[16/10]',
                                         'width' => 960,
                                         'height' => 600,
                                     ])
                                     <div class="p-2 pt-4">
                                         <h3 class="text-lg font-black uppercase tracking-tight text-white">{{ $collection->name }}</h3>
-                                        <p class="mt-2 line-clamp-2 text-sm leading-6 text-zinc-400">{{ $collection->description ?: 'Kurasi karya Chapung Art.' }}</p>
-                                        <p class="mt-4 text-xs font-black uppercase tracking-[0.16em] text-yellow-600">{{ $collection->artworks_count }} artwork</p>
+                                        <p class="mt-2 text-sm leading-6 text-zinc-400" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ $collection->description ?: __('chapung.home.collection_fallback') }}</p>
+                                        <p class="mt-4 text-xs font-black uppercase tracking-[0.16em] text-yellow-600">{{ __('chapung.artist_store.artwork_count', ['count' => number_format($collection->artworks_count)]) }}</p>
                                     </div>
                                 </a>
                             </article>
@@ -167,28 +277,28 @@
                     </div>
                     <div class="mt-8">{{ $collections->links() }}</div>
                 @else
-                    <div class="mt-6">@include('partials.public.empty-state', ['label' => 'Collections', 'title' => 'Belum ada collection untuk artist ini'])</div>
+                    <div class="mt-6">@include('partials.public.empty-state', ['label' => __('chapung.types.collections'), 'title' => __('chapung.common.empty_title')])</div>
                 @endif
             </div>
 
             <div>
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-600">Visual Archive</p>
-                        <h2 class="mt-2 text-2xl font-black uppercase tracking-tight text-white">Photography</h2>
+                        <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-600">{{ __('chapung.artist_store.visual_archive') }}</p>
+                        <h2 class="mt-2 text-2xl font-black uppercase tracking-tight text-white">{{ __('chapung.types.photography') }}</h2>
                     </div>
-                    <p class="text-sm text-zinc-500">{{ number_format($photographies->total()) }} foto</p>
+                    <p class="text-sm text-zinc-500">{{ __('chapung.artist_store.photo_count', ['count' => number_format($photographies->total())]) }}</p>
                 </div>
 
                 @if ($photographies->count())
-                    <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
                         @foreach ($photographies as $photo)
                             @include('partials.public.photography-card', ['photo' => $photo])
                         @endforeach
                     </div>
                     <div class="mt-8">{{ $photographies->links() }}</div>
                 @else
-                    <div class="mt-6">@include('partials.public.empty-state', ['label' => 'Photography', 'title' => 'Belum ada photography'])</div>
+                    <div class="mt-6">@include('partials.public.empty-state', ['label' => __('chapung.types.photography'), 'title' => __('chapung.common.empty_title')])</div>
                 @endif
             </div>
         </div>

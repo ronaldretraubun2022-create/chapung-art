@@ -65,13 +65,21 @@ test('customer owner can view branded html invoice', function () {
     $order = invoiceOrder($user);
 
     $this->actingAs($user)
+        ->withSession(['locale' => 'en'])
         ->get(route('invoice.show', $order))
         ->assertOk()
         ->assertSee('Chapung Art')
         ->assertSee($order->invoice_number)
         ->assertSee($order->order_number)
         ->assertSee('Invoice Artwork')
-        ->assertSee('Download PDF');
+        ->assertSee('Download PDF')
+        ->assertSee('4000202029294')
+        ->assertSee('BANK PAPUA')
+        ->assertSee('8316008181')
+        ->assertSee('Bank BCA')
+        ->assertSee('JL SESATE NO 242 RT.007 RW.002 BAMBU PEMALI')
+        ->assertSee('0813-4400-1427')
+        ->assertSee('0813-9226-9774');
 });
 
 test('other authenticated customer cannot access invoice', function () {
@@ -101,6 +109,10 @@ test('customer owner can download pdf invoice safely', function () {
     expect($response->headers->get('Content-Disposition'))->toContain($order->invoice_number.'.pdf')
         ->and($response->getContent())->toStartWith('%PDF-1.4')
         ->and($response->getContent())->toContain($order->invoice_number)
+        ->and($response->getContent())->toContain('4000202029294')
+        ->and($response->getContent())->toContain('8316008181')
+        ->and($response->getContent())->toContain('0813-4400-1427')
+        ->and($response->getContent())->toContain('0813-9226-9774')
         ->and($response->getContent())->toContain('Chapung Art');
 });
 

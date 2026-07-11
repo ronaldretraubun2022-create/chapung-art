@@ -30,11 +30,31 @@ class Shipment extends Model
     {
         static::saved(function (Shipment $shipment): void {
             if ($shipment->status === 'shipped' && $shipment->order) {
-                $shipment->order->forceFill(['status' => 'shipped'])->saveQuietly();
+                $order = $shipment->order;
+                $previousStatus = $order->status;
+                $order->forceFill(['status' => 'shipped'])->saveQuietly();
+
+                if ($previousStatus !== 'shipped') {
+                    $order->recordStatusHistory(
+                        'Order dikirim melalui shipment #'.$shipment->id.'.',
+                        'shipment',
+                        statusFrom: $previousStatus,
+                    );
+                }
             }
 
             if ($shipment->status === 'delivered' && $shipment->order) {
-                $shipment->order->forceFill(['status' => 'completed'])->saveQuietly();
+                $order = $shipment->order;
+                $previousStatus = $order->status;
+                $order->forceFill(['status' => 'completed'])->saveQuietly();
+
+                if ($previousStatus !== 'completed') {
+                    $order->recordStatusHistory(
+                        'Order selesai dari shipment #'.$shipment->id.'.',
+                        'shipment',
+                        statusFrom: $previousStatus,
+                    );
+                }
             }
         });
     }

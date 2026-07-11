@@ -17,13 +17,13 @@
     <main class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         <div class="no-print mb-5 flex flex-wrap items-center justify-between gap-3">
             <a href="{{ route('checkout.success', $order->order_number) }}" class="text-sm font-bold text-zinc-600 hover:text-zinc-950">Back to order</a>
-            <a href="{{ route('invoice.download', $order) }}" class="rounded-md bg-yellow-600 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black hover:bg-yellow-500">Download PDF</a>
+            <a href="{{ route('invoice.download', $order) }}" class="rounded-md bg-yellow-600 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black hover:bg-yellow-500">{{ __('chapung.pages.invoice.download_pdf') }}</a>
         </div>
 
         <article class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-zinc-200 sm:p-10">
             <header class="flex flex-col gap-8 border-b border-zinc-200 pb-8 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-700">Invoice</p>
+                    <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-700">{{ __('chapung.pages.invoice.title') }}</p>
                     <h1 class="mt-3 text-3xl font-black uppercase tracking-tight text-zinc-950">{{ $order->invoice_number }}</h1>
                     <p class="mt-2 text-sm text-zinc-500">Order {{ $order->order_number }}</p>
                     <p class="mt-1 text-sm text-zinc-500">Issued {{ optional($order->invoiced_at)->format('d M Y H:i') }}</p>
@@ -48,7 +48,7 @@
                     <p class="text-sm text-zinc-600">{{ $order->customer_phone ?: '-' }}</p>
                 </div>
                 <div>
-                    <p class="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">Status</p>
+                    <p class="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">{{ __('chapung.pages.order.status') }}</p>
                     <div class="mt-3 grid gap-2 text-sm text-zinc-600">
                         <p><span class="font-bold text-zinc-950">Order:</span> {{ ucfirst($order->status) }}</p>
                         <p><span class="font-bold text-zinc-950">Payment:</span> {{ ucfirst($order->payment_status) }}</p>
@@ -62,9 +62,9 @@
                         <thead class="border-b border-zinc-200 text-xs uppercase tracking-[0.14em] text-zinc-500">
                             <tr>
                                 <th class="py-3 pr-4">Item</th>
-                                <th class="py-3 pr-4 text-right">Price</th>
+                                <th class="py-3 pr-4 text-right">{{ __('chapung.pages.invoice.price') }}</th>
                                 <th class="py-3 pr-4 text-right">Qty</th>
-                                <th class="py-3 text-right">Total</th>
+                                <th class="py-3 text-right">{{ __('chapung.pages.cart.total') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-zinc-100">
@@ -82,12 +82,17 @@
             </section>
 
             <footer class="grid gap-8 border-t border-zinc-200 pt-8 sm:grid-cols-[1fr_320px]">
-                <p class="text-sm leading-7 text-zinc-500">Terima kasih telah mendukung karya seni dan dokumentasi budaya Papua Selatan bersama Chapung Art.</p>
+                <div>
+                    <p class="text-sm leading-7 text-zinc-500">{{ __('chapung.pages.invoice.thank_you') }}</p>
+                    <div class="mt-6">
+                        @include('partials.public.payment-information', ['variant' => 'light', 'address' => $site_address, 'bankAccounts' => $bank_accounts ?? site_bank_accounts()])
+                    </div>
+                </div>
                 <div class="space-y-3 text-sm">
-                    <div class="flex justify-between gap-4 text-zinc-600"><span>Subtotal</span><strong>Rp {{ number_format((float) $order->subtotal, 0, ',', '.') }}</strong></div>
+                    <div class="flex justify-between gap-4 text-zinc-600"><span>{{ __('chapung.pages.cart.subtotal') }}</span><strong>Rp {{ number_format((float) $order->subtotal, 0, ',', '.') }}</strong></div>
                     <div class="flex justify-between gap-4 text-zinc-600"><span>Discount</span><strong>Rp {{ number_format((float) $order->discount_total, 0, ',', '.') }}</strong></div>
                     <div class="flex justify-between gap-4 text-zinc-600"><span>Shipping</span><strong>Rp {{ number_format((float) $order->shipping_total, 0, ',', '.') }}</strong></div>
-                    <div class="flex justify-between gap-4 border-t border-zinc-200 pt-3 text-lg font-black text-zinc-950"><span>Total</span><strong>Rp {{ number_format((float) $order->grand_total, 0, ',', '.') }}</strong></div>
+                    <div class="flex justify-between gap-4 border-t border-zinc-200 pt-3 text-lg font-black text-zinc-950"><span>{{ __('chapung.pages.cart.total') }}</span><strong>Rp {{ number_format((float) $order->grand_total, 0, ',', '.') }}</strong></div>
                 </div>
             </footer>
         </article>

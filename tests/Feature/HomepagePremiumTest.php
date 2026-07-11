@@ -81,7 +81,8 @@ test('premium homepage renders hero featured content seo and lazy images', funct
         'thumbnail' => 'posts/cerita.jpg',
     ]));
 
-    $this->get(route('home'))
+    $this->withSession(['locale' => 'en'])
+        ->get(route('home'))
         ->assertOk()
         ->assertSee('CHAPUNG ART')
         ->assertSee('Featured Artwork')

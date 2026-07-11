@@ -166,6 +166,104 @@ const initGlobalSearch = () => {
     });
 };
 
+const updateFavoriteCounts = (count) => {
+    document.querySelectorAll('[data-favorite-count]').forEach((badge) => {
+        const nextCount = Number(count) || 0;
+        const format = badge.dataset.favoriteCountFormat || 'plain';
+
+        badge.textContent = format === 'paren' ? `(${nextCount})` : `${nextCount}`;
+        badge.classList.toggle('hidden', nextCount < 1);
+    });
+};
+
+const setFavoriteState = (form, favorited) => {
+    const button = form.querySelector('[data-favorite-button]');
+    const method = form.querySelector('[data-favorite-method]');
+    const label = form.querySelector('[data-favorite-label]');
+    const addLabel = form.dataset.addLabel || 'Add Favorite';
+    const removeLabel = form.dataset.removeLabel || 'Remove Favorite';
+    const nextLabel = favorited ? removeLabel : addLabel;
+
+    form.dataset.favorited = favorited ? 'true' : 'false';
+    form.action = favorited ? form.dataset.destroyUrl : form.dataset.storeUrl;
+
+    if (method) {
+        method.value = favorited ? 'DELETE' : 'POST';
+    }
+
+    if (button) {
+        button.setAttribute('aria-pressed', favorited ? 'true' : 'false');
+        button.setAttribute('aria-label', nextLabel);
+        button.classList.toggle('border-yellow-500', favorited);
+        button.classList.toggle('bg-yellow-600', favorited);
+        button.classList.toggle('text-black', favorited);
+    }
+
+    if (label) {
+        label.textContent = nextLabel;
+    }
+};
+
+const syncFavoriteState = (slug, favorited) => {
+    document.querySelectorAll(`[data-favorite-form][data-artwork-slug="${CSS.escape(slug)}"]`).forEach((form) => {
+        setFavoriteState(form, favorited);
+    });
+
+    if (! favorited && window.location.pathname === '/favorites') {
+        document.querySelectorAll(`[data-favorite-card][data-artwork-slug="${CSS.escape(slug)}"]`).forEach((card) => {
+            card.remove();
+        });
+    }
+};
+
+const initFavorites = () => {
+    document.querySelectorAll('[data-favorite-form]').forEach((form) => {
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const button = form.querySelector('[data-favorite-button]');
+            const method = form.querySelector('[data-favorite-method]')?.value || 'POST';
+            const slug = form.dataset.artworkSlug;
+
+            if (! slug) {
+                form.submit();
+                return;
+            }
+
+            button?.setAttribute('disabled', 'disabled');
+
+            try {
+                const response = await fetch(form.action, {
+                    method,
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    },
+                });
+
+                if (response.status === 401 || response.redirected) {
+                    window.location.href = response.url || '/login';
+                    return;
+                }
+
+                if (! response.ok) {
+                    throw new Error('Favorite request failed.');
+                }
+
+                const payload = await response.json();
+                syncFavoriteState(slug, Boolean(payload.favorited));
+                updateFavoriteCounts(payload.count);
+            } catch (error) {
+                form.submit();
+            } finally {
+                button?.removeAttribute('disabled');
+            }
+        });
+    });
+};
+
 document.addEventListener('DOMContentLoaded', initGlobalSearch);
+document.addEventListener('DOMContentLoaded', initFavorites);
 
 Alpine.start();

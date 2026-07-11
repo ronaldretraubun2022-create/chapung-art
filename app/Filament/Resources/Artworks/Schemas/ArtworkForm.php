@@ -6,6 +6,7 @@ use App\Models\Artist;
 use App\Models\Category;
 use App\Models\Collection;
 use App\Models\Tag;
+use App\Services\DigitalDownloadService;
 use App\Services\ImageUploadService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
@@ -275,6 +276,32 @@ class ArtworkForm
                                         'commercial' => 'Commercial Use',
                                     ])
                                     ->nullable(),
+                            ]),
+                    ]),
+
+                Section::make('Digital Download')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                Toggle::make('digital_download_enabled')
+                                    ->label('Aktifkan Download Digital')
+                                    ->helperText('File disimpan di private storage dan hanya dapat diunduh oleh pembeli terotorisasi.')
+                                    ->default(false),
+
+                                FileUpload::make('digital_file_path')
+                                    ->label('File Digital Private')
+                                    ->disk('local')
+                                    ->directory('artworks/digital')
+                                    ->visibility('private')
+                                    ->acceptedFileTypes(DigitalDownloadService::allowedMimeTypes())
+                                    ->maxSize(DigitalDownloadService::maxKilobytes())
+                                    ->storeFileNamesIn('digital_file_name')
+                                    ->getUploadedFileNameForStorageUsing(fn ($file): string => app(DigitalDownloadService::class)->uniqueFileName($file))
+                                    ->saveUploadedFileUsing(fn ($component, $file): ?string => app(DigitalDownloadService::class)->storeFilamentUpload($component, $file))
+                                    ->deleteUploadedFileUsing(fn (?string $file): mixed => app(DigitalDownloadService::class)->delete($file))
+                                    ->helperText('Format aman: PDF, JPEG, PNG, WebP. Jangan unggah ZIP, executable, atau file master yang tidak untuk pembeli.')
+                                    ->nullable()
+                                    ->columnSpan(2),
                             ]),
                     ]),
 
