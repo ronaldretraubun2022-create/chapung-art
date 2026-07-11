@@ -20,6 +20,8 @@ test('homepage can be rendered without serialized eloquent collection errors', f
 test('premium homepage renders hero featured content seo and lazy images', function () {
     Cache::flush();
 
+    $t = fn (string $key, array $replace = []): string => trans($key, $replace, 'en');
+
     HomepageSection::updateOrCreate(
         ['section_key' => 'hero'],
         [
@@ -84,21 +86,31 @@ test('premium homepage renders hero featured content seo and lazy images', funct
     $this->withSession(['locale' => 'en'])
         ->get(route('home'))
         ->assertOk()
-        ->assertSee('CHAPUNG ART')
-        ->assertSee('Featured Artwork')
-        ->assertSee('Langit Wasur')
-        ->assertSee('Featured Artist')
-        ->assertSee('Agnes Mahuze')
-        ->assertSee('Collections')
-        ->assertSee('Rawa Selatan')
-        ->assertSee('Photography')
-        ->assertSee('Pagi di Maro')
-        ->assertSee('News')
-        ->assertSee('Cerita Visual Merauke')
-        ->assertSee('Explore Gallery')
-        ->assertSee('<meta property="og:image" content="'.asset('storage/homepage/hero.jpg').'">', false)
+        ->assertSeeText($t('chapung.home.hero_marketplace'))
+        ->assertSeeText('Langit Wasur')
+        ->assertSee(route('artwork.show', 'langit-wasur'), false)
+        ->assertSeeText($t('chapung.home.latest_artworks'))
+        ->assertSeeText($t('chapung.home.featured_artist'))
+        ->assertSeeText($t('chapung.home.selected_artists'))
+        ->assertSeeText('Agnes Mahuze')
+        ->assertSee(route('artists.show', 'agnes-mahuze'), false)
+        ->assertSeeText($t('chapung.home.collections'))
+        ->assertSeeText($t('chapung.home.artwork_collections'))
+        ->assertSeeText('Rawa Selatan')
+        ->assertSee(route('collections.show', 'rawa-selatan'), false)
+        ->assertSeeText($t('chapung.home.photography'))
+        ->assertSeeText($t('chapung.home.photography_digital'))
+        ->assertSeeText('Pagi di Maro')
+        ->assertSee(route('photography.index'), false)
+        ->assertSeeText($t('chapung.home.news'))
+        ->assertSeeText($t('chapung.home.supporting_updates'))
+        ->assertSeeText('Cerita Visual Merauke')
+        ->assertSee(route('news.index'), false)
+        ->assertSeeText($t('chapung.home.explore_gallery'))
+        ->assertSee('<meta property="og:image" content="'.asset('storage/artworks/langit.jpg').'">', false)
         ->assertSee('<script type="application/ld+json">', false)
+        ->assertSee('"@type":"WebSite"', false)
         ->assertSee('loading="lazy"', false)
-        ->assertSee(route('gallery'), false)
+        ->assertSee(route('artworks.index'), false)
         ->assertSee(route('contact'), false);
 });
