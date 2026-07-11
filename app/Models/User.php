@@ -23,6 +23,19 @@ class User extends Authenticatable implements FilamentUser
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
 
+    private const PANEL_ROLES = [
+        'Super Admin',
+        'Pengelola Karya',
+        'Pengelola Transaksi',
+        'Pengelola Konten',
+        'Operator Viewer',
+        'Administrator',
+        'Curator',
+        'Artist',
+        'Photographer',
+        'Journalist',
+    ];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -47,14 +60,7 @@ class User extends Authenticatable implements FilamentUser
             return false;
         }
 
-        if ($this->hasAnyRole([
-            'Super Admin',
-            'Administrator',
-            'Curator',
-            'Artist',
-            'Photographer',
-            'Journalist',
-        ])) {
+        if ($this->hasAnyRole(self::PANEL_ROLES)) {
             return $this->isConfiguredAdmin();
         }
 

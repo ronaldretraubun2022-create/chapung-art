@@ -12,6 +12,10 @@ class RolePermissionSeeder extends Seeder
 {
     private const ROLES = [
         'Super Admin',
+        'Pengelola Karya',
+        'Pengelola Transaksi',
+        'Pengelola Konten',
+        'Operator Viewer',
         'Administrator',
         'Curator',
         'Artist',
@@ -73,11 +77,15 @@ class RolePermissionSeeder extends Seeder
         }
 
         Role::findByName('Super Admin', 'web')->syncPermissions(Permission::all());
+        Role::findByName('Pengelola Karya', 'web')->syncPermissions($this->artworkManagerPermissions());
+        Role::findByName('Pengelola Transaksi', 'web')->syncPermissions($this->transactionManagerPermissions());
+        Role::findByName('Pengelola Konten', 'web')->syncPermissions($this->contentManagerPermissions());
+        Role::findByName('Operator Viewer', 'web')->syncPermissions($this->viewerPermissions());
         Role::findByName('Administrator', 'web')->syncPermissions($this->administratorPermissions());
-        Role::findByName('Curator', 'web')->syncPermissions($this->curatorPermissions());
-        Role::findByName('Artist', 'web')->syncPermissions($this->artistPermissions());
-        Role::findByName('Photographer', 'web')->syncPermissions($this->photographerPermissions());
-        Role::findByName('Journalist', 'web')->syncPermissions($this->journalistPermissions());
+        Role::findByName('Curator', 'web')->syncPermissions($this->artworkManagerPermissions());
+        Role::findByName('Artist', 'web')->syncPermissions($this->legacyArtistPermissions());
+        Role::findByName('Photographer', 'web')->syncPermissions($this->legacyPhotographerPermissions());
+        Role::findByName('Journalist', 'web')->syncPermissions($this->contentManagerPermissions());
         Role::findByName('Customer', 'web')->syncPermissions([]);
 
         $adminEmails = collect(config('chapung.admin_emails', []));
@@ -122,7 +130,7 @@ class RolePermissionSeeder extends Seeder
     /**
      * @return array<int, string>
      */
-    private function curatorPermissions(): array
+    private function artworkManagerPermissions(): array
     {
         return $this->permissionsFor([
             'artist',
@@ -141,7 +149,68 @@ class RolePermissionSeeder extends Seeder
     /**
      * @return array<int, string>
      */
-    private function artistPermissions(): array
+    private function transactionManagerPermissions(): array
+    {
+        return $this->permissionsFor([
+            'certificate',
+            'customer',
+            'order',
+            'payment',
+            'report',
+            'shipment',
+        ]);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function contentManagerPermissions(): array
+    {
+        return $this->permissionsFor([
+            'category',
+            'exhibition',
+            'homepage_section',
+            'media_item',
+            'post',
+            'seo_meta',
+            'tag',
+        ]);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function viewerPermissions(): array
+    {
+        return $this->permissionsFor([
+            'activity_log',
+            'artist',
+            'artwork',
+            'artwork_review',
+            'category',
+            'certificate',
+            'collection',
+            'customer',
+            'exhibition',
+            'homepage_section',
+            'media_item',
+            'order',
+            'page_view',
+            'payment',
+            'photography',
+            'post',
+            'report',
+            'seo_meta',
+            'shipment',
+            'site_setting',
+            'tag',
+        ], ['view_any', 'view']);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function legacyArtistPermissions(): array
     {
         return $this->permissionsFor([
             'artwork',
@@ -156,7 +225,7 @@ class RolePermissionSeeder extends Seeder
     /**
      * @return array<int, string>
      */
-    private function photographerPermissions(): array
+    private function legacyPhotographerPermissions(): array
     {
         return $this->permissionsFor([
             'collection',
@@ -167,28 +236,16 @@ class RolePermissionSeeder extends Seeder
     }
 
     /**
-     * @return array<int, string>
-     */
-    private function journalistPermissions(): array
-    {
-        return $this->permissionsFor([
-            'category',
-            'media_item',
-            'post',
-            'tag',
-        ]);
-    }
-
-    /**
      * @param  array<int, string>  $resources
+     * @param  array<int, string>  $actions
      * @return array<int, string>
      */
-    private function permissionsFor(array $resources): array
+    private function permissionsFor(array $resources, array $actions = self::ACTIONS): array
     {
         $permissions = [];
 
         foreach ($resources as $resource) {
-            foreach (self::ACTIONS as $action) {
+            foreach ($actions as $action) {
                 $permissions[] = $action.' '.$resource;
             }
         }

@@ -9,9 +9,12 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Spatie\Permission\Models\Role;
+use Throwable;
 
 class RegisteredUserController extends Controller
 {
@@ -42,10 +45,27 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        $this->assignCustomerRole($user);
+
         event(new Registered($user));
 
         Auth::login($user);
 
         return redirect(route('dashboard', absolute: false));
+    }
+
+    private function assignCustomerRole(User $user): void
+    {
+        try {
+            if (! Schema::hasTable(config('permission.table_names.roles', 'roles'))) {
+                return;
+            }
+
+            if (Role::query()->where('name', 'Customer')->where('guard_name', 'web')->exists()) {
+                $user->assignRole('Customer');
+            }
+        } catch (Throwable) {
+            // Registration must remain available during fresh installs before role seeding runs.
+        }
     }
 }

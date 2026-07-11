@@ -9,6 +9,8 @@ $adminEmails = array_values(array_filter(array_map(
     explode(',', (string) env('ADMIN_EMAILS', 'admin@chapungart.com')),
 )));
 
+$adminEmails = array_slice(array_values(array_unique($adminEmails)), 0, 5);
+
 return [
     'admin_emails' => $adminEmails,
 
