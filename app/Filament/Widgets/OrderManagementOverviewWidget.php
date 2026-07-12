@@ -13,20 +13,20 @@ class OrderManagementOverviewWidget extends StatsOverviewWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Pending Orders', number_format(Order::query()->where('status', 'pending')->count()))
-                ->description('Order baru menunggu konfirmasi')
+            Stat::make(__('admin.stats.pending_orders'), number_format(Order::query()->where('status', 'pending')->count()))
+                ->description(__('admin.stats.pending_orders_description'))
                 ->color('gray'),
 
-            Stat::make('Paid Orders', number_format(Order::query()->where('payment_status', 'paid')->count()))
-                ->description('Pembayaran sudah diverifikasi')
+            Stat::make(__('admin.stats.paid_orders'), number_format(Order::query()->where('payment_status', 'paid')->count()))
+                ->description(__('admin.stats.paid_orders_description'))
                 ->color('success'),
 
-            Stat::make('In Fulfillment', number_format(Order::query()->whereIn('status', ['confirmed', 'processing', 'shipped'])->count()))
-                ->description('Order sedang diproses atau dikirim')
+            Stat::make(__('admin.stats.in_fulfillment'), number_format(Order::query()->whereIn('status', ['confirmed', 'processing', 'shipped'])->count()))
+                ->description(__('admin.stats.in_fulfillment_description'))
                 ->color('warning'),
 
-            Stat::make('Paid Revenue', 'Rp '.number_format((float) Order::query()->where('payment_status', 'paid')->sum('grand_total'), 0, ',', '.'))
-                ->description('Total nilai order paid')
+            Stat::make(__('admin.stats.paid_revenue'), 'Rp '.number_format((float) Order::query()->where('payment_status', 'paid')->sum('grand_total'), 0, ',', '.'))
+                ->description(__('admin.stats.paid_revenue_description'))
                 ->color('info'),
         ];
     }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\SeoMetaResource\Pages;
 use App\Models\Artwork;
 use App\Models\Category;
@@ -10,6 +11,9 @@ use App\Models\Post;
 use App\Models\SeoMeta;
 use App\Services\ImageUploadService;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -21,16 +25,24 @@ use UnitEnum;
 
 class SeoMetaResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = SeoMeta::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-magnifying-glass-circle';
+
     protected static ?string $navigationLabel = 'SEO Manager';
+
     protected static ?string $modelLabel = 'SEO Meta';
+
     protected static ?string $pluralModelLabel = 'SEO Metas';
+
     protected static ?string $recordTitleAttribute = 'meta_title';
+
     protected static string|UnitEnum|null $navigationGroup = 'CMS';
+
     protected static ?int $navigationSort = 30;
 
     public static function form(Schema $schema): Schema
@@ -176,14 +188,14 @@ class SeoMetaResource extends Resource
                 Tables\Filters\SelectFilter::make('seoable_type')
                     ->options(self::seoableTypeOptions()),
             ])
-            ->emptyStateHeading('Belum ada SEO meta')
-            ->emptyStateDescription('Tambahkan SEO meta untuk route atau konten tertentu.')
+            ->emptyStateHeading(__('admin.empty_states.seo_meta_heading'))
+            ->emptyStateDescription(__('admin.empty_states.seo_meta_description'))
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('updated_at', 'desc');
     }

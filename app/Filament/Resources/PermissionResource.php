@@ -2,8 +2,12 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\PermissionResource\Pages;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -16,16 +20,24 @@ use UnitEnum;
 
 class PermissionResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = Permission::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-key';
+
     protected static ?string $navigationLabel = 'Permissions';
+
     protected static ?string $modelLabel = 'Permission';
+
     protected static ?string $pluralModelLabel = 'Permissions';
+
     protected static ?string $recordTitleAttribute = 'name';
+
     protected static string|UnitEnum|null $navigationGroup = 'System';
+
     protected static ?int $navigationSort = 30;
 
     public static function form(Schema $schema): Schema
@@ -83,14 +95,14 @@ class PermissionResource extends Resource
                     ->label('Guard')
                     ->options(['web' => 'web']),
             ])
-            ->emptyStateHeading('Belum ada permission')
-            ->emptyStateDescription('Permission digunakan untuk membatasi menu dan aksi CMS.')
+            ->emptyStateHeading(__('admin.empty_states.permissions_heading'))
+            ->emptyStateDescription(__('admin.empty_states.permissions_description'))
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('name');
     }

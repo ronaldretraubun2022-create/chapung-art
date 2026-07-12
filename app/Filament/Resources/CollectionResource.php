@@ -2,10 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\CollectionResource\Pages;
 use App\Models\Collection;
 use App\Services\ImageUploadService;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -18,16 +22,24 @@ use UnitEnum;
 
 class CollectionResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = Collection::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-squares-2x2';
+
     protected static ?string $navigationLabel = 'Collections';
+
     protected static ?string $modelLabel = 'Collection';
+
     protected static ?string $pluralModelLabel = 'Collections';
+
     protected static ?string $recordTitleAttribute = 'name';
+
     protected static string|UnitEnum|null $navigationGroup = 'Marketplace';
+
     protected static ?int $navigationSort = 20;
 
     public static function form(Schema $schema): Schema
@@ -163,14 +175,14 @@ class CollectionResource extends Resource
                 Tables\Filters\TernaryFilter::make('is_featured')
                     ->label('Featured'),
             ])
-            ->emptyStateHeading('Belum ada collection')
-            ->emptyStateDescription('Tambahkan collection untuk mengelompokkan artwork dan photography.')
+            ->emptyStateHeading(__('admin.empty_states.collections_heading'))
+            ->emptyStateDescription(__('admin.empty_states.collections_description'))
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('created_at', 'desc');
     }

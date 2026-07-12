@@ -2,9 +2,13 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\TagResource\Pages;
 use App\Models\Tag;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -17,16 +21,24 @@ use UnitEnum;
 
 class TagResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = Tag::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-hashtag';
+
     protected static ?string $navigationLabel = 'Tags';
+
     protected static ?string $modelLabel = 'Tag';
+
     protected static ?string $pluralModelLabel = 'Tags';
+
     protected static ?string $recordTitleAttribute = 'name';
+
     protected static string|UnitEnum|null $navigationGroup = 'Marketplace';
+
     protected static ?int $navigationSort = 30;
 
     public static function form(Schema $schema): Schema
@@ -138,14 +150,14 @@ class TagResource extends Resource
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Active'),
             ])
-            ->emptyStateHeading('Belum ada tag')
-            ->emptyStateDescription('Tambahkan tag untuk menghubungkan artwork, photography, dan post.')
+            ->emptyStateHeading(__('admin.empty_states.tags_heading'))
+            ->emptyStateDescription(__('admin.empty_states.tags_description'))
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('name');
     }

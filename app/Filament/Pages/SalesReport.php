@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Pages\Concerns\InteractsWithReportFilters;
 use App\Models\Order;
 use BackedEnum;
@@ -13,6 +14,7 @@ use UnitEnum;
 
 class SalesReport extends Page
 {
+    use HasLocalizedNavigation;
     use InteractsWithReportFilters;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-banknotes';
@@ -43,11 +45,16 @@ class SalesReport extends Page
     {
         return [
             Action::make('exportCsv')
-                ->label('Export CSV')
+                ->label(__('admin.actions.export_csv'))
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('gray')
                 ->action('exportCsv'),
         ];
+    }
+
+    public function getTitle(): string
+    {
+        return __('admin.navigation.resources.sales_report');
     }
 
     /**

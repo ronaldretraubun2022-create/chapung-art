@@ -2,8 +2,11 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\RoleResource\Pages;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -18,16 +21,24 @@ use UnitEnum;
 
 class RoleResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = Role::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-shield-check';
+
     protected static ?string $navigationLabel = 'Roles';
+
     protected static ?string $modelLabel = 'Role';
+
     protected static ?string $pluralModelLabel = 'Roles';
+
     protected static ?string $recordTitleAttribute = 'name';
+
     protected static string|UnitEnum|null $navigationGroup = 'System';
+
     protected static ?int $navigationSort = 20;
 
     public static function canDelete(Model $record): bool
@@ -107,11 +118,11 @@ class RoleResource extends Resource
                     ->label('Guard')
                     ->options(['web' => 'web']),
             ])
-            ->emptyStateHeading('Belum ada role')
-            ->emptyStateDescription('Buat role untuk mengatur akses admin Chapung Art CMS.')
+            ->emptyStateHeading(__('admin.empty_states.roles_heading'))
+            ->emptyStateDescription(__('admin.empty_states.roles_description'))
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make()
+                EditAction::make(),
+                DeleteAction::make()
                     ->visible(fn (Role $record): bool => $record->name !== 'Super Admin'),
             ])
             ->bulkActions([])

@@ -2,10 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\CustomerResource\Pages;
 use App\Models\Customer;
 use App\Models\User;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -17,16 +21,24 @@ use UnitEnum;
 
 class CustomerResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = Customer::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-users';
+
     protected static ?string $navigationLabel = 'Customers';
+
     protected static ?string $modelLabel = 'Customer';
+
     protected static ?string $pluralModelLabel = 'Customers';
+
     protected static ?string $recordTitleAttribute = 'name';
+
     protected static string|UnitEnum|null $navigationGroup = 'Commerce';
+
     protected static ?int $navigationSort = 10;
 
     public static function form(Schema $schema): Schema
@@ -163,14 +175,14 @@ class CustomerResource extends Resource
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Active'),
             ])
-            ->emptyStateHeading('Belum ada customer')
-            ->emptyStateDescription('Tambahkan customer untuk data pembeli dan kontak kolektor.')
+            ->emptyStateHeading(__('admin.empty_states.customers_heading'))
+            ->emptyStateDescription(__('admin.empty_states.customers_description'))
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('created_at', 'desc');
     }

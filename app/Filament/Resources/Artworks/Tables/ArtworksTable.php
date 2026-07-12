@@ -51,7 +51,7 @@ class ArtworksTable
                 TextColumn::make('price')
                     ->label('Harga')
                     ->sortable()
-                    ->formatStateUsing(fn ($state): string => $state !== null ? 'Rp ' . number_format((float) $state, 0, ',', '.') : '-'),
+                    ->formatStateUsing(fn ($state): string => $state !== null ? 'Rp '.number_format((float) $state, 0, ',', '.') : '-'),
 
                 TextColumn::make('stock')
                     ->label('Stock')

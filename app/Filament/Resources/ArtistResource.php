@@ -2,11 +2,15 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\ArtistResource\Pages;
 use App\Models\Artist;
 use App\Models\User;
 use App\Services\ImageUploadService;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -20,16 +24,24 @@ use UnitEnum;
 
 class ArtistResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = Artist::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-user-group';
+
     protected static ?string $navigationLabel = 'Artists';
+
     protected static ?string $modelLabel = 'Artist';
+
     protected static ?string $pluralModelLabel = 'Artists';
+
     protected static ?string $recordTitleAttribute = 'name';
+
     protected static string|UnitEnum|null $navigationGroup = 'Marketplace';
+
     protected static ?int $navigationSort = 10;
 
     public static function form(Schema $schema): Schema
@@ -277,14 +289,14 @@ class ArtistResource extends Resource
                         ->pluck('province', 'province')
                         ->all()),
             ])
-            ->emptyStateHeading('Belum ada artist')
-            ->emptyStateDescription('Tambahkan profil seniman Chapung Art untuk mulai mengelola katalog kreator.')
+            ->emptyStateHeading(__('admin.empty_states.artists_heading'))
+            ->emptyStateDescription(__('admin.empty_states.artists_description'))
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('created_at', 'desc');
     }

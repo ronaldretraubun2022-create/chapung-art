@@ -111,9 +111,7 @@
                 <a href="{{ auth()->check() ? route('favorites.index') : route('login') }}" class="flex items-center justify-between rounded-chapung border border-chapung-line bg-black/25 px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-zinc-200 hover:border-chapung-gold hover:text-chapung-gold" data-favorite-nav><span class="inline-flex items-center gap-2"><x-heroicon-o-heart class="h-5 w-5" aria-hidden="true" />{{ __('chapung.nav.favorites') }}</span><span class="rounded-full bg-chapung-gold px-2 py-1 text-[10px] text-black {{ $favoriteCount > 0 ? '' : 'hidden' }}" data-favorite-count data-favorite-count-format="plain">{{ $favoriteCount }}</span></a>
             </div>
             <div class="mt-5 flex flex-wrap gap-2 border-t border-chapung-line pt-5">
-                @foreach (config('locales.available', ['id', 'en']) as $locale)
-                    <a href="{{ route('language.switch', $locale) }}" class="rounded-full border border-chapung-line px-3 py-2 text-xs font-black uppercase tracking-[0.14em] {{ app()->getLocale() === $locale ? 'border-chapung-gold text-chapung-gold' : 'text-zinc-300' }}">{{ config('locales.flags.'.$locale) }} {{ config('locales.labels.'.$locale) }}</a>
-                @endforeach
+                @include('partials.language-switcher')
                 <button type="button" class="inline-flex min-h-11 items-center gap-2 rounded-full border border-chapung-line px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-zinc-300 hover:border-chapung-gold hover:text-chapung-gold" data-theme-toggle data-label-light="{{ __('chapung.theme.switch_to_light') }}" data-label-dark="{{ __('chapung.theme.switch_to_dark') }}" aria-label="{{ __('chapung.theme.switch_to_light') }}" aria-pressed="false">
                     <x-heroicon-o-sun class="h-4 w-4" data-theme-icon-light aria-hidden="true" />
                     <x-heroicon-o-moon class="hidden h-4 w-4" data-theme-icon-dark aria-hidden="true" />

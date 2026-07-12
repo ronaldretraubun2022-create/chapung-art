@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\PhotographyResource\Pages;
 use App\Models\Artist;
 use App\Models\Category;
@@ -10,6 +11,9 @@ use App\Models\Photography;
 use App\Models\Tag;
 use App\Services\ImageUploadService;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -22,13 +26,18 @@ use UnitEnum;
 
 class PhotographyResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = Photography::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-camera';
+
     protected static ?string $navigationLabel = 'Photographies';
+
     protected static ?string $recordTitleAttribute = 'title';
+
     protected static string|UnitEnum|null $navigationGroup = 'Marketplace';
 
     public static function form(Schema $schema): Schema
@@ -414,7 +423,7 @@ class PhotographyResource extends Resource
                 Tables\Columns\TextColumn::make('price')
                     ->label('Price')
                     ->sortable()
-                    ->formatStateUsing(fn ($state): string => $state !== null ? 'Rp ' . number_format((float) $state, 0, ',', '.') : '-'),
+                    ->formatStateUsing(fn ($state): string => $state !== null ? 'Rp '.number_format((float) $state, 0, ',', '.') : '-'),
 
                 Tables\Columns\TextColumn::make('stock')
                     ->label('Stock')
@@ -456,11 +465,11 @@ class PhotographyResource extends Resource
                     ->label('Featured'),
             ])
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('created_at', 'desc');
     }

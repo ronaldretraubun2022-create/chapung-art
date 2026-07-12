@@ -2,11 +2,15 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\PaymentResource\Pages;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Services\ImageUploadService;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -18,16 +22,24 @@ use UnitEnum;
 
 class PaymentResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = Payment::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-credit-card';
+
     protected static ?string $navigationLabel = 'Payments';
+
     protected static ?string $modelLabel = 'Payment';
+
     protected static ?string $pluralModelLabel = 'Payments';
+
     protected static ?string $recordTitleAttribute = 'id';
+
     protected static string|UnitEnum|null $navigationGroup = 'Commerce';
+
     protected static ?int $navigationSort = 30;
 
     public static function form(Schema $schema): Schema
@@ -165,14 +177,14 @@ class PaymentResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->options(self::statusOptions()),
             ])
-            ->emptyStateHeading('Belum ada payment')
-            ->emptyStateDescription('Tambahkan pembayaran untuk order marketplace.')
+            ->emptyStateHeading(__('admin.empty_states.payments_heading'))
+            ->emptyStateDescription(__('admin.empty_states.payments_description'))
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('created_at', 'desc');
     }

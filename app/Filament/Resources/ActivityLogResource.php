@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\ActivityLogResource\Pages;
 use App\Models\ActivityLog;
 use BackedEnum;
@@ -13,15 +14,22 @@ use UnitEnum;
 
 class ActivityLogResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = ActivityLog::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-clock';
+
     protected static ?string $navigationLabel = 'Activity Logs';
+
     protected static ?string $modelLabel = 'Activity Log';
+
     protected static ?string $pluralModelLabel = 'Activity Logs';
+
     protected static string|UnitEnum|null $navigationGroup = 'System';
+
     protected static ?int $navigationSort = 10;
 
     public static function canCreate(): bool
@@ -83,8 +91,8 @@ class ActivityLogResource extends Resource
                     ->searchable()
                     ->preload(),
             ])
-            ->emptyStateHeading('Belum ada activity log')
-            ->emptyStateDescription('Aktivitas login, create, update, delete, publish, dan order update akan tercatat otomatis.')
+            ->emptyStateHeading(__('admin.empty_states.activity_logs_heading'))
+            ->emptyStateDescription(__('admin.empty_states.activity_logs_description'))
             ->actions([])
             ->bulkActions([])
             ->defaultSort('created_at', 'desc');

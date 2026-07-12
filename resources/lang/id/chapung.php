@@ -5,6 +5,7 @@ return [
         'label' => 'Bahasa',
         'indonesia' => 'Indonesia',
         'english' => 'English',
+        'active' => 'Aktif',
     ],
     'theme' => [
         'switch_to_light' => 'Ganti ke mode terang',

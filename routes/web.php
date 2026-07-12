@@ -21,8 +21,12 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/language/{locale}', LocaleController::class)->name('language.switch');
-Route::get('/lang/{locale}', LocaleController::class)->name('lang.switch');
+Route::get('/language/{locale}', LocaleController::class)
+    ->whereIn('locale', config('locales.available', ['id', 'en']))
+    ->name('language.switch');
+Route::get('/lang/{locale}', LocaleController::class)
+    ->whereIn('locale', config('locales.available', ['id', 'en']))
+    ->name('lang.switch');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/search', [SearchController::class, 'index'])->middleware('throttle:global-search')->name('search.index');
 Route::get('/search/live', [SearchController::class, 'live'])->middleware('throttle:global-search')->name('search.live');

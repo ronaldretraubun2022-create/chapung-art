@@ -2,10 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\HomepageSectionResource\Pages;
 use App\Models\HomepageSection;
 use App\Services\ImageUploadService;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -17,16 +21,24 @@ use UnitEnum;
 
 class HomepageSectionResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = HomepageSection::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-home-modern';
+
     protected static ?string $navigationLabel = 'Homepage Sections';
+
     protected static ?string $modelLabel = 'Homepage Section';
+
     protected static ?string $pluralModelLabel = 'Homepage Sections';
+
     protected static ?string $recordTitleAttribute = 'section_key';
+
     protected static string|UnitEnum|null $navigationGroup = 'CMS';
+
     protected static ?int $navigationSort = 10;
 
     public static function form(Schema $schema): Schema
@@ -170,14 +182,14 @@ class HomepageSectionResource extends Resource
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Active'),
             ])
-            ->emptyStateHeading('Belum ada homepage section')
-            ->emptyStateDescription('Tambahkan section untuk mengelola konten homepage dari CMS.')
+            ->emptyStateHeading(__('admin.empty_states.homepage_sections_heading'))
+            ->emptyStateDescription(__('admin.empty_states.homepage_sections_description'))
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('sort_order');
     }

@@ -23,19 +23,19 @@ class AnalyticsOverviewWidget extends StatsOverviewWidget
         $popularPhotography = $popularItems[Photography::class] ?? $this->emptyPopularItem();
 
         return [
-            Stat::make('Total Views', number_format(PageView::count()))
-                ->description('All tracked page views')
+            Stat::make(__('admin.stats.total_views'), number_format(PageView::count()))
+                ->description(__('admin.stats.total_views_description'))
                 ->color('success'),
 
-            Stat::make('Popular Artworks', number_format($popularArtwork['views']))
+            Stat::make(__('admin.stats.popular_artworks'), number_format($popularArtwork['views']))
                 ->description($popularArtwork['title'])
                 ->color('warning'),
 
-            Stat::make('Popular Posts', number_format($popularPost['views']))
+            Stat::make(__('admin.stats.popular_posts'), number_format($popularPost['views']))
                 ->description($popularPost['title'])
                 ->color('info'),
 
-            Stat::make('Popular Photography', number_format($popularPhotography['views']))
+            Stat::make(__('admin.stats.popular_photography'), number_format($popularPhotography['views']))
                 ->description($popularPhotography['title'])
                 ->color('gray'),
         ];
@@ -76,7 +76,7 @@ class AnalyticsOverviewWidget extends StatsOverviewWidget
     private function emptyPopularItem(): array
     {
         return [
-            'title' => 'Belum ada data',
+            'title' => __('admin.stats.empty'),
             'views' => 0,
         ];
     }

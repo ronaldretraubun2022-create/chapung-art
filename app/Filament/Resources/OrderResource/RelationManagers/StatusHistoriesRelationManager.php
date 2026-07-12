@@ -50,8 +50,8 @@ class StatusHistoriesRelationManager extends RelationManager
                     ->dateTime('d M Y H:i')
                     ->sortable(),
             ])
-            ->emptyStateHeading('Belum ada riwayat status')
-            ->emptyStateDescription('Perubahan status order dan payment akan tercatat otomatis.')
+            ->emptyStateHeading(__('admin.empty_states.status_histories_heading'))
+            ->emptyStateDescription(__('admin.empty_states.status_histories_description'))
             ->defaultSort('created_at', 'desc');
     }
 }

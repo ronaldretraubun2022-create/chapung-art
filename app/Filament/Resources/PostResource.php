@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\PostResource\Pages;
 use App\Models\Category;
 use App\Models\Post;
@@ -9,6 +10,9 @@ use App\Models\Tag;
 use App\Models\User;
 use App\Services\ImageUploadService;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -21,13 +25,18 @@ use UnitEnum;
 
 class PostResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = Post::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
+
     protected static ?string $navigationLabel = 'Posts';
+
     protected static ?string $recordTitleAttribute = 'title';
+
     protected static string|UnitEnum|null $navigationGroup = 'Marketplace';
 
     public static function form(Schema $schema): Schema
@@ -362,11 +371,11 @@ class PostResource extends Resource
                     ->label('Featured'),
             ])
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('created_at', 'desc');
     }

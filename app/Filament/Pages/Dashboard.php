@@ -11,11 +11,14 @@ use Illuminate\Contracts\Support\Htmlable;
 
 class Dashboard extends BaseDashboard
 {
-    protected static ?string $title = 'Chapung Art CMS';
-
-    public function getSubheading(): string | Htmlable | null
+    public function getTitle(): string|Htmlable
     {
-        return 'Creative Media & Cultural Marketplace';
+        return __('admin.dashboard.title');
+    }
+
+    public function getSubheading(): string|Htmlable|null
+    {
+        return __('admin.dashboard.subheading');
     }
 
     /**

@@ -2,10 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\ShipmentResource\Pages;
 use App\Models\Order;
 use App\Models\Shipment;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -17,16 +21,24 @@ use UnitEnum;
 
 class ShipmentResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = Shipment::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-truck';
+
     protected static ?string $navigationLabel = 'Shipments';
+
     protected static ?string $modelLabel = 'Shipment';
+
     protected static ?string $pluralModelLabel = 'Shipments';
+
     protected static ?string $recordTitleAttribute = 'tracking_number';
+
     protected static string|UnitEnum|null $navigationGroup = 'Commerce';
+
     protected static ?int $navigationSort = 40;
 
     public static function form(Schema $schema): Schema
@@ -178,14 +190,14 @@ class ShipmentResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->options(self::statusOptions()),
             ])
-            ->emptyStateHeading('Belum ada shipment')
-            ->emptyStateDescription('Tambahkan pengiriman untuk order marketplace.')
+            ->emptyStateHeading(__('admin.empty_states.shipments_heading'))
+            ->emptyStateDescription(__('admin.empty_states.shipments_description'))
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('created_at', 'desc');
     }

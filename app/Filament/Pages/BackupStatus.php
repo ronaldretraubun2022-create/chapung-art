@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -15,6 +16,8 @@ use UnitEnum;
 
 class BackupStatus extends Page
 {
+    use HasLocalizedNavigation;
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-archive-box';
 
     protected static string|UnitEnum|null $navigationGroup = 'System';
@@ -38,14 +41,19 @@ class BackupStatus extends Page
     {
         return [
             Action::make('runBackup')
-                ->label('Run Backup')
+                ->label(__('admin.actions.run_backup'))
                 ->icon('heroicon-o-play')
                 ->color('warning')
                 ->requiresConfirmation()
-                ->modalHeading('Run full backup')
-                ->modalDescription('This will create a database and upload backup in private storage. It may take a while on cPanel hosting.')
+                ->modalHeading(__('admin.actions.run_full_backup'))
+                ->modalDescription(__('admin.backup.modal_description'))
                 ->action('runBackup'),
         ];
+    }
+
+    public function getTitle(): string
+    {
+        return __('admin.navigation.resources.backup_status');
     }
 
     public function runBackup(): void
@@ -57,7 +65,7 @@ class BackupStatus extends Page
 
             if ($exitCode !== 0) {
                 Notification::make()
-                    ->title('Backup failed')
+                    ->title(__('admin.backup.failed'))
                     ->body(Str::limit(Artisan::output(), 240))
                     ->danger()
                     ->send();
@@ -66,13 +74,13 @@ class BackupStatus extends Page
             }
 
             Notification::make()
-                ->title('Backup created')
-                ->body('Backup file tersimpan di private storage, bukan public folder.')
+                ->title(__('admin.backup.created'))
+                ->body(__('admin.backup.created_body'))
                 ->success()
                 ->send();
         } catch (Throwable $exception) {
             Notification::make()
-                ->title('Backup failed')
+                ->title(__('admin.backup.failed'))
                 ->body(Str::limit($exception->getMessage(), 240))
                 ->danger()
                 ->send();
@@ -109,7 +117,7 @@ class BackupStatus extends Page
     {
         $latest = $this->getBackupFiles()[0] ?? null;
 
-        return $latest ? $latest['modified_at'] : 'Belum ada backup';
+        return $latest ? $latest['modified_at'] : __('admin.backup.none');
     }
 
     public function getTotalBackupSize(): string

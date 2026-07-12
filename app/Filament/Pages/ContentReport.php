@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Pages\Concerns\InteractsWithReportFilters;
 use App\Models\Artwork;
 use App\Models\Photography;
@@ -15,6 +16,7 @@ use UnitEnum;
 
 class ContentReport extends Page
 {
+    use HasLocalizedNavigation;
     use InteractsWithReportFilters;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-chart-bar';
@@ -45,11 +47,16 @@ class ContentReport extends Page
     {
         return [
             Action::make('exportCsv')
-                ->label('Export CSV')
+                ->label(__('admin.actions.export_csv'))
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('gray')
                 ->action('exportCsv'),
         ];
+    }
+
+    public function getTitle(): string
+    {
+        return __('admin.navigation.resources.content_report');
     }
 
     /**

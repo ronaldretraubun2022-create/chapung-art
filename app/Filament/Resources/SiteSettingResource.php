@@ -2,10 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\SiteSettingResource\Pages;
 use App\Models\SiteSetting;
 use App\Services\ImageUploadService;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -17,16 +21,24 @@ use UnitEnum;
 
 class SiteSettingResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = SiteSetting::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-cog-6-tooth';
+
     protected static ?string $navigationLabel = 'Site Settings';
+
     protected static ?string $modelLabel = 'Site Setting';
+
     protected static ?string $pluralModelLabel = 'Site Settings';
+
     protected static ?string $recordTitleAttribute = 'key';
+
     protected static string|UnitEnum|null $navigationGroup = 'CMS';
+
     protected static ?int $navigationSort = 20;
 
     public static function form(Schema $schema): Schema
@@ -138,14 +150,14 @@ class SiteSettingResource extends Resource
                         'image' => 'Image',
                     ]),
             ])
-            ->emptyStateHeading('Belum ada site setting')
-            ->emptyStateDescription('Tambahkan setting untuk brand, kontak, media sosial, dan konfigurasi frontend.')
+            ->emptyStateHeading(__('admin.empty_states.site_settings_heading'))
+            ->emptyStateDescription(__('admin.empty_states.site_settings_description'))
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('group');
     }

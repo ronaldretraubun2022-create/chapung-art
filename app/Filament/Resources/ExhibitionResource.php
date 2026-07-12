@@ -2,12 +2,16 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\ExhibitionResource\Pages;
 use App\Models\Artwork;
 use App\Models\Exhibition;
 use App\Models\Photography;
 use App\Services\ImageUploadService;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -20,16 +24,24 @@ use UnitEnum;
 
 class ExhibitionResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = Exhibition::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-building-storefront';
+
     protected static ?string $navigationLabel = 'Exhibitions';
+
     protected static ?string $modelLabel = 'Exhibition';
+
     protected static ?string $pluralModelLabel = 'Exhibitions';
+
     protected static ?string $recordTitleAttribute = 'title';
+
     protected static string|UnitEnum|null $navigationGroup = 'Marketplace';
+
     protected static ?int $navigationSort = 60;
 
     public static function form(Schema $schema): Schema
@@ -213,14 +225,14 @@ class ExhibitionResource extends Resource
                 Tables\Filters\TernaryFilter::make('is_featured')
                     ->label('Featured'),
             ])
-            ->emptyStateHeading('Belum ada exhibition')
-            ->emptyStateDescription('Tambahkan pameran untuk mengkurasi artwork dan photography.')
+            ->emptyStateHeading(__('admin.empty_states.exhibitions_heading'))
+            ->emptyStateDescription(__('admin.empty_states.exhibitions_description'))
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('created_at', 'desc');
     }

@@ -2,12 +2,16 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\CertificateResource\Pages;
 use App\Models\Artist;
 use App\Models\Artwork;
 use App\Models\Certificate;
 use App\Support\UploadSecurity;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -20,16 +24,24 @@ use UnitEnum;
 
 class CertificateResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = Certificate::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-check';
+
     protected static ?string $navigationLabel = 'Certificates';
+
     protected static ?string $modelLabel = 'Certificate';
+
     protected static ?string $pluralModelLabel = 'Certificates';
+
     protected static ?string $recordTitleAttribute = 'certificate_number';
+
     protected static string|UnitEnum|null $navigationGroup = 'Marketplace';
+
     protected static ?int $navigationSort = 50;
 
     public static function form(Schema $schema): Schema
@@ -186,14 +198,14 @@ class CertificateResource extends Resource
                 Tables\Filters\TernaryFilter::make('is_verified')
                     ->label('Verified'),
             ])
-            ->emptyStateHeading('Belum ada certificate')
-            ->emptyStateDescription('Tambahkan certificate of authenticity untuk artwork.')
+            ->emptyStateHeading(__('admin.empty_states.certificates_heading'))
+            ->emptyStateDescription(__('admin.empty_states.certificates_description'))
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('created_at', 'desc');
     }

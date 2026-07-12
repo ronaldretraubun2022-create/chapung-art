@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\ArtworkResource\Pages;
 use App\Models\Artist;
 use App\Models\Artwork;
@@ -10,35 +11,47 @@ use App\Models\Collection;
 use App\Models\Tag;
 use App\Services\DigitalDownloadService;
 use App\Services\ImageUploadService;
+use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use UnitEnum;
-use BackedEnum;
 
 class ArtworkResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = Artwork::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-photo';
+
     protected static ?string $navigationLabel = 'Artworks';
+
     protected static ?string $modelLabel = 'Artwork';
+
     protected static ?string $pluralModelLabel = 'Artworks';
+
     protected static ?string $recordTitleAttribute = 'title';
+
     protected static string|UnitEnum|null $navigationGroup = 'Marketplace';
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->schema([
-                \Filament\Schemas\Components\Section::make('Informasi Karya')
+                Section::make('Informasi Karya')
                     ->schema([
-                        \Filament\Schemas\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('title')
                                     ->label('Judul Karya')
@@ -97,9 +110,9 @@ class ArtworkResource extends Resource
                     ])
                     ->columns(2),
 
-                \Filament\Schemas\Components\Section::make('Detail Karya')
+                Section::make('Detail Karya')
                     ->schema([
-                        \Filament\Schemas\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('artist_name')
                                     ->label('Nama Seniman')
@@ -229,7 +242,7 @@ class ArtworkResource extends Resource
                     ])
                     ->columns(2),
 
-                \Filament\Schemas\Components\Section::make('Gallery')
+                Section::make('Gallery')
                     ->schema([
                         Forms\Components\Repeater::make('mediaItems')
                             ->label('Gallery Images')
@@ -323,7 +336,7 @@ class ArtworkResource extends Resource
                 Tables\Columns\TextColumn::make('price')
                     ->label('Harga')
                     ->sortable()
-                    ->formatStateUsing(fn ($state): string => $state !== null ? 'Rp ' . number_format((float) $state, 0, ',', '.') : '-'),
+                    ->formatStateUsing(fn ($state): string => $state !== null ? 'Rp '.number_format((float) $state, 0, ',', '.') : '-'),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
@@ -373,11 +386,11 @@ class ArtworkResource extends Resource
                     ->label('Download Digital'),
             ])
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ]);
     }
 

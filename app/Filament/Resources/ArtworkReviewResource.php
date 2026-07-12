@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\ArtworkReviewResource\Pages;
 use App\Models\ArtworkReview;
 use BackedEnum;
@@ -17,16 +18,24 @@ use UnitEnum;
 
 class ArtworkReviewResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = ArtworkReview::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-star';
+
     protected static ?string $navigationLabel = 'Artwork Reviews';
+
     protected static ?string $modelLabel = 'Artwork Review';
+
     protected static ?string $pluralModelLabel = 'Artwork Reviews';
+
     protected static ?string $recordTitleAttribute = 'title';
+
     protected static string|UnitEnum|null $navigationGroup = 'Marketplace';
+
     protected static ?int $navigationSort = 24;
 
     public static function form(Schema $schema): Schema
@@ -165,8 +174,8 @@ class ArtworkReviewResource extends Resource
                 Tables\Filters\SelectFilter::make('rating')
                     ->options([5 => '5', 4 => '4', 3 => '3', 2 => '2', 1 => '1']),
             ])
-            ->emptyStateHeading('Belum ada review karya')
-            ->emptyStateDescription('Review pembeli terverifikasi akan muncul di sini untuk dimoderasi.')
+            ->emptyStateHeading(__('admin.empty_states.artwork_reviews_heading'))
+            ->emptyStateDescription(__('admin.empty_states.artwork_reviews_description'))
             ->actions([
                 Actions\Action::make('approve')
                     ->label('Approve')

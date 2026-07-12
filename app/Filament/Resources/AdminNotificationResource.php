@@ -2,9 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\AdminNotificationResource\Pages;
 use App\Models\AdminNotification;
 use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -16,16 +21,24 @@ use UnitEnum;
 
 class AdminNotificationResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = AdminNotification::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-bell-alert';
+
     protected static ?string $navigationLabel = 'Notifications';
+
     protected static ?string $modelLabel = 'Notification';
+
     protected static ?string $pluralModelLabel = 'Notifications';
+
     protected static ?string $recordTitleAttribute = 'title';
+
     protected static string|UnitEnum|null $navigationGroup = 'CMS';
+
     protected static ?int $navigationSort = 40;
 
     public static function form(Schema $schema): Schema
@@ -122,27 +135,27 @@ class AdminNotificationResource extends Resource
                 Tables\Filters\SelectFilter::make('type')
                     ->options(self::typeOptions()),
             ])
-            ->emptyStateHeading('Belum ada notification')
-            ->emptyStateDescription('Notifikasi admin akan muncul saat order, payment, customer, atau post published dibuat.')
+            ->emptyStateHeading(__('admin.empty_states.notifications_heading'))
+            ->emptyStateDescription(__('admin.empty_states.notifications_description'))
             ->actions([
-                \Filament\Actions\Action::make('mark_as_read')
+                Action::make('mark_as_read')
                     ->label('Mark as read')
                     ->icon('heroicon-o-check-circle')
                     ->visible(fn (AdminNotification $record): bool => blank($record->read_at))
                     ->action(fn (AdminNotification $record): mixed => $record->markAsRead()),
 
-                \Filament\Actions\Action::make('open_url')
+                Action::make('open_url')
                     ->label('Open')
                     ->icon('heroicon-o-arrow-top-right-on-square')
                     ->url(fn (AdminNotification $record): ?string => $record->url)
                     ->openUrlInNewTab()
                     ->visible(fn (AdminNotification $record): bool => filled($record->url)),
 
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('created_at', 'desc');
     }

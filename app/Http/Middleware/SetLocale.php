@@ -11,14 +11,17 @@ class SetLocale
     public function handle(Request $request, Closure $next): Response
     {
         $available = config('locales.available', ['id', 'en']);
-        $locale = session('locale') ?: $request->user()?->locale ?: config('locales.default', 'id');
+        $default = config('locales.default', 'id');
+        $fallback = config('locales.fallback', 'en');
+        $locale = session('locale') ?: $request->user()?->locale ?: $default;
 
         if (! in_array($locale, $available, true)) {
-            $locale = config('locales.default', 'id');
+            $locale = $default;
         }
 
         session(['locale' => $locale]);
         app()->setLocale($locale);
+        app()->setFallbackLocale($fallback);
 
         return $next($request);
     }

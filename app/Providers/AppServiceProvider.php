@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Models\AdminNotification;
-use App\Models\ActivityLog;
 use App\Models\Artist;
 use App\Models\Artwork;
 use App\Models\ArtworkReview;
@@ -29,9 +28,9 @@ use App\Observers\ActivityLogObserver;
 use App\Services\ActivityLogger;
 use App\Services\CartService;
 use Illuminate\Auth\Events\Login as LoginEvent;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
@@ -55,6 +54,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        app()->setFallbackLocale(config('locales.fallback', 'en'));
+
         if ($this->app->isProduction() && str_starts_with((string) config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }

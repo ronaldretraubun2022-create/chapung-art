@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasLocalizedNavigation;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers\PaymentsRelationManager;
 use App\Filament\Resources\OrderResource\RelationManagers\ShipmentsRelationManager;
@@ -9,6 +10,10 @@ use App\Filament\Resources\OrderResource\RelationManagers\StatusHistoriesRelatio
 use App\Models\Customer;
 use App\Models\Order;
 use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -20,16 +25,24 @@ use UnitEnum;
 
 class OrderResource extends Resource
 {
+    use HasLocalizedNavigation;
+
     protected static bool $shouldCheckPolicyExistence = false;
 
     protected static ?string $model = Order::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-shopping-bag';
+
     protected static ?string $navigationLabel = 'Orders';
+
     protected static ?string $modelLabel = 'Order';
+
     protected static ?string $pluralModelLabel = 'Orders';
+
     protected static ?string $recordTitleAttribute = 'order_number';
+
     protected static string|UnitEnum|null $navigationGroup = 'Commerce';
+
     protected static ?int $navigationSort = 20;
 
     public static function form(Schema $schema): Schema
@@ -298,16 +311,16 @@ class OrderResource extends Resource
                 Tables\Filters\SelectFilter::make('payment_status')
                     ->options(self::paymentStatusOptions()),
             ])
-            ->emptyStateHeading('Belum ada order')
-            ->emptyStateDescription('Buat order marketplace untuk pembelian artwork atau photography.')
+            ->emptyStateHeading(__('admin.empty_states.orders_heading'))
+            ->emptyStateDescription(__('admin.empty_states.orders_description'))
             ->actions([
-                \Filament\Actions\Action::make('invoice')
+                Action::make('invoice')
                     ->label('Invoice')
                     ->icon('heroicon-o-document-arrow-down')
                     ->url(fn (Order $record): string => route('invoice.show', $record))
                     ->openUrlInNewTab(),
 
-                \Filament\Actions\Action::make('mark_paid')
+                Action::make('mark_paid')
                     ->label('Mark Paid')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
@@ -315,7 +328,7 @@ class OrderResource extends Resource
                     ->visible(fn (Order $record): bool => $record->payment_status !== 'paid')
                     ->action(fn (Order $record): bool => $record->forceFill(['payment_status' => 'paid'])->save()),
 
-                \Filament\Actions\Action::make('mark_processing')
+                Action::make('mark_processing')
                     ->label('Process')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->color('info')
@@ -323,7 +336,7 @@ class OrderResource extends Resource
                     ->visible(fn (Order $record): bool => ! in_array($record->status, ['processing', 'shipped', 'completed', 'cancelled'], true))
                     ->action(fn (Order $record): bool => $record->forceFill(['status' => 'processing'])->save()),
 
-                \Filament\Actions\Action::make('mark_completed')
+                Action::make('mark_completed')
                     ->label('Complete')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
@@ -331,11 +344,11 @@ class OrderResource extends Resource
                     ->visible(fn (Order $record): bool => $record->status !== 'completed')
                     ->action(fn (Order $record): bool => $record->forceFill(['status' => 'completed'])->save()),
 
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                \Filament\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('created_at', 'desc');
     }
