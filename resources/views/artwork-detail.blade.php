@@ -81,6 +81,84 @@
         __('chapung.product_detail.variants.frame') => $artwork->frame,
         __('chapung.product_detail.variants.size') => $artwork->size ?: ($artwork->width && $artwork->height ? $artwork->width.' x '.$artwork->height.' cm' : null),
     ])->filter(fn ($value) => filled($value));
+    $schemaImage = $selectedImage['url'] ?? ImageUploadService::fallbackUrl();
+    $productSchema = [
+        '@type' => 'Product',
+        '@id' => $publicUrl.'#product',
+        'name' => $artwork->title,
+        'description' => (string) $description,
+        'image' => $schemaImage,
+        'sku' => $artwork->sku ?: $artwork->slug,
+        'brand' => [
+            '@type' => 'Brand',
+            'name' => site_setting('site_name', 'Chapung Art'),
+        ],
+        'category' => $artwork->category?->name ?: __('chapung.types.artwork'),
+    ];
+
+    if ($priceValue) {
+        $productSchema['offers'] = [
+            '@type' => 'Offer',
+            'url' => $publicUrl,
+            'priceCurrency' => 'IDR',
+            'price' => (string) (int) $priceValue,
+            'availability' => $canAddToCart ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            'itemCondition' => 'https://schema.org/NewCondition',
+        ];
+    }
+
+    if ($reviewCount > 0 && $rating > 0) {
+        $productSchema['aggregateRating'] = [
+            '@type' => 'AggregateRating',
+            'ratingValue' => round($rating, 1),
+            'reviewCount' => $reviewCount,
+        ];
+    }
+
+    $artworkSchema = [
+        '@context' => 'https://schema.org',
+        '@graph' => [
+            [
+                '@type' => 'VisualArtwork',
+                '@id' => $publicUrl.'#visual-artwork',
+                'name' => $artwork->title,
+                'description' => (string) $description,
+                'image' => $schemaImage,
+                'url' => $publicUrl,
+                'creator' => [
+                    '@type' => 'Person',
+                    'name' => $artist?->name ?: $artwork->artist_name ?: __('chapung.home.artist_fallback'),
+                ],
+                'artMedium' => $artwork->medium ?: $artwork->material,
+                'artform' => $artwork->category?->name ?: __('chapung.types.artwork'),
+                'dateCreated' => $artwork->year,
+            ],
+            $productSchema,
+            [
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => [
+                    [
+                        '@type' => 'ListItem',
+                        'position' => 1,
+                        'name' => __('chapung.nav.home'),
+                        'item' => route('home'),
+                    ],
+                    [
+                        '@type' => 'ListItem',
+                        'position' => 2,
+                        'name' => __('chapung.nav.artwork'),
+                        'item' => route('artworks.index'),
+                    ],
+                    [
+                        '@type' => 'ListItem',
+                        'position' => 3,
+                        'name' => $artwork->title,
+                        'item' => $publicUrl,
+                    ],
+                ],
+            ],
+        ],
+    ];
 @endphp
 
 @section('seo')
@@ -89,6 +167,7 @@
         'description' => (string) $description,
         'og_image' => $mainImage ? asset('storage/'.ImageUploadService::normalizePath($mainImage)) : asset('images/og-image.jpg'),
         'canonical_url' => route('artwork.show', $artwork->slug),
+        'schema_json' => $artworkSchema,
     ])])
 @endsection
 

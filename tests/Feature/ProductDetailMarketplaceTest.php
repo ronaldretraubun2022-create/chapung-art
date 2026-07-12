@@ -125,6 +125,13 @@ test('artwork detail renders complete marketplace product page', function () {
         ->assertSee('data-mobile-sticky-purchase', false)
         ->assertSee('Related Artwork')
         ->assertSee('Related Detail Artwork')
+        ->assertSee('<script type="application/ld+json">', false)
+        ->assertSee('"@type":"VisualArtwork"', false)
+        ->assertSee('"@type":"Product"', false)
+        ->assertSee('"@type":"BreadcrumbList"', false)
+        ->assertSee('"priceCurrency":"IDR"', false)
+        ->assertSee('sizes="', false)
+        ->assertSee('fetchpriority="high"', false)
         ->assertSee(asset('storage/artworks/detail-main.jpg'), false)
         ->assertSee(asset('storage/artworks/detail-side.jpg'), false)
         ->assertDontSee('storage/app/private', false);

@@ -40,10 +40,43 @@
         'canonical_url' => route('home'),
         'schema_json' => [
             '@context' => 'https://schema.org',
-            '@type' => 'WebSite',
-            'name' => site_setting('site_name', 'Chapung Art'),
-            'description' => (string) str(strip_tags($heroContent))->limit(160),
-            'url' => route('home'),
+            '@graph' => [
+                [
+                    '@type' => 'Organization',
+                    '@id' => route('home').'#organization',
+                    'name' => site_setting('site_name', 'Chapung Art'),
+                    'url' => route('home'),
+                    'logo' => asset('images/og-image.jpg'),
+                    'address' => site_setting('address', config('chapung.address')),
+                    'contactPoint' => [
+                        '@type' => 'ContactPoint',
+                        'telephone' => site_setting('contact_phone', config('chapung.contact_phone')),
+                        'contactType' => 'customer support',
+                    ],
+                ],
+                [
+                    '@type' => 'WebSite',
+                    '@id' => route('home').'#website',
+                    'name' => site_setting('site_name', 'Chapung Art'),
+                    'description' => (string) str(strip_tags($heroContent))->limit(160),
+                    'url' => route('home'),
+                    'publisher' => ['@id' => route('home').'#organization'],
+                    'potentialAction' => [
+                        '@type' => 'SearchAction',
+                        'target' => route('search.index').'?q={search_term_string}',
+                        'query-input' => 'required name=search_term_string',
+                    ],
+                ],
+                [
+                    '@type' => 'BreadcrumbList',
+                    'itemListElement' => [[
+                        '@type' => 'ListItem',
+                        'position' => 1,
+                        'name' => __('chapung.nav.home'),
+                        'item' => route('home'),
+                    ]],
+                ],
+            ],
         ],
     ])])
 @endsection

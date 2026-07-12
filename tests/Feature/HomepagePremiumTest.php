@@ -109,8 +109,12 @@ test('premium homepage renders hero featured content seo and lazy images', funct
         ->assertSeeText($t('chapung.home.explore_gallery'))
         ->assertSee('<meta property="og:image" content="'.asset('storage/artworks/langit.jpg').'">', false)
         ->assertSee('<script type="application/ld+json">', false)
+        ->assertSee('"@type":"Organization"', false)
         ->assertSee('"@type":"WebSite"', false)
+        ->assertSee('"@type":"BreadcrumbList"', false)
+        ->assertSee('"@type":"SearchAction"', false)
         ->assertSee('loading="lazy"', false)
+        ->assertSee('sizes="', false)
         ->assertSee(route('artworks.index'), false)
         ->assertSee(route('contact'), false);
 });
