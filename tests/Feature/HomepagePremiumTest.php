@@ -6,6 +6,7 @@ use App\Models\Collection;
 use App\Models\HomepageSection;
 use App\Models\Photography;
 use App\Models\Post;
+use App\Models\SiteSetting;
 use App\Support\PerformanceCache;
 use Illuminate\Support\Facades\Cache;
 
@@ -87,6 +88,15 @@ test('premium homepage renders hero featured content seo and lazy images', funct
         ->get(route('home'))
         ->assertOk()
         ->assertSeeText($t('chapung.home.hero_marketplace'))
+        ->assertSee('<picture class="block h-full w-full">', false)
+        ->assertSee('media="(max-width: 767px)"', false)
+        ->assertSee('images/hero/chapung-art-hero-background-mobile.webp', false)
+        ->assertSee('images/hero/chapung-art-hero-background.webp', false)
+        ->assertSee('width="1080" height="1350"', false)
+        ->assertSee('width="1920" height="1000"', false)
+        ->assertSee('alt=""', false)
+        ->assertSee('aria-hidden="true"', false)
+        ->assertSee('fetchpriority="high"', false)
         ->assertSeeText('Langit Wasur')
         ->assertSee(route('artwork.show', 'langit-wasur'), false)
         ->assertSeeText($t('chapung.home.latest_artworks'))
@@ -117,4 +127,34 @@ test('premium homepage renders hero featured content seo and lazy images', funct
         ->assertSee('sizes="', false)
         ->assertSee(route('artworks.index'), false)
         ->assertSee(route('contact'), false);
+});
+
+test('homepage html renders the normalized Chapung Art contact address', function () {
+    Cache::flush();
+
+    SiteSetting::updateOrCreate(
+        ['key' => 'address'],
+        [
+            'value' => (string) config('chapung.address'),
+            'type' => 'textarea',
+            'group' => 'contact',
+        ],
+    );
+
+    $response = $this->get(route('home'));
+
+    $response
+        ->assertOk()
+        ->assertSee('JL. SESATE NO. 242, RT 007/RW 002, BAMBU PEMALI', false)
+        ->assertSee('KABUPATEN MERAUKE, PAPUA SELATAN 99616', false)
+        ->assertDontSee('MERAUKE MERAUKE', false)
+        ->assertDontSee('KAB. 99616', false)
+        ->assertDontSee('JL SESATE NO 242 RT.007 RW.002 BAMBU PEMALI', false);
+
+    expect($response->getContent())
+        ->toContain('<footer')
+        ->toContain('JL. SESATE NO. 242, RT 007/RW 002, BAMBU PEMALI')
+        ->toContain('KABUPATEN MERAUKE, PAPUA SELATAN 99616')
+        ->not->toContain('MERAUKE MERAUKE')
+        ->not->toContain('KAB. 99616');
 });

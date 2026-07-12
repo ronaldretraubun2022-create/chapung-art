@@ -227,5 +227,6 @@ test('checkout success page displays order number and totals', function () {
         ->assertSee('BANK PAPUA')
         ->assertSee('8316008181')
         ->assertSee('Bank BCA')
-        ->assertSee('JL SESATE NO 242 RT.007 RW.002 BAMBU PEMALI');
+        ->assertSee('JL. SESATE NO. 242, RT 007/RW 002, BAMBU PEMALI')
+        ->assertSee('KABUPATEN MERAUKE, PAPUA SELATAN 99616');
 });

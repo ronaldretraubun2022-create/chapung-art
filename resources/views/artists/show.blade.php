@@ -2,11 +2,12 @@
 
 @php
     use App\Services\ImageUploadService;
+    use Illuminate\Support\Facades\Storage;
 
     $coverImage = ImageUploadService::normalizePath($coverImage ?? null);
     $profilePhoto = ImageUploadService::normalizePath($artist->photo);
     $coverUrl = $coverImage ? asset('storage/'.$coverImage) : ImageUploadService::fallbackUrl();
-    $profileUrl = $profilePhoto ? asset('storage/'.$profilePhoto) : null;
+    $profileUrl = ($profilePhoto && Storage::disk('public')->exists($profilePhoto)) ? asset('storage/'.$profilePhoto) : null;
     $seoDescription = (string) str(strip_tags($artist->bio ?: $artist->specialization ?: __('chapung.artist_store.bio_empty')))->limit(160);
     $location = collect([$artist->origin_area, $artist->city, $artist->province, $artist->country])->filter()->unique()->implode(', ') ?: __('chapung.artist_store.location_fallback');
     $rating = (float) ($storefrontStats['rating'] ?? 0);
@@ -65,11 +66,13 @@
 
         <div class="relative mx-auto grid min-h-[38rem] max-w-7xl content-end gap-8 px-4 pb-10 pt-28 sm:px-6 lg:grid-cols-[18rem_1fr] lg:px-8 lg:pb-14 lg:pt-36">
             <div class="w-44 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-950 p-2 shadow-2xl shadow-black/40 sm:w-56 lg:w-full">
-                @if ($profileUrl)
-                    <img src="{{ $profileUrl }}" alt="{{ ImageUploadService::altText($artist->name, __('chapung.types.artist')) }}" width="800" height="1000" class="aspect-[4/5] w-full rounded-md object-cover" loading="eager" decoding="async">
-                @else
-                    <div class="grid aspect-[4/5] w-full place-items-center rounded-md bg-[radial-gradient(circle_at_top,rgba(202,138,4,.22),transparent_20rem),#101010] text-5xl font-black text-yellow-600">{{ str($artist->name)->substr(0, 2)->upper() }}</div>
-                @endif
+                @include('partials.public.artist-photo', [
+                    'path' => $artist->photo,
+                    'alt' => $artist->name,
+                    'ratio' => 'aspect-[4/5] w-full',
+                    'width' => 800,
+                    'height' => 1000,
+                ])
             </div>
 
             <article class="max-w-5xl self-end">
@@ -297,13 +300,10 @@
                 @if ($collections->count())
                     <div class="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                         @foreach ($collections as $collection)
-                            @php($collectionImage = $collection->banner_image ?: $collection->cover_image)
                             <article class="group rounded-lg border border-zinc-800 bg-zinc-950 p-3 transition hover:border-yellow-600/70">
                                 <a href="{{ route('collections.show', $collection->slug) }}" class="block">
-                                    @include('partials.public.image', [
-                                        'path' => $collectionImage,
-                                        'alt' => $collection->name,
-                                        'label' => __('chapung.types.collection'),
+                                    @include('partials.public.collection-cover', [
+                                        'collection' => $collection,
                                         'ratio' => 'aspect-[16/10]',
                                         'width' => 960,
                                         'height' => 600,

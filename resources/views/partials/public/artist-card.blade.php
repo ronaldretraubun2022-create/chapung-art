@@ -1,6 +1,4 @@
 @php
-    use App\Services\ImageUploadService;
-
     $location = collect([$artist->origin_area ?? null, $artist->city ?? null, $artist->province ?? null])
         ->filter()
         ->unique()
@@ -10,20 +8,13 @@
 
 <article class="ca-surface group overflow-hidden p-3 transition hover:border-chapung-gold focus-within:border-chapung-gold">
     <a href="{{ route('artists.show', $artist->slug) }}" class="block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-chapung-gold">
-        @if ($artist->photo)
-            @include('partials.public.image', [
-                'path' => $artist->photo,
-                'alt' => $artist->name,
-                'label' => __('chapung.types.artist'),
-                'ratio' => 'aspect-[4/5]',
-                'width' => 720,
-                'height' => 900,
-            ])
-        @else
-            <div class="grid aspect-[4/5] place-items-center rounded-md border border-chapung-line bg-[radial-gradient(circle_at_top,rgba(200,155,60,.2),transparent_18rem),#111113] text-5xl font-black uppercase text-chapung-gold">
-                {{ str($artist->name)->substr(0, 2)->upper() }}
-            </div>
-        @endif
+        @include('partials.public.artist-photo', [
+            'path' => $artist->photo,
+            'alt' => $artist->name,
+            'ratio' => 'aspect-[4/5]',
+            'width' => 720,
+            'height' => 900,
+        ])
 
         <div class="p-2 pt-4">
             <div class="flex flex-wrap items-center gap-2">

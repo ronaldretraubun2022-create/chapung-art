@@ -565,13 +565,13 @@
         <div class="mx-auto max-w-7xl rounded-lg border border-zinc-800 bg-zinc-950 p-6">
             <div class="grid gap-6 md:grid-cols-[auto_1fr_auto] md:items-center">
                 <div class="group h-24 w-24 overflow-hidden rounded-lg border border-zinc-800 bg-black">
-                    @include('partials.public.image', [
+                    @include('partials.public.artist-photo', [
                         'path' => $artist?->photo,
                         'alt' => $artist?->name ?: $artwork->artist_display_name,
                         'ratio' => 'aspect-square',
-                        'label' => __('chapung.types.artist'),
                         'width' => 240,
                         'height' => 240,
+                        'sizes' => '6rem',
                     ])
                 </div>
                 <div>

@@ -26,6 +26,8 @@
     $heroContent = $hero?->content ?: __('chapung.home.hero_content');
     $heroImage = ImageUploadService::normalizePath($heroArtwork?->thumbnail) ?: ImageUploadService::normalizePath($hero?->image);
     $heroImageUrl = $heroImage ? asset('storage/'.$heroImage) : ImageUploadService::fallbackUrl();
+    $heroBackgroundUrl = asset('images/hero/chapung-art-hero-background.webp');
+    $heroMobileBackgroundUrl = asset('images/hero/chapung-art-hero-background-mobile.webp');
     $heroPrice = filled($heroArtwork?->price) ? (float) $heroArtwork->price : null;
     $heroAvailable = $heroArtwork && $heroArtwork->status === 'available' && (int) ($heroArtwork->stock ?? 0) > 0;
     $supportingUpdates = $latestPosts->take(3);
@@ -83,9 +85,13 @@
 
 @section('content')
     <section class="relative overflow-hidden border-b border-chapung-line bg-black">
-        <div class="absolute inset-0">
-            <img src="{{ $heroImageUrl }}" alt="{{ ImageUploadService::altText($heroTitle, __('chapung.types.artwork')) }}" width="1800" height="1200" class="h-full w-full object-cover opacity-55" loading="eager" decoding="async" fetchpriority="high" onerror="this.onerror=null;this.src='{{ ImageUploadService::fallbackUrl() }}'">
-            <div class="absolute inset-0 bg-gradient-to-b from-black/45 via-black/78 to-black"></div>
+        <div class="absolute inset-0" aria-hidden="true">
+            <picture class="block h-full w-full">
+                <source media="(max-width: 767px)" srcset="{{ $heroMobileBackgroundUrl }}" width="1080" height="1350">
+                <img src="{{ $heroBackgroundUrl }}" alt="" width="1920" height="1000" class="h-full w-full object-cover object-center md:object-center lg:object-[center_right] max-md:object-top" loading="eager" decoding="async" fetchpriority="high">
+            </picture>
+            <div class="absolute inset-0 bg-black/55"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/74 to-black"></div>
         </div>
 
         <div class="ca-container relative grid min-h-[calc(100svh-7rem)] gap-8 py-12 sm:py-16 lg:grid-cols-[1.05fr_.95fr] lg:items-end lg:py-18">
@@ -229,10 +235,9 @@
                     @foreach ($featuredArtists as $artist)
                         <article class="ca-surface group overflow-hidden p-3 transition hover:border-chapung-gold">
                             <a href="{{ route('artists.show', $artist->slug) }}" class="block">
-                                @include('partials.public.image', [
+                                @include('partials.public.artist-photo', [
                                     'path' => $artist->photo,
                                     'alt' => $artist->name,
-                                    'label' => __('chapung.types.artist'),
                                     'ratio' => 'aspect-[4/5]',
                                     'width' => 800,
                                     'height' => 1000,
@@ -265,13 +270,10 @@
             @if ($featuredCollections->count())
                 <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                     @foreach ($featuredCollections as $collection)
-                        @php($collectionImage = $collection->banner_image ?: $collection->cover_image)
                         <article class="ca-surface group overflow-hidden p-3 transition hover:border-chapung-gold">
                             <a href="{{ route('collections.show', $collection->slug) }}" class="block">
-                                @include('partials.public.image', [
-                                    'path' => $collectionImage,
-                                    'alt' => $collection->name,
-                                    'label' => __('chapung.types.collection'),
+                                @include('partials.public.collection-cover', [
+                                    'collection' => $collection,
                                     'ratio' => 'aspect-[16/11]',
                                     'width' => 960,
                                     'height' => 660,
@@ -378,10 +380,9 @@
                     @foreach ($storyArtists as $artist)
                         <article class="ca-surface grid gap-4 p-4 sm:grid-cols-[8rem_1fr]">
                             <a href="{{ route('artists.show', $artist->slug) }}" class="block">
-                                @include('partials.public.image', [
+                                @include('partials.public.artist-photo', [
                                     'path' => $artist->photo,
                                     'alt' => $artist->name,
-                                    'label' => __('chapung.types.artist'),
                                     'ratio' => 'aspect-square sm:aspect-[4/5]',
                                     'width' => 420,
                                     'height' => 520,

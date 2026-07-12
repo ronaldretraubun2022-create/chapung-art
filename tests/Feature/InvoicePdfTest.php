@@ -87,7 +87,8 @@ test('customer owner can view branded html invoice', function () {
         ->assertSee('BANK PAPUA')
         ->assertSee('8316008181')
         ->assertSee('Bank BCA')
-        ->assertSee('JL SESATE NO 242 RT.007 RW.002 BAMBU PEMALI')
+        ->assertSee('JL. SESATE NO. 242, RT 007/RW 002, BAMBU PEMALI')
+        ->assertSee('KABUPATEN MERAUKE, PAPUA SELATAN 99616')
         ->assertSee('0813-4400-1427')
         ->assertSee('0813-9226-9774');
 });
