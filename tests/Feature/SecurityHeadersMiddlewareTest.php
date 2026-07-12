@@ -43,3 +43,32 @@ test('csp can run in report only mode from configuration', function () {
         ->assertHeaderMissing('Content-Security-Policy')
         ->assertHeader('Content-Security-Policy-Report-Only');
 });
+
+test('csp can be disabled from string configuration values', function () {
+    config(['security.csp.enabled' => 'false']);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertHeaderMissing('Content-Security-Policy')
+        ->assertHeaderMissing('Content-Security-Policy-Report-Only');
+});
+
+test('csp directives are normalized before they are attached', function () {
+    config([
+        'security.csp.directives' => [
+            'default-src' => "'self' https:",
+            'img-src' => ["'self'", '', null, "'self'", 'data:'],
+            'bad;directive' => ["'none'"],
+        ],
+    ]);
+
+    $response = $this->get('/');
+    $csp = $response->headers->get('Content-Security-Policy');
+
+    $response->assertOk();
+
+    expect($csp)->toContain("default-src 'self' https:")
+        ->toContain("img-src 'self' data:")
+        ->not->toContain('bad;directive')
+        ->not->toContain("'self' 'self'");
+});
