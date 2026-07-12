@@ -5,7 +5,7 @@
     $siteFaviconUrl = filled($siteFavicon) ? asset('storage/'.$siteFavicon) : null;
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth" data-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,6 +22,23 @@
     @if ($siteFaviconUrl)
         <link rel="icon" href="{{ $siteFaviconUrl }}">
     @endif
+    <script>
+        (() => {
+            const storageKey = 'chapung-theme';
+            let storedTheme = null;
+
+            try {
+                storedTheme = window.localStorage?.getItem(storageKey);
+            } catch (error) {
+                storedTheme = null;
+            }
+
+            const systemTheme = window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+            const theme = ['dark', 'light'].includes(storedTheme) ? storedTheme : systemTheme;
+
+            document.documentElement.dataset.theme = theme;
+        })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -43,7 +60,7 @@
         </x-public.alert>
     @endif
 
-    <main>
+    <main class="ca-page-shell">
         @yield('content')
     </main>
 

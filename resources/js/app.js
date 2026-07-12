@@ -301,8 +301,74 @@ const initCommerceForms = () => {
     });
 };
 
+const themeStorage = {
+    key: 'chapung-theme',
+    get() {
+        try {
+            return window.localStorage.getItem(this.key);
+        } catch (error) {
+            return null;
+        }
+    },
+    set(value) {
+        try {
+            window.localStorage.setItem(this.key, value);
+        } catch (error) {
+            // Theme still works for the current page when storage is unavailable.
+        }
+    },
+};
+
+const preferredTheme = () => {
+    const stored = themeStorage.get();
+
+    if (['dark', 'light'].includes(stored)) {
+        return stored;
+    }
+
+    return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+};
+
+const applyTheme = (theme) => {
+    const nextTheme = theme === 'light' ? 'light' : 'dark';
+
+    document.documentElement.dataset.theme = nextTheme;
+
+    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+        const lightIcon = button.querySelector('[data-theme-icon-light]');
+        const darkIcon = button.querySelector('[data-theme-icon-dark]');
+        const label = button.querySelector('[data-theme-label]');
+        const nextLabel = nextTheme === 'dark'
+            ? (button.dataset.labelLight || 'Switch to light mode')
+            : (button.dataset.labelDark || 'Switch to dark mode');
+
+        button.setAttribute('aria-label', nextLabel);
+        button.setAttribute('aria-pressed', nextTheme === 'light' ? 'true' : 'false');
+        lightIcon?.classList.toggle('hidden', nextTheme === 'light');
+        darkIcon?.classList.toggle('hidden', nextTheme !== 'light');
+
+        if (label) {
+            label.textContent = nextLabel;
+        }
+    });
+};
+
+const initThemeToggle = () => {
+    applyTheme(preferredTheme());
+
+    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const nextTheme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+
+            themeStorage.set(nextTheme);
+            applyTheme(nextTheme);
+        });
+    });
+};
+
 document.addEventListener('DOMContentLoaded', initGlobalSearch);
 document.addEventListener('DOMContentLoaded', initFavorites);
 document.addEventListener('DOMContentLoaded', initCommerceForms);
+document.addEventListener('DOMContentLoaded', initThemeToggle);
 
 Alpine.start();

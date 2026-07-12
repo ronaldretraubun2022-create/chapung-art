@@ -59,6 +59,10 @@
                 <button type="button" class="grid h-11 w-11 place-items-center rounded-chapung border border-chapung-line bg-black/30 text-zinc-100 transition hover:border-chapung-gold hover:text-chapung-gold" aria-label="{{ __('chapung.pages.search.aria') }}" :aria-expanded="searchOpen.toString()" aria-controls="site-search-dialog" @click="searchOpen = true; $nextTick(() => $refs.searchInput?.focus())">
                     <x-heroicon-o-magnifying-glass class="h-5 w-5" aria-hidden="true" />
                 </button>
+                <button type="button" class="grid h-11 w-11 place-items-center rounded-chapung border border-chapung-line bg-black/30 text-zinc-100 transition hover:border-chapung-gold hover:text-chapung-gold" data-theme-toggle data-label-light="{{ __('chapung.theme.switch_to_light') }}" data-label-dark="{{ __('chapung.theme.switch_to_dark') }}" aria-label="{{ __('chapung.theme.switch_to_light') }}" aria-pressed="false">
+                    <x-heroicon-o-sun class="h-5 w-5" data-theme-icon-light aria-hidden="true" />
+                    <x-heroicon-o-moon class="hidden h-5 w-5" data-theme-icon-dark aria-hidden="true" />
+                </button>
                 <a href="{{ route('cart.index') }}" class="relative grid h-11 w-11 place-items-center rounded-chapung border border-chapung-line bg-black/30 text-zinc-100 transition hover:border-chapung-gold hover:text-chapung-gold" aria-label="{{ __('chapung.nav.cart') }}">
                     <x-heroicon-o-shopping-bag class="h-5 w-5" aria-hidden="true" />
                     <span class="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-chapung-gold px-1 text-[10px] font-black leading-none text-black {{ $cartCount > 0 ? '' : 'hidden' }}">{{ $cartCount }}</span>
@@ -110,6 +114,11 @@
                 @foreach (config('locales.available', ['id', 'en']) as $locale)
                     <a href="{{ route('language.switch', $locale) }}" class="rounded-full border border-chapung-line px-3 py-2 text-xs font-black uppercase tracking-[0.14em] {{ app()->getLocale() === $locale ? 'border-chapung-gold text-chapung-gold' : 'text-zinc-300' }}">{{ config('locales.flags.'.$locale) }} {{ config('locales.labels.'.$locale) }}</a>
                 @endforeach
+                <button type="button" class="inline-flex min-h-11 items-center gap-2 rounded-full border border-chapung-line px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-zinc-300 hover:border-chapung-gold hover:text-chapung-gold" data-theme-toggle data-label-light="{{ __('chapung.theme.switch_to_light') }}" data-label-dark="{{ __('chapung.theme.switch_to_dark') }}" aria-label="{{ __('chapung.theme.switch_to_light') }}" aria-pressed="false">
+                    <x-heroicon-o-sun class="h-4 w-4" data-theme-icon-light aria-hidden="true" />
+                    <x-heroicon-o-moon class="hidden h-4 w-4" data-theme-icon-dark aria-hidden="true" />
+                    <span data-theme-label>{{ __('chapung.theme.switch_to_light') }}</span>
+                </button>
             </div>
         </div>
         <div class="border-t border-chapung-line p-5">

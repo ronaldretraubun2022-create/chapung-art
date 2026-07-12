@@ -6,6 +6,10 @@ return [
         'indonesia' => 'Indonesia',
         'english' => 'English',
     ],
+    'theme' => [
+        'switch_to_light' => 'Ganti ke mode terang',
+        'switch_to_dark' => 'Ganti ke mode gelap',
+    ],
     'nav' => [
         'home' => 'Beranda',
         'artwork' => 'Karya',
