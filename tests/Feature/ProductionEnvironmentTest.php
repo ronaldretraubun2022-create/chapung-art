@@ -26,6 +26,20 @@ test('env example is production ready for cpanel mariadb and ssl', function () {
         ->and($env['SECURITY_HSTS_ENABLED'] ?? null)->toBe('true');
 });
 
+test('env example uses placeholders instead of real secrets', function () {
+    $env = exampleEnvironment();
+
+    expect($env['APP_KEY'] ?? null)->toBe('')
+        ->and($env['DB_PASSWORD'] ?? null)->toStartWith('CHANGE_ME')
+        ->and($env['MAIL_PASSWORD'] ?? null)->toBe('')
+        ->and($env['AWS_ACCESS_KEY_ID'] ?? null)->toBe('')
+        ->and($env['AWS_SECRET_ACCESS_KEY'] ?? null)->toBe('')
+        ->and($env['BACKUP_ARCHIVE_PASSWORD'] ?? null)->toStartWith('CHANGE_ME')
+        ->and(File::get(base_path('.env.example')))->not->toMatch('/sk-[A-Za-z0-9]/')
+        ->not->toMatch('/AKIA[0-9A-Z]{16}/')
+        ->not->toMatch('/-----BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY-----/');
+});
+
 test('production environment documentation covers deployment requirements', function () {
     $document = File::get(base_path('docs/PRODUCTION_ENVIRONMENT.md'));
 
@@ -40,4 +54,22 @@ test('production environment documentation covers deployment requirements', func
         ->and($document)->toContain('php artisan config:cache')
         ->and($document)->toContain('php artisan route:cache')
         ->and($document)->toContain('php artisan view:cache');
+});
+
+test('production readiness and checklist documentation cover cpanel rollout', function () {
+    $readiness = File::get(base_path('docs/PRODUCTION_READINESS.md'));
+    $checklist = File::get(base_path('docs/PRODUCTION_CHECKLIST.md'));
+
+    expect($readiness)->toContain('cPanel')
+        ->toContain('php artisan migrate --force')
+        ->toContain('php artisan storage:link')
+        ->toContain('APP_DEBUG=false')
+        ->toContain('localhost:5173')
+        ->toContain('Rollback')
+        ->and($checklist)->toContain('Before Deploy')
+        ->toContain('Backup')
+        ->toContain('Server Permissions')
+        ->toContain('Safe Migration')
+        ->toContain('Security Verification')
+        ->toContain('Rollback');
 });

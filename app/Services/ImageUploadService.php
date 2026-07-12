@@ -4,12 +4,15 @@ namespace App\Services;
 
 use Filament\Forms\Components\BaseFileUpload;
 use Filament\Forms\Components\FileUpload;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Throwable;
 
 class ImageUploadService
 {
@@ -105,7 +108,7 @@ class ImageUploadService
     }
 
     /**
-     * @return array<int, string|\Illuminate\Contracts\Validation\ValidationRule>
+     * @return array<int, string|ValidationRule>
      */
     public static function rules(bool $nullable = true): array
     {
@@ -132,7 +135,16 @@ class ImageUploadService
     {
         $this->assertSafeImage($file);
 
-        $path = $file->storeAs(trim($directory, '/'), $this->uniqueFileName($file), $disk);
+        try {
+            $path = $file->storeAs(trim($directory, '/'), $this->uniqueFileName($file), $disk);
+        } catch (Throwable) {
+            $this->logUploadFailure('image_upload', $disk, $directory);
+        }
+
+        if (! is_string($path) || $path === '') {
+            $this->logUploadFailure('image_upload', $disk, $directory);
+        }
+
         $this->makeThumbnail($path, $disk);
 
         return $path;
@@ -146,11 +158,19 @@ class ImageUploadService
             return null;
         }
 
-        $path = $file->storeAs(
-            $component->getDirectory(),
-            $component->getUploadedFileNameForStorage($file),
-            $component->getDiskName(),
-        );
+        try {
+            $path = $file->storeAs(
+                $component->getDirectory(),
+                $component->getUploadedFileNameForStorage($file),
+                $component->getDiskName(),
+            );
+        } catch (Throwable) {
+            $this->logUploadFailure('filament_image_upload', $component->getDiskName(), $component->getDirectory());
+        }
+
+        if (! is_string($path) || $path === '') {
+            $this->logUploadFailure('filament_image_upload', $component->getDiskName(), $component->getDirectory());
+        }
 
         if ($component->getVisibility() === 'public') {
             rescue(fn () => $component->getDisk()->setVisibility($path, 'public'), report: false);
@@ -284,6 +304,19 @@ class ImageUploadService
         $path = $file->getRealPath();
 
         return $path ? (new \finfo(FILEINFO_MIME_TYPE))->file($path) ?: null : null;
+    }
+
+    private function logUploadFailure(string $event, string $disk, ?string $directory): never
+    {
+        Log::warning('Chapung Art image upload failed.', [
+            'event' => $event,
+            'disk' => $disk,
+            'directory' => $directory,
+        ]);
+
+        throw ValidationException::withMessages([
+            'file' => 'The uploaded image could not be stored. Please try again.',
+        ]);
     }
 
     private function containsExecutableSignature(UploadedFile $file): bool

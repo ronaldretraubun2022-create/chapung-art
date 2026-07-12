@@ -1,11 +1,11 @@
 @php
     $code = $code ?? 500;
-    $title = $title ?? 'Sistem Sedang Dipulihkan';
-    $message = $message ?? 'Chapung Art sedang menata ulang ruang digital. Silakan kembali beberapa saat lagi.';
+    $title = $title ?? __('chapung.errors.500_title');
+    $message = $message ?? __('chapung.errors.500_message');
 @endphp
 
 <!DOCTYPE html>
-<html lang="id">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,7 +17,7 @@
     <main class="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8" aria-labelledby="error-title">
         <section class="w-full max-w-3xl rounded-lg border border-zinc-800 bg-zinc-950/80 px-6 py-10 text-center shadow-2xl shadow-black/40 sm:px-10 sm:py-14">
             <p class="text-xs font-black uppercase tracking-[0.32em] text-yellow-600">Chapung Art</p>
-            <p class="mt-6 text-sm font-black uppercase tracking-[0.28em] text-red-500">Error {{ $code }}</p>
+            <p class="mt-6 text-sm font-black uppercase tracking-[0.28em] text-red-500">{{ __('chapung.errors.label', ['code' => $code]) }}</p>
             <h1 id="error-title" class="mx-auto mt-4 max-w-2xl text-4xl font-black uppercase leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
                 {{ $title }}
             </h1>
@@ -26,7 +26,7 @@
             </p>
             <div class="mt-9 flex justify-center">
                 <a href="{{ url('/') }}" class="inline-flex min-h-12 items-center justify-center rounded-md bg-yellow-600 px-6 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-black transition hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-black">
-                    Kembali Beranda
+                    {{ __('chapung.errors.back_home') }}
                 </a>
             </div>
         </section>

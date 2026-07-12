@@ -2,6 +2,7 @@
 
 use App\Services\ImageUploadService;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -73,4 +74,25 @@ test('image upload service throws validation exception for disguised executable 
 
     expect(fn () => app(ImageUploadService::class)->store($file, 'unsafe'))
         ->toThrow(ValidationException::class);
+});
+
+test('image upload storage failure is converted to validation error', function () {
+    $blockedRoot = storage_path('framework/testing/disks/not-a-directory');
+    File::ensureDirectoryExists(dirname($blockedRoot));
+    File::put($blockedRoot, 'blocked');
+
+    config([
+        'filesystems.disks.broken_upload' => [
+            'driver' => 'local',
+            'root' => $blockedRoot,
+            'throw' => false,
+        ],
+    ]);
+
+    $file = UploadedFile::fake()->image('valid.jpg', 600, 400)->size(200);
+
+    expect(fn () => app(ImageUploadService::class)->store($file, 'artworks', 'broken_upload'))
+        ->toThrow(ValidationException::class);
+
+    File::delete($blockedRoot);
 });

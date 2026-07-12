@@ -1,11 +1,12 @@
 <?php
 
-use App\Mail\ContactInquiryReceived;
 use App\Mail\AdminNotificationCreated;
+use App\Mail\ContactInquiryReceived;
 use App\Mail\PaymentNotificationReceived;
 use App\Models\AdminNotification;
 use App\Models\Order;
 use App\Models\Payment;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 function contactPayload(array $overrides = []): array
@@ -107,6 +108,26 @@ test('contact form sends default inquiry to contact mailbox using configured sen
         return $mail->hasTo('contact@chapungart.com')
             && $mail->hasFrom('admin@chapungart.com');
     });
+});
+
+test('contact form logs mail failure without exposing exception detail to the user', function () {
+    Log::spy();
+    Mail::shouldReceive('to')
+        ->once()
+        ->with('contact@chapungart.com')
+        ->andThrow(new RuntimeException('smtp password leaked detail'));
+
+    $this->post(route('contact.send'), contactPayload())
+        ->assertRedirect()
+        ->assertSessionHas('toast');
+
+    Log::shouldHaveReceived('warning')
+        ->once()
+        ->with('Chapung Art contact mail failed.', Mockery::on(fn (array $context): bool => ($context['department'] ?? null) === 'contact'
+            && ($context['recipient'] ?? null) === 'contact@chapungart.com'
+            && ($context['exception'] ?? null) === RuntimeException::class
+            && ! str_contains(json_encode($context, JSON_THROW_ON_ERROR), 'smtp password leaked detail')
+        ));
 });
 
 test('payment notification is sent to finance mailbox', function () {

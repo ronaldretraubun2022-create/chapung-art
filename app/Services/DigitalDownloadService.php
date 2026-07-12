@@ -8,6 +8,7 @@ use App\Models\User;
 use Filament\Forms\Components\BaseFileUpload;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -134,11 +135,29 @@ class DigitalDownloadService
             return null;
         }
 
-        return $file->storeAs(
-            $component->getDirectory(),
-            $component->getUploadedFileNameForStorage($file),
-            $component->getDiskName(),
-        );
+        try {
+            $path = $file->storeAs(
+                $component->getDirectory(),
+                $component->getUploadedFileNameForStorage($file),
+                $component->getDiskName(),
+            );
+        } catch (Throwable) {
+            $path = null;
+        }
+
+        if (! is_string($path) || $path === '') {
+            Log::warning('Chapung Art digital upload failed.', [
+                'event' => 'filament_digital_upload',
+                'disk' => $component->getDiskName(),
+                'directory' => $component->getDirectory(),
+            ]);
+
+            throw ValidationException::withMessages([
+                'file' => 'The uploaded digital file could not be stored. Please try again.',
+            ]);
+        }
+
+        return $path;
     }
 
     public function delete(?string $path): void

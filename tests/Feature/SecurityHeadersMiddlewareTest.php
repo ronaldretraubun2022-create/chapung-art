@@ -34,6 +34,30 @@ test('hsts is sent only for https production responses', function () {
         ->assertHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
 });
 
+test('local csp allows vite dev server only in local environment', function () {
+    config(['app.env' => 'local']);
+
+    $csp = $this->get('/')
+        ->assertOk()
+        ->headers->get('Content-Security-Policy');
+
+    expect($csp)->toContain('http://localhost:5173')
+        ->toContain('http://127.0.0.1:5173')
+        ->toContain('ws://localhost:5173')
+        ->toContain('ws://127.0.0.1:5173');
+});
+
+test('production csp does not allow vite dev server sources', function () {
+    config(['app.env' => 'production']);
+
+    $csp = $this->get('https://localhost/')
+        ->assertOk()
+        ->headers->get('Content-Security-Policy');
+
+    expect($csp)->not->toContain('localhost:5173')
+        ->not->toContain('127.0.0.1:5173');
+});
+
 test('csp can run in report only mode from configuration', function () {
     config(['security.csp.report_only' => true]);
 

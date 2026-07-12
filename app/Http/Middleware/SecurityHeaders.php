@@ -58,6 +58,8 @@ class SecurityHeaders
             return '';
         }
 
+        $directives = $this->withLocalViteSources($directives);
+
         return collect($directives)
             ->mapWithKeys(function (mixed $sources, string $directive): array {
                 $directive = trim($directive);
@@ -72,6 +74,30 @@ class SecurityHeaders
             })
             ->map(fn (array $sources, string $directive): string => $directive.' '.implode(' ', $sources))
             ->implode('; ');
+    }
+
+    /**
+     * @param  array<string, mixed>  $directives
+     * @return array<string, mixed>
+     */
+    private function withLocalViteSources(array $directives): array
+    {
+        if (config('app.env') !== 'local') {
+            return $directives;
+        }
+
+        $httpSources = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+        $webSocketSources = ['ws://localhost:5173', 'ws://127.0.0.1:5173'];
+
+        foreach (['script-src', 'style-src'] as $directive) {
+            $sources = $this->normalizeCspSources($directives[$directive] ?? []);
+            $directives[$directive] = array_values(array_unique([...$sources, ...$httpSources]));
+        }
+
+        $connectSources = $this->normalizeCspSources($directives['connect-src'] ?? []);
+        $directives['connect-src'] = array_values(array_unique([...$connectSources, ...$httpSources, ...$webSocketSources]));
+
+        return $directives;
     }
 
     private function shouldSendHsts(Request $request): bool

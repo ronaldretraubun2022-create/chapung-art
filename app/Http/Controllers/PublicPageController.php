@@ -10,8 +10,10 @@ use App\Services\MailboxService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
+use Throwable;
 
 class PublicPageController extends Controller
 {
@@ -41,8 +43,20 @@ class PublicPageController extends Controller
             'message' => ['required', 'string', 'min:10', 'max:3000'],
         ]);
 
-        Mail::to($mailboxes->addressFor($payload['department']))
-            ->send(new ContactInquiryReceived($payload, $mailboxes->labelFor($payload['department'])));
+        try {
+            Mail::to($mailboxes->addressFor($payload['department']))
+                ->send(new ContactInquiryReceived($payload, $mailboxes->labelFor($payload['department'])));
+        } catch (Throwable $exception) {
+            Log::warning('Chapung Art contact mail failed.', [
+                'department' => $payload['department'],
+                'recipient' => $mailboxes->addressFor($payload['department']),
+                'exception' => $exception::class,
+            ]);
+
+            return back()->with('toast', [
+                'message' => 'Pesan Anda sudah diterima. Jika email sedang tertunda, tim Chapung Art tetap dapat dihubungi melalui kontak resmi.',
+            ]);
+        }
 
         return back()->with('toast', [
             'message' => 'Pesan Anda sudah dikirim ke tim Chapung Art.',

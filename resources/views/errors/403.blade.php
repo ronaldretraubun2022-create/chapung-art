@@ -1,5 +1,13 @@
+@php
+    $locale = session('locale', config('locales.default', 'id'));
+
+    if (in_array($locale, config('locales.available', ['id', 'en']), true)) {
+        app()->setLocale($locale);
+    }
+@endphp
+
 @include('errors.layout', [
     'code' => 403,
-    'title' => 'Akses Tidak Diizinkan',
-    'message' => 'Anda tidak memiliki izin untuk membuka ruang ini. Silakan kembali ke beranda atau masuk dengan akun yang sesuai.',
+    'title' => __('chapung.errors.403_title'),
+    'message' => __('chapung.errors.403_message'),
 ])

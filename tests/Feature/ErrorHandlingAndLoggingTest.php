@@ -40,6 +40,17 @@ test('419 error page is branded when token mismatch is rendered', function () {
         ->assertDontSee('Stack trace');
 });
 
+test('error pages render english copy from active locale', function () {
+    $this->withSession(['locale' => 'en'])
+        ->get('/__missing-page-for-english-error-test')
+        ->assertNotFound()
+        ->assertSee('lang="en"', false)
+        ->assertSee('Page Not Found')
+        ->assertSee('Back Home')
+        ->assertDontSee('Halaman Tidak Ditemukan')
+        ->assertDontSee('Stack trace');
+});
+
 test('production log channel uses daily rotation and sanitizer tap', function () {
     expect(config('logging.channels.production.driver'))->toBe('daily')
         ->and(config('logging.channels.production.tap'))->toContain(SanitizeLogContext::class);
