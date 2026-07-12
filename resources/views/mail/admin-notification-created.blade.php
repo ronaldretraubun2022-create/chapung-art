@@ -5,6 +5,8 @@
     <title>{{ $notification->title }}</title>
 </head>
 <body style="font-family: Arial, sans-serif; color: #18181b; line-height: 1.6;">
+    @include('mail.partials.brand-header')
+
     <h1 style="margin-bottom: 8px;">{{ $notification->title }}</h1>
     <p style="margin-top: 0;">{{ $notification->message }}</p>
 

@@ -1,8 +1,7 @@
 @php
     $siteName = site_setting('site_name', 'Chapung Art');
     $siteDescription = site_setting('site_description', __('chapung.home.hero_subtitle'));
-    $siteFavicon = site_setting('favicon');
-    $siteFaviconUrl = filled($siteFavicon) ? asset('storage/'.$siteFavicon) : null;
+    $brandIconUrl = asset('images/brand/chapung-art-icon.svg');
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth" data-theme="dark">
@@ -19,9 +18,8 @@
             'canonical_url' => url()->current(),
         ])])
     @endif
-    @if ($siteFaviconUrl)
-        <link rel="icon" href="{{ $siteFaviconUrl }}">
-    @endif
+    <link rel="icon" type="image/svg+xml" href="{{ $brandIconUrl }}">
+    <link rel="apple-touch-icon" href="{{ $brandIconUrl }}">
     <script>
         (() => {
             const storageKey = 'chapung-theme';

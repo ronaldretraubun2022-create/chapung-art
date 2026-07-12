@@ -1,7 +1,5 @@
 @php
     $siteName = site_setting('site_name', 'Chapung Art');
-    $siteLogo = site_setting('logo');
-    $siteLogoUrl = filled($siteLogo) ? asset('storage/'.$siteLogo) : null;
     $cartCount = app(\App\Services\CartService::class)->count();
     $favoriteCount = auth()->check() ? app(\App\Services\FavoriteService::class)->count(auth()->user()) : 0;
     $categoryUrl = route('artworks.index').'#catalog-filters';
@@ -31,13 +29,7 @@
     <header class="sticky top-0 z-50 border-b border-chapung-line bg-chapung-black/92 backdrop-blur-xl">
         <x-public.container class="flex min-h-[4.75rem] items-center justify-between gap-4 py-3">
             <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3" aria-label="{{ $siteName }}">
-                @if ($siteLogoUrl)
-                    <img src="{{ $siteLogoUrl }}" alt="{{ $siteName }}" width="42" height="42" class="h-10 w-10 rounded-md object-cover sm:h-11 sm:w-11" loading="lazy" decoding="async">
-                @else
-                    <span class="grid h-10 w-10 shrink-0 place-items-center rounded-chapung border border-chapung-gold/50 bg-chapung-charcoal text-chapung-gold sm:h-11 sm:w-11" aria-hidden="true">
-                        <x-heroicon-o-sparkles class="h-5 w-5" />
-                    </span>
-                @endif
+                <x-brand-logo variant="dark" width="42" height="53" loading="eager" class="h-10 w-10 shrink-0 rounded-chapung bg-white object-contain p-1 sm:h-11 sm:w-11" />
                 <span class="min-w-0">
                     <span class="block truncate text-base font-black uppercase tracking-[0.18em] text-white sm:text-lg">{{ $siteName }}</span>
                     <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.22em] text-chapung-gold">
@@ -94,7 +86,13 @@
     <div x-cloak x-show="mobileMenuOpen" x-transition.opacity class="fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm xl:hidden" @click="mobileMenuOpen = false"></div>
     <aside id="mobile-navigation" x-cloak x-show="mobileMenuOpen" x-transition class="fixed bottom-0 right-0 top-0 z-[80] flex w-full max-w-sm flex-col border-l border-chapung-line bg-chapung-ink shadow-chapung-soft xl:hidden" role="dialog" aria-modal="true" aria-label="{{ __('chapung.nav.mobile_menu') }}">
         <div class="flex items-center justify-between gap-4 border-b border-chapung-line px-5 py-4">
-            <p class="text-xs font-black uppercase tracking-[0.22em] text-chapung-gold">{{ __('chapung.nav.mobile_menu') }}</p>
+            <div class="flex min-w-0 items-center gap-3">
+                <x-brand-logo variant="dark" width="40" height="50" loading="lazy" class="h-10 w-10 shrink-0 rounded-chapung bg-white object-contain p-1" />
+                <div class="min-w-0">
+                    <p class="truncate text-sm font-black uppercase tracking-[0.18em] text-white">{{ $siteName }}</p>
+                    <p class="text-[10px] font-black uppercase tracking-[0.22em] text-chapung-gold">{{ __('chapung.nav.mobile_menu') }}</p>
+                </div>
+            </div>
             <button type="button" class="grid h-10 w-10 place-items-center rounded-chapung border border-chapung-line text-zinc-100 hover:border-chapung-gold hover:text-chapung-gold" aria-label="{{ __('chapung.nav.close_menu') }}" @click="mobileMenuOpen = false"><x-heroicon-o-x-mark class="h-5 w-5" aria-hidden="true" /></button>
         </div>
         <div class="flex-1 overflow-y-auto px-5 py-5">

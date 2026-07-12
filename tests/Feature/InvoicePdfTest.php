@@ -69,6 +69,8 @@ test('customer owner can view branded html invoice', function () {
         ->get(route('invoice.show', $order))
         ->assertOk()
         ->assertSee('Chapung Art')
+        ->assertSee('images/brand/chapung-art-logo.svg', false)
+        ->assertSee('alt="Chapung Art"', false)
         ->assertSee($order->invoice_number)
         ->assertSee($order->order_number)
         ->assertSee('Invoice Artwork')

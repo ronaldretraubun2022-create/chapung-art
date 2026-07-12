@@ -30,6 +30,9 @@
                 </div>
 
                 <div class="sm:text-right">
+                    <div class="mb-4 flex sm:justify-end">
+                        <x-brand-logo variant="normal" width="72" height="90" loading="eager" class="h-[90px] w-[72px] rounded-md bg-white object-contain" />
+                    </div>
                     <h2 class="text-2xl font-black uppercase tracking-[0.22em] text-zinc-950">{{ $site_name }}</h2>
                     <p class="mt-3 max-w-sm text-sm leading-6 text-zinc-500">{{ $site_description }}</p>
                     <p class="mt-3 text-sm leading-6 text-zinc-600">{{ $site_address }}</p>

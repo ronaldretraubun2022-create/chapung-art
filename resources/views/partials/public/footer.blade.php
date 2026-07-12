@@ -1,8 +1,6 @@
 @php
     $siteName = site_setting('site_name', 'Chapung Art');
     $siteDescription = site_setting('site_description', __('chapung.home.hero_subtitle'));
-    $siteLogo = site_setting('logo');
-    $siteLogoUrl = filled($siteLogo) ? asset('storage/'.$siteLogo) : null;
     $siteEmail = site_setting('email', (string) config('chapung.emails.info'));
     $sitePhone = site_setting('phone', (string) config('chapung.contact_phone'));
     $siteWhatsapp = site_setting('whatsapp', (string) config('chapung.contact_whatsapp'));
@@ -35,11 +33,7 @@
     <x-public.container class="grid gap-10 lg:grid-cols-[1.2fr_.75fr_.8fr_.9fr]">
         <div>
             <div class="flex items-center gap-3">
-                @if ($siteLogoUrl)
-                    <img src="{{ $siteLogoUrl }}" alt="{{ $siteName }}" width="44" height="44" class="h-11 w-11 rounded-md object-cover" loading="lazy" decoding="async">
-                @else
-                    <span class="grid h-11 w-11 place-items-center rounded-chapung border border-chapung-gold/50 bg-black text-chapung-gold" aria-hidden="true"><x-heroicon-o-sparkles class="h-5 w-5" /></span>
-                @endif
+                <x-brand-logo variant="dark" width="44" height="55" loading="lazy" class="h-11 w-11 shrink-0 rounded-chapung bg-white object-contain p-1" />
                 <div>
                     <h2 class="text-lg font-black uppercase tracking-[0.18em] text-white sm:text-xl">{{ $siteName }}</h2>
                     <p class="text-[10px] font-black uppercase tracking-[0.22em] text-chapung-gold">{{ __('chapung.brand.region') }}</p>

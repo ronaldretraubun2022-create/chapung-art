@@ -5,6 +5,8 @@
     <title>{{ $payload['subject'] }}</title>
 </head>
 <body style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
+    @include('mail.partials.brand-header')
+
     <h1 style="font-size: 20px; margin-bottom: 8px;">Chapung Art Contact Inquiry</h1>
     <p style="margin: 0 0 16px; color: #4b5563;">Mailbox: {{ $departmentLabel }}</p>
 

@@ -2,8 +2,6 @@
 
 @php
     $siteName = site_setting('site_name', 'Chapung Art');
-    $siteLogo = site_setting('logo');
-    $siteLogoUrl = filled($siteLogo) ? asset('storage/'.$siteLogo) : null;
     $marketplaceRoute = route('artworks.index');
     $cartCount = app(\App\Services\CartService::class)->count();
     $favoriteCount = auth()->check() ? app(\App\Services\FavoriteService::class)->count(auth()->user()) : 0;
@@ -42,13 +40,7 @@
     <section class="border-b border-zinc-800 bg-black/95 px-4 py-4 sm:px-6 lg:sticky lg:top-[73px] lg:z-40 lg:px-8 lg:backdrop-blur-xl">
         <div class="mx-auto grid max-w-7xl gap-4 lg:grid-cols-[auto_auto_minmax(280px,1fr)_auto] lg:items-center">
             <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3">
-                @if ($siteLogoUrl)
-                    <img src="{{ $siteLogoUrl }}" alt="{{ $siteName }}" width="44" height="44" class="h-11 w-11 rounded-md object-cover" loading="lazy" decoding="async">
-                @else
-                    <span class="grid h-11 w-11 place-items-center rounded-md border border-yellow-600/60 bg-zinc-950 text-yellow-500" aria-hidden="true">
-                        <x-heroicon-o-sparkles class="h-5 w-5" />
-                    </span>
-                @endif
+                <x-brand-logo variant="dark" width="44" height="55" loading="eager" class="h-11 w-11 shrink-0 rounded-md bg-white object-contain p-1" />
                 <span class="min-w-0">
                     <span class="block truncate text-lg font-black uppercase tracking-[0.2em] text-white">{{ $siteName }}</span>
                     <span class="block truncate text-[10px] font-black uppercase tracking-[0.22em] text-yellow-600">{{ __('chapung.marketplace.header_label') }}</span>

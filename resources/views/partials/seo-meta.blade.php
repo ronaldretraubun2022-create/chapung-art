@@ -12,12 +12,16 @@
 <meta property="og:title" content="{{ $seo['title'] }}">
 <meta property="og:description" content="{{ $seo['description'] }}">
 <meta property="og:image" content="{{ $seo['og_image'] }}">
+<meta property="og:image:alt" content="Chapung Art">
+<meta property="og:site_name" content="Chapung Art">
+<meta property="og:logo" content="{{ asset('images/brand/chapung-art-logo.svg') }}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ $seo['canonical_url'] }}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ $seo['title'] }}">
 <meta name="twitter:description" content="{{ $seo['description'] }}">
 <meta name="twitter:image" content="{{ $seo['og_image'] }}">
+<meta name="twitter:image:alt" content="Chapung Art">
 @if (! empty($seo['schema_json']))
     <script type="application/ld+json">{!! json_encode($seo['schema_json'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
 @endif

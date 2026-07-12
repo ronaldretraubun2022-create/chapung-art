@@ -18,6 +18,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -28,6 +29,11 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->brandName('Chapung Art')
+            ->brandLogo(fn (): HtmlString => new HtmlString(view('filament.brand-logo', ['variant' => 'normal'])->render()))
+            ->darkModeBrandLogo(fn (): HtmlString => new HtmlString(view('filament.brand-logo', ['variant' => 'dark'])->render()))
+            ->brandLogoHeight('2.25rem')
+            ->favicon(asset('images/brand/chapung-art-icon.svg'))
             ->login(Login::class)
             ->colors([
                 'primary' => Color::Amber,

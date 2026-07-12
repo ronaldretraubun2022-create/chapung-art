@@ -5,7 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'Chapung Art') }}</title>
+        <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/chapung-art-icon.svg') }}">
+        <link rel="apple-touch-icon" href="{{ asset('images/brand/chapung-art-icon.svg') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -18,7 +20,7 @@
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
             <div>
                 <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                    <x-application-logo variant="normal" width="96" height="120" class="h-24 w-24 rounded-lg bg-white object-contain p-2 shadow-sm" />
                 </a>
             </div>
 

@@ -59,6 +59,39 @@ test('marketplace views keep responsive and loading states in place', function (
         ->and($gallery.$product.$cart.$checkout)->not->toContain('storage/app/private');
 });
 
+test('chapung art brand assets are integrated across primary surfaces', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('images/brand/chapung-art-logo-dark.svg', false)
+        ->assertSee('images/brand/chapung-art-icon.svg', false)
+        ->assertSee('alt="Chapung Art"', false)
+        ->assertSee('og:logo', false);
+
+    $this->get(route('login'))
+        ->assertOk()
+        ->assertSee('images/brand/chapung-art-logo.svg', false)
+        ->assertSee('images/brand/chapung-art-icon.svg', false)
+        ->assertSee('alt="Chapung Art"', false);
+
+    $adminProvider = File::get(app_path('Providers/Filament/AdminPanelProvider.php'));
+    $filamentLogo = File::get(resource_path('views/filament/brand-logo.blade.php'));
+    $invoiceView = File::get(resource_path('views/invoice/show.blade.php'));
+    $mailHeader = File::get(resource_path('views/mail/partials/brand-header.blade.php'));
+
+    expect($adminProvider)->toContain("view('filament.brand-logo', ['variant' => 'normal']")
+        ->and($adminProvider)->toContain("view('filament.brand-logo', ['variant' => 'dark']")
+        ->and($adminProvider)->toContain("favicon(asset('images/brand/chapung-art-icon.svg'))")
+        ->and($filamentLogo)->toContain('width="108"')
+        ->and($filamentLogo)->toContain('height="135"')
+        ->and($invoiceView)->toContain('variant="normal"')
+        ->and($invoiceView)->toContain('width="72"')
+        ->and($invoiceView)->toContain('height="90"')
+        ->and($mailHeader)->toContain("asset('images/brand/chapung-art-logo.svg')")
+        ->and($mailHeader)->toContain('alt="Chapung Art"')
+        ->and($mailHeader)->toContain('width="96"')
+        ->and($mailHeader)->toContain('height="120"');
+});
+
 test('production safety files protect secrets and build artifacts', function () {
     $gitignore = File::get(base_path('.gitignore'));
     $filesystem = config('filesystems.disks.local.root');
